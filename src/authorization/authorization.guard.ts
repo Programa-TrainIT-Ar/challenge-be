@@ -1,49 +1,48 @@
-import { CanActivate, ExecutionContext, Injectable, Redirect, UnauthorizedException } from '@nestjs/common';
+import { CanActivate, ExecutionContext, Injectable } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { expressJwtSecret } from 'jwks-rsa';
 import { promisify } from 'util';
 import { expressjwt } from 'express-jwt';
-import * as jwt from 'express-jwt'
-import { log } from 'console';
-
-// import { ConfigService } from '@nestjs/config';
 
 @Injectable()
 export class AuthorizationGuard implements CanActivate {
+  private CLIENT_ID: string;
+  private ISSUER_BASE_URL: string;
 
-  private CLIENT_ID: string = process.env.CLIENT_ID
-  private ISSUER_BASE_URL: string = process.env.ISSUER_BASE_URL
-
+  constructor(private configService: ConfigService) {
+    this.CLIENT_ID = this.configService.get<string>('CLIENT_ID');
+    this.ISSUER_BASE_URL = this.configService.get<string>('ISSUER_BASE_URL');
+  }
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
+    const req = context.switchToHttp().getRequest();
+    const res = context.switchToHttp().getResponse();
 
-      const req = context.getArgByIndex(0)
-      const res = context.getArgByIndex(1)
+    const checkJwt = promisify(
+      expressjwt({
+        secret: expressJwtSecret({
+          cache: true,
+          rateLimit: true,
+          jwksRequestsPerMinute: 5,
+          jwksUri: `${this.ISSUER_BASE_URL}/.well-known/jwks.json`,
+        }) as any,
+        audience: this.CLIENT_ID,
+        issuer: this.ISSUER_BASE_URL,
+        algorithms: ['RS256'],
+      })
+    );
 
-      
+    try {
+      await checkJwt(req, res);
+      return true;
+    } catch (error) {
+      console.error('JWT validation error:', error);
+      console.log('Issuer URL:', this.ISSUER_BASE_URL);
 
-      const checkJwt = promisify (
-        expressjwt({
-          secret: expressJwtSecret({
-            cache: true,
-            rateLimit: true,
-            jwksRequestsPerMinute: 5,
-            jwksUri: `${this.ISSUER_BASE_URL}.well-know/jwks.json`
-          })as any,
-          audience: this.CLIENT_ID,
-          issuer: this.ISSUER_BASE_URL,
-          algorithms: ['RS256']
-        })
-      );
-      try {
-        await checkJwt(req, res)
-        return true;
-      } catch (error) {
-        console.log(this.ISSUER_BASE_URL);
-        throw new UnauthorizedException(error)
-
-        // res.redirect('https://dev-anq6akqu2adna18f.us.auth0.com/u/login?state=hKFo2SBLWXBhWkt5b0s3TGxLNUJibEtlM18zTEtodnJoTklIQ6Fur3VuaXZlcnNhbC1sb2dpbqN0aWTZIEdMcW9vRUVjeVNNbERWdEdFanFkZkpXRkpCRW9GbXZNo2NpZNkgVFFycGNuMnlKdTkzdkxDRmZsaWJncjlYOThYNlRKYmc')
-        // return false
-      }
-
+      // Redirigir a la página de inicio de sesión de Auth0
+      const loginUrl = `https://${this.ISSUER_BASE_URL}/login`; 
+      res.redirect(loginUrl);
+      return false;
+    }
   }
 }
