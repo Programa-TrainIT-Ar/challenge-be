@@ -1,0 +1,5 @@
+/* eslint-disable */
+export default async () => {
+    const t = {};
+    return { "@nestjs/swagger": { "models": [[import("./dtos/challenge-dtos/create-challenge.dto"), { "CreateChallengeDto": {} }], [import("./dtos/challenge-dtos/update-challenge.dto"), { "UpdateChallengeDto": {} }]], "controllers": [[import("./app.controller"), { "AppController": { "getHello": { type: String }, "getPublic": { type: String }, "getPrivate": { type: String } } }], [import("./modules/users/users.controller"), { "UsersController": { "findAll": {}, "findByRole": {}, "findById": { type: Object }, "createUser": {}, "updateUser": {}, "deleteUser": {} } }], [import("./modules/auth/auth.controller"), { "AuthController": { "register": {}, "login": { type: Object } } }], [import("./modules/challenge/challenge.controller"), { "ChallengeController": { "create": {}, "findAll": {}, "findByTag": {}, "findOne": {}, "patch": {}, "remove": {} } }]] } };
+};
