@@ -3,6 +3,7 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { ConfigModule } from '@nestjs/config';
 import { AuthorizationModule } from './authorization/authorization.module';
+import { AuthorizationGuard } from './authorization/authorization.guard';
 
 @Module({
   imports: [
@@ -12,6 +13,6 @@ import { AuthorizationModule } from './authorization/authorization.module';
     AuthorizationModule
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [AppService, AuthorizationGuard],
 })
 export class AppModule {}

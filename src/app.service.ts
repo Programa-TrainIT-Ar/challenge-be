@@ -6,7 +6,7 @@ export class AppService {
     return '🎊🥳🎊🥳 Welcome to this Challenge 2,024...!!! 🥳🎊🥳🎊';
   }
 
-  getPrivate(): string {
-    return 'This is a protected resource. Register now visitor!';
+  getPrivate(): {} {
+    return {protegido:'This is a protected resource. Register now visitor!'};
   }
 }

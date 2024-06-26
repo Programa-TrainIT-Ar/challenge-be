@@ -13,7 +13,7 @@ export class AppController {
 
   @UseGuards(AuthorizationGuard)
   @Get('/protected')
-  getProtected():string {
+  getProtected():{} {
     return this.appService.getPrivate()
   }
 }
