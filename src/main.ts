@@ -11,8 +11,9 @@ async function bootstrap() {
     credentials: true,
   });
 
+  const configService = app.get(ConfigService);
 
-  const PORT = process.env.PORT
+  const PORT = configService.get<number>('PORT') || 3000;
   await app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);
   });

@@ -9,6 +9,7 @@ import { AuthorizationGuard } from './authorization/authorization.guard';
   imports: [
     ConfigModule.forRoot({
       envFilePath: '.env.template',
+      isGlobal: true, // Hace que ConfigService esté disponible en toda la aplicación
     }),
     AuthorizationModule
   ],
