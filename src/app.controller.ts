@@ -10,13 +10,14 @@ export class AppController {
   getHello(): string {
     return this.appService.getHello();
   }
+  
   @Get('/logout')
   getLogout(){
     return this.appService.getLogout()
   }
 
   @Get('/callback')
-  getCallBack(): string {
+  getCallBack(): {} {
     return this.appService.callBack()
   }
 

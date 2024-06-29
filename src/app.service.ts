@@ -14,7 +14,7 @@ export class AppService {
     return {protegido:'This is a protected resource. Register now visitor!'};
   }
 
-  callBack(): string {
-    return 'CallBack';
+  callBack(): {} {
+    return {protegido:'This is a callback resource. Register now visitor!'}
   }
 }
