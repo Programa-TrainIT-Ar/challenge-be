@@ -4,6 +4,7 @@ import { AppService } from './app.service';
 import { ConfigModule } from '@nestjs/config';
 import { AuthorizationModule } from './authorization/authorization.module';
 import { AuthorizationGuard } from './authorization/authorization.guard';
+import { UserModule } from './user/user.module';
 
 @Module({
   imports: [
@@ -11,7 +12,8 @@ import { AuthorizationGuard } from './authorization/authorization.guard';
       envFilePath: '.env.template',
       isGlobal: true, // Hace que ConfigService esté disponible en toda la aplicación
     }),
-    AuthorizationModule
+    AuthorizationModule,
+    UserModule
   ],
   controllers: [AppController],
   providers: [AppService, AuthorizationGuard],

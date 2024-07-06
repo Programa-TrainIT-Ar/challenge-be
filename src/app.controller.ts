@@ -10,16 +10,6 @@ export class AppController {
   getHello(): string {
     return this.appService.getHello();
   }
-  
-  @Get('/logout')
-  getLogout(){
-    return this.appService.getLogout()
-  }
-
-  @Get('/callback')
-  getCallBack(): {} {
-    return this.appService.callBack()
-  }
 
   @UseGuards(AuthorizationGuard)
   @Get('/protected')

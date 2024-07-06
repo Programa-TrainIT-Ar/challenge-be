@@ -3,10 +3,10 @@ version: '3.8'
 services:
   postgres:
     image: postgres
-    container_name: postgres
+    container_name: postgres-TrainIT
     environment:
       POSTGRES_USER: admin
       POSTGRES_PASSWORD: admin
-      POSTGRES_DB: nestdatabase
+      POSTGRES_DB: nestDB
     ports:
-      - 5499:5432
+      - 5432:5432
