@@ -5,8 +5,8 @@ services:
     image: postgres
     container_name: postgres-TrainIT
     environment:
-      POSTGRES_USER: admin
-      POSTGRES_PASSWORD: admin
-      POSTGRES_DB: nestDB
+      POSTGRES_USER: TrainIT
+      POSTGRES_PASSWORD: TrainIT
+      POSTGRES_DB: nest
     ports:
-      - 5432:5432
+      - 5499:5432

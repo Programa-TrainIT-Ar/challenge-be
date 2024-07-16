@@ -1,8 +1,9 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, UsePipes, ValidationPipe } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, UsePipes, ValidationPipe, UseGuards } from '@nestjs/common';
 import { UserService } from './user.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { ValidationMetadata } from 'class-validator/types/metadata/ValidationMetadata';
+import { AuthorizationGuard } from 'src/authorization/authorization.guard';
 
 @Controller('user')
 export class UserController {
@@ -10,6 +11,7 @@ export class UserController {
 
   @Post()
   @UsePipes(new ValidationPipe)
+  @UseGuards(AuthorizationGuard)
   create(@Body() createUserDto: CreateUserDto) {
     return this.userService.create(createUserDto);
   }
@@ -19,18 +21,21 @@ export class UserController {
     return this.userService.findAll();
   }
 
+  @UseGuards(AuthorizationGuard)
   @Get(':id')
   findOne(@Param('id') id: string) {
-    return this.userService.findOne(+id);
+    return this.userService.findOne(id);
   }
 
+  @UseGuards(AuthorizationGuard)
   @Patch(':id')
   update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
-    return this.userService.update(+id, updateUserDto);
+    return this.userService.update(id, updateUserDto);
   }
 
+  @UseGuards(AuthorizationGuard)
   @Delete(':id')
   remove(@Param('id') id: string) {
-    return this.userService.remove(+id);
+    return this.userService.remove(id);
   }
 }
