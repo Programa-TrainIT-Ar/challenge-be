@@ -7,7 +7,7 @@ import { AuthorizationModule } from './authorization/authorization.module';
 @Module({
   imports: [
     ConfigModule.forRoot({
-      envFilePath: '.env.template',
+      envFilePath: '.env',
     }),
     AuthorizationModule
   ],

@@ -12,3 +12,42 @@ datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
+
+model User {
+  id            Int     @default(autoincrement()) @id
+  email         String  @unique
+  password      String
+  first_name    String
+  last_name     String
+  gender        String
+  photo         String?
+  phone_number  String?
+  timezone      String?
+  is_active     Boolean  @default(true)
+  is_staff      Boolean  @default(false)
+  is_superuser  Boolean  @default(false)
+  created_at    DateTime @default(now())
+  update_at     DateTime?
+  last_login    DateTime?
+  birthdate     DateTime
+  quizzes       Quiz[]
+}
+
+model Quiz {
+  id              Int     @default(autoincrement()) @id
+  name            String
+  description     String?
+  skill_level     Int 
+  challenge_type  QuestionType
+  max_time        Int?
+  user            User @relation(fields: [created_by], references: [id])
+  created_by      Int
+}
+
+enum QuestionType {
+  multiple_choice
+  simple_choice
+  true_false
+  open_ended
+  code
+  }
