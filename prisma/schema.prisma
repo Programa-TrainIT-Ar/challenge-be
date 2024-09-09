@@ -51,3 +51,9 @@ enum QuestionType {
   open_ended
   code
   }
+
+  model Module{
+    id Int     @default(autoincrement()) @id
+    name String
+    is_active Boolean  @default(true)
+  }
