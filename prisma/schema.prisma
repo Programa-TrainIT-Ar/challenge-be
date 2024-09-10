@@ -37,7 +37,8 @@ model Quiz {
   id              Int     @default(autoincrement()) @id
   name            String
   description     String?
-  skill_level     Int 
+  skill_level     SkillLevel @relation(fields: [skill_levelId], references: [id])
+  skill_levelId   Int 
   challenge_type  QuestionType
   max_time        Int?
   user            User @relation(fields: [created_by], references: [id])
@@ -53,7 +54,42 @@ enum QuestionType {
   }
 
   model Module{
-    id Int     @default(autoincrement()) @id
-    name String
-    is_active Boolean  @default(true)
+    id          Int @default(autoincrement()) @id
+    name        String
+    is_active   Boolean  @default(true)
   }
+
+model SkillLevel{
+  id          Int @default(autoincrement()) @id
+  cell        String
+  seniority   String
+  quiz        Quiz[]
+}
+
+enum Seniority{
+  trainee
+  junior
+  middle
+  senior
+}
+
+model Question{
+  id Int @default(autoincrement()) @id
+  question QuestionCell @relation(fields: [questionId], references: [id])
+  questionId Int
+  seniority String
+  type String
+  options Int[]
+  correct_option Int
+  explanation String
+  link String
+  is_active Boolean
+}
+
+model QuestionCell{
+  id        Int @default(autoincrement()) @id
+  question  String
+  cell      String
+  questions Question[]
+}
+
