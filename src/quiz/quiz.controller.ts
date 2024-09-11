@@ -1,34 +1,44 @@
 import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
 import { QuizService } from './quiz.service';
+import { QuestionType, Quiz, User } from '@prisma/client';
 import { CreateQuizDto } from './dto/create-quiz.dto';
-import { UpdateQuizDto } from './dto/update-quiz.dto';
 
 @Controller('quiz')
 export class QuizController {
   constructor(private readonly quizService: QuizService) {}
 
-  @Post()
-  create(@Body() createQuizDto: CreateQuizDto) {
-    return this.quizService.create(createQuizDto);
-  }
+  /* @Post()
+  create(@Body() quizData: {
+    name:string;
+    description?:string;
+    skill_level:number;
+    user:number;
+    challenge_type:QuestionType;
+    max_time?:number;
+  }) {
+    return this.quizService.createQuiz(quizData);
+  } */
 
   @Get()
   findAll() {
-    return this.quizService.findAll();
+    return this.quizService.findAllQuiz();
   }
 
   @Get(':id')
   findOne(@Param('id') id: string) {
-    return this.quizService.findOne(+id);
+    return this.quizService.findOneQuiz({ id: Number(id) });
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateQuizDto: UpdateQuizDto) {
-    return this.quizService.update(+id, updateQuizDto);
+  update(@Param('id') id: string, @Body() data: Quiz) {
+    return this.quizService.updateQuiz({
+      where: { id: Number(id) },
+      data:data,
+    });
   }
 
   @Delete(':id')
   remove(@Param('id') id: string) {
-    return this.quizService.remove(+id);
+    return this.quizService.removeQuiz({ id: Number(id) });
   }
 }
