@@ -3,13 +3,15 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { ConfigModule } from '@nestjs/config';
 import { AuthorizationModule } from './authorization/authorization.module';
+import { QuizModule } from './quiz/quiz.module';
 
 @Module({
   imports: [
     ConfigModule.forRoot({
       envFilePath: '.env',
     }),
-    AuthorizationModule
+    AuthorizationModule,
+    QuizModule
   ],
   controllers: [AppController],
   providers: [AppService],
