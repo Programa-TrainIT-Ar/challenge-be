@@ -1,7 +1,6 @@
 import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
 import { QuizService } from './quiz.service';
 import { QuestionType, Quiz, User } from '@prisma/client';
-import { CreateQuizDto } from './dto/create-quiz.dto';
 
 @Controller('quiz')
 export class QuizController {
