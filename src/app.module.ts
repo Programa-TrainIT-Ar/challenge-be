@@ -4,6 +4,7 @@ import { AppService } from './app.service';
 import { ConfigModule } from '@nestjs/config';
 import { AuthorizationModule } from './authorization/authorization.module';
 import { QuizModule } from './quiz/quiz.module';
+import { PrismaModule } from './prisma/prisma.module';
 
 @Module({
   imports: [
@@ -11,7 +12,8 @@ import { QuizModule } from './quiz/quiz.module';
       envFilePath: '.env',
     }),
     AuthorizationModule,
-    QuizModule
+    QuizModule,
+    PrismaModule
   ],
   controllers: [AppController],
   providers: [AppService],
