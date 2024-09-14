@@ -11,7 +11,7 @@ export class QuizController {
   constructor(private readonly quizService: QuizService) {}
 
   @Post()
-  @ApiCreatedResponse({ type: QuizEntity })
+  //@ApiCreatedResponse({ type: QuizEntity })
   create(@Body() createQuizDto: CreateQuizDto) {
     return this.quizService.createQuiz(createQuizDto);
   }
