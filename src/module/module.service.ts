@@ -19,14 +19,17 @@ export class ModuleService {
     return this.prisma.module.create({ data });
   }
 
-  async updateModule(id: number, data: Module): Promise<Module[]> {
+  async updateModule(
+    id: number,
+    data: { name?: string; is_active?: boolean },
+  ): Promise<Module> {
     return this.prisma.module.update({
       where: { id },
       data,
     });
   }
 
-  async deleteModule(id: number): Promise<Module[]> {
+  async deleteModule(id: number): Promise<Module> {
     return this.prisma.module.delete({
       where: { id },
     });

@@ -56,4 +56,13 @@ enum QuestionType {
     id Int     @default(autoincrement()) @id
     name String
     is_active Boolean  @default(true)
+    cells     Cell[]   // A Module has many Cells
+  }
+
+  model Cell{
+      id        Int     @default(autoincrement()) @id
+  name      String
+  is_active Boolean @default(true)
+  module    Module  @relation(fields: [module_id], references: [id])
+  module_id Int     // Foreign key pointing to Module
   }

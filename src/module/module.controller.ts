@@ -40,6 +40,6 @@ export class ModuleController {
 
   @Put(':id')
   async updateModule(@Param('id') id: string, @Body() data: Module) {
-    return this.moduleService.updateModule(Number(id));
+    return this.moduleService.updateModule(Number(id), data);
   }
 }
