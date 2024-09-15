@@ -93,7 +93,7 @@ enum QuestionType {
 
 enum Seniority {
   trainee
-  junios
+  junior
   middle
   senior
 }
