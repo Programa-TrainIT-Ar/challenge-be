@@ -1,19 +1,20 @@
 import { Injectable } from '@nestjs/common';
-import { PrismaService } from 'src/prisma.service';
+import { PrismaService } from 'src/prisma/prisma.service';
 import { Quiz, Prisma } from '@prisma/client';
+import { CreateQuizDto } from './dto/create-quiz.dto';
 
 @Injectable()
 export class QuizService {
   constructor(private prisma: PrismaService) {}
 
-  async createQuiz(data: Prisma.QuizCreateInput): Promise<Quiz>{
+  async createQuiz(data: CreateQuizDto): Promise<Quiz | null>{
     return this.prisma.quiz.create({
-      data,
+      data ,
     });
   }
 
   findAllQuiz() {
-    return `This action returns all quiz`;
+    return this.prisma.quiz.findMany({ where: { is_active: true } });
   }
 
   async findOneQuiz(
@@ -24,11 +25,11 @@ export class QuizService {
     });
   }
 
-  updateQuiz(params: {
+  updateQuiz(
     where: Prisma.QuizWhereUniqueInput,
     data: Prisma.QuizUpdateInput,
-  }): Promise<Quiz> {
-    const {where, data} = params;
+  ): Promise<Quiz> {
+    
     return this.prisma.quiz.update({
       where,
       data,
