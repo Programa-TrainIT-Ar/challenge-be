@@ -9,7 +9,7 @@ export class ModuleService {
     return this.prisma.module.findMany();
   }
 
-  async getModuleById(id: number): Promise<Module> {
+  async getModuleById(id: string): Promise<Module> {
     return this.prisma.module.findUnique({
       where: { id },
     });
@@ -20,7 +20,7 @@ export class ModuleService {
   }
 
   async updateModule(
-    id: number,
+    id: string,
     data: { name?: string; is_active?: boolean },
   ): Promise<Module> {
     return this.prisma.module.update({
@@ -29,7 +29,7 @@ export class ModuleService {
     });
   }
 
-  async deleteModule(id: number): Promise<Module> {
+  async deleteModule(id: string): Promise<Module> {
     return this.prisma.module.delete({
       where: { id },
     });

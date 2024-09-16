@@ -3,9 +3,12 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { ConfigModule } from '@nestjs/config';
 import { AuthorizationModule } from './authorization/authorization.module';
+
 import { ModuleModule } from './module/module.module';
 import { CellModule } from './cell/cell.module';
 import { QuizModule } from './quiz/quiz.module';
+
+import { PrismaModule } from './prisma/prisma.module';
 
 @Module({
   imports: [
@@ -14,9 +17,11 @@ import { QuizModule } from './quiz/quiz.module';
       envFilePath: '.env',
     }),
     AuthorizationModule,
+
+    QuizModule,
+    PrismaModule,
     ModuleModule,
     CellModule,
-    QuizModule,
   ],
   controllers: [AppController],
   providers: [AppService],

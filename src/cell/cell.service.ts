@@ -9,7 +9,7 @@ export class CellService {
     return this.prisma.cell.findMany();
   }
 
-  async getCellById(id: number): Promise<Cell> {
+  async getCellById(id: string): Promise<Cell | null> {
     return this.prisma.cell.findUnique({
       where: { id },
     });
@@ -18,7 +18,7 @@ export class CellService {
   async createCell(data: {
     name: string;
     is_active: boolean;
-    module_id: number;
+    module_id: string;
   }): Promise<Cell> {
     return this.prisma.cell.create({
       data: {
@@ -30,8 +30,8 @@ export class CellService {
   }
 
   async updateCell(
-    id: number,
-    data: { name: string; is_active: boolean; module_id: number },
+    id: string,
+    data: { name: string; is_active: boolean; module_id: string },
   ): Promise<Cell> {
     return this.prisma.cell.update({
       where: { id },
@@ -43,7 +43,7 @@ export class CellService {
     });
   }
 
-  async deleteCell(id: number): Promise<Cell> {
+  async deleteCell(id: string): Promise<Cell> {
     return this.prisma.cell.delete({
       where: { id },
     });

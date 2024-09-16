@@ -14,34 +14,73 @@ datasource db {
 }
 
 model User {
-  id            Int     @default(autoincrement()) @id
-  email         String  @unique
-  password      String
-  first_name    String
-  last_name     String
-  gender        String
-  photo         String?
-  phone_number  String?
-  timezone      String?
-  is_active     Boolean  @default(true)
-  is_staff      Boolean  @default(false)
-  is_superuser  Boolean  @default(false)
-  created_at    DateTime @default(now())
-  update_at     DateTime?
-  last_login    DateTime?
-  birthdate     DateTime
-  quizzes       Quiz[]
+  id           String    @id @default(uuid())
+  email        String    @unique
+  password     String
+  first_name   String
+  last_name    String
+  gender       String
+  photo        String?
+  phone_number String?
+  timezone     String?
+  is_active    Boolean    @default(true)
+  is_staff     Boolean    @default(false)
+  is_superuser Boolean    @default(false)
+  created_at   DateTime   @default(now())
+  update_at    DateTime?  @updatedAt
+  last_login   DateTime?
+  birthdate    DateTime
+  Quiz         Quiz[]
+  //  challenges    Challenge[]
+  //  hardSkills    HardSkillUser[]
+  //  softSkills    SoftSkillUser[]
+  //  languages     LanguageUser[]
+  //  roles         RolUser[]
+  //  socials       Socials[]
 }
 
 model Quiz {
-  id              Int     @default(autoincrement()) @id
+  id              String        @id @default(uuid())
   name            String
   description     String?
-  skill_level     Int 
-  challenge_type  QuestionType
+  skill_level     SkillLevel    @relation(fields: [skill_level_id], references: [id])
+  skill_level_id  String
+  challenge_type  ChallengeType
   max_time        Int?
-  user            User @relation(fields: [created_by], references: [id])
-  created_by      Int
+  created_by      User          @relation(fields: [created_by_id], references: [id])
+  created_by_id   String
+  is_active       Boolean        @default(true)
+}
+
+model SkillLevel {
+  id          String        @id @default(uuid())
+  cell        Cell          @relation(fields: [cell_id], references: [id])
+  cell_id     String    
+  seniority   Seniority
+  quiz        Quiz[]
+}
+
+model Cell {
+  id          String        @id @default(uuid())
+  name        String
+  is_active   Boolean       @default(true)
+  module      Module        @relation(fields: [module_id], references: [id])
+  module_id   String
+  skill_level SkillLevel[]     
+}
+
+model Module{
+    id        String  @id @default(uuid()) 
+    name      String
+    is_active Boolean @default(true)
+    cell      Cell[]
+  }
+
+enum ChallengeType {
+  immediate
+  interview
+  collaborative
+  timed
 }
 
 enum QuestionType {
@@ -50,19 +89,11 @@ enum QuestionType {
   true_false
   open_ended
   code
-  }
+}
 
-  model Module{
-    id Int     @default(autoincrement()) @id
-    name String
-    is_active Boolean  @default(true)
-    cells     Cell[]   // A Module has many Cells
-  }
-
-  model Cell{
-      id        Int     @default(autoincrement()) @id
-  name      String
-  is_active Boolean @default(true)
-  module    Module  @relation(fields: [module_id], references: [id])
-  module_id Int     // Foreign key pointing to Module
-  }
+enum Seniority {
+  trainee
+  junior
+  middle
+  senior
+}
