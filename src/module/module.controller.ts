@@ -10,6 +10,9 @@ import {
 } from '@nestjs/common';
 import { ModuleService } from './module.service';
 import { Module } from '@prisma/client';
+import { ApiTags } from '@nestjs/swagger';
+
+@ApiTags("Module")
 @Controller('modules')
 export class ModuleController {
   constructor(private readonly moduleService: ModuleService) {}
@@ -26,7 +29,7 @@ export class ModuleController {
 
   @Get(':id')
   async getModuleById(@Param('id') id: string) {
-    const module = await this.moduleService.getModuleById(Number(id));
+    const module = await this.moduleService.getModuleById(id);
     if (!module) {
       throw new NotFoundException(`Module with ID ${id} not found`);
     }
@@ -35,11 +38,11 @@ export class ModuleController {
 
   @Delete(':id')
   async deleteModule(@Param('id') id: string) {
-    this.moduleService.deleteModule(Number(id));
+    this.moduleService.deleteModule(id);
   }
 
   @Put(':id')
   async updateModule(@Param('id') id: string, @Body() data: Module) {
-    return this.moduleService.updateModule(Number(id));
+    return this.moduleService.updateModule(id, data);
   }
 }
