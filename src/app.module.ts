@@ -5,6 +5,7 @@ import { ConfigModule } from '@nestjs/config';
 import { AuthorizationModule } from './authorization/authorization.module';
 import { ModuleModule } from './module/module.module';
 import { CellModule } from './cell/cell.module';
+import { QuizModule } from './quiz/quiz.module';
 
 @Module({
   imports: [
@@ -15,6 +16,7 @@ import { CellModule } from './cell/cell.module';
     AuthorizationModule,
     ModuleModule,
     CellModule,
+    QuizModule,
   ],
   controllers: [AppController],
   providers: [AppService],
