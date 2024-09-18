@@ -8,6 +8,7 @@ import { PrismaModule } from './prisma/prisma.module';
 import { ModuleModule } from './module/module.module';
 import { CellModule } from './cell/cell.module';
 import { SkillLevelModule } from './skill-level/skill-level.module';
+import { QuestionModule } from './question/question.module';
 
 @Module({
   imports: [
@@ -21,6 +22,7 @@ import { SkillLevelModule } from './skill-level/skill-level.module';
     ModuleModule,
     CellModule,
     SkillLevelModule,
+    QuestionModule,
   ],
   controllers: [AppController],
   providers: [AppService],
