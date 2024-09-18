@@ -2,13 +2,14 @@ import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import { ValidationPipe } from '@nestjs/common';
+import { PrismaExceptionFilter } from './filters/prisma-exception.filter';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
-  
+
   //Activa CORS
   app.enableCors();
-  
+
   //Genera la documentacio con swagger
   const config = new DocumentBuilder()
     .setTitle('Challenge')
@@ -21,12 +22,13 @@ async function bootstrap() {
     .build();
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('docs', app, document);
-  
-  
+
   //Activa validaciones
-  app.useGlobalPipes(new ValidationPipe({whitelist: true, transform: true }));
-  
-  const PORT = process.env.PORT
+  app.useGlobalPipes(new ValidationPipe({ whitelist: true, transform: true }));
+
+  app.useGlobalFilters(new PrismaExceptionFilter());
+
+  const PORT = process.env.PORT;
   await app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);
   });

@@ -1,6 +1,6 @@
-import { Injectable } from '@nestjs/common';
+import { ConflictException, Injectable } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { Cell } from '@prisma/client';
+import { Cell, Prisma } from '@prisma/client';
 @Injectable()
 export class CellService {
   constructor(private prisma: PrismaService) {}
@@ -15,11 +15,38 @@ export class CellService {
     });
   }
 
+  /* prueba de error  async createCell(data: {
+    name: string;
+    is_active: boolean;
+    module_id: string;
+  }): Promise<Cell> {
+    // Simula un error de restricción única
+    throw new Prisma.PrismaClientKnownRequestError(
+      'Simulated unique constraint error',
+      {
+        code: 'P2002',
+      },
+    );
+  } */
+
   async createCell(data: {
     name: string;
     is_active: boolean;
     module_id: string;
   }): Promise<Cell> {
+    // Verifica si ya existe una celda con el mismo nombre
+    const existingCell = await this.prisma.cell.findFirst({
+      where: {
+        name: data.name,
+      },
+    });
+
+    if (existingCell) {
+      // Lanza una excepción si el registro ya existe
+      throw new ConflictException('A cell with this name already exists');
+    }
+
+    // Crea un nuevo registro si no existe uno con el mismo nombre
     return this.prisma.cell.create({
       data: {
         name: data.name,
