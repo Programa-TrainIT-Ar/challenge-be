@@ -3,13 +3,15 @@ import { QuestionService } from './question.service';
 import { CreateQuestionDto } from './dto/create-question.dto';
 import { UpdateQuestionDto } from './dto/update-question.dto';
 import { Prisma } from '@prisma/client';
+import { ApiTags } from '@nestjs/swagger';
 
+@ApiTags('Question')
 @Controller('question')
 export class QuestionController {
   constructor(private readonly questionService: QuestionService) {}
 
   @Post()
-  create(@Body() createQuestionDto: Prisma.QuestionCreateInput) {
+  create(@Body() createQuestionDto: CreateQuestionDto) {
     return this.questionService.create(createQuestionDto);
   }
 
@@ -20,16 +22,16 @@ export class QuestionController {
 
   @Get(':id')
   findOne(@Param('id') id: string) {
-    return this.questionService.findOne(+id);
+    return this.questionService.findOne(id);
   }
 
   @Patch(':id')
   update(@Param('id') id: string, @Body() updateQuestionDto: UpdateQuestionDto) {
-    return this.questionService.update(+id, updateQuestionDto);
+    return this.questionService.update(id, updateQuestionDto);
   }
 
   @Delete(':id')
   delete(@Param('id') id: string) {
-    return this.questionService.delete(+id);
+    return this.questionService.delete(id);
   }
 }

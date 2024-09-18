@@ -1,30 +1,41 @@
-import { IsArray, IsBoolean, IsInt, IsOctal, IsOptional, IsString } from 'class-validator';
+import { ApiProperty } from '@nestjs/swagger';
+import { Seniority, QuestionType } from '@prisma/client';
+import { IsArray, IsBoolean, IsEnum, IsInt, IsOctal, IsOptional, IsString } from 'class-validator';
 
 
 export class CreateQuestionDto {
-    @IsInt()
-    questionId: number;
-
     @IsString()
-    seniority: string;
+    @ApiProperty()
+    question: string;
 
-    @IsString()
-    type: string;
+    @IsEnum(Seniority)
+    @ApiProperty()
+    seniority: Seniority;
+
+    @IsEnum(QuestionType)
+    @ApiProperty()
+    type: QuestionType;
 
     @IsArray()
-    options: number[];
+    @ApiProperty()
+    options: string[];
 
-    @IsInt()
-    correct_option: number;
-
-    @IsString()
-    explanation: string;
+    @IsArray()
+    @ApiProperty()
+    correct_option: number[];
 
     @IsString()
     @IsOptional()
-    link: string;
+    @ApiProperty()
+    explanation?: string;
+
+    @IsString()
+    @IsOptional()
+    @ApiProperty()
+    link?: string;
 
     @IsBoolean()
-    is_active: boolean;
+    @ApiProperty({ required: false, default:true })
+    is_active: boolean = true;
 
 }

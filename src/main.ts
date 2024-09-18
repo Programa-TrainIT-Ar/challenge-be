@@ -16,9 +16,11 @@ async function bootstrap() {
     .setDescription('Proyecto creado en Nestjs Con Prisma ')
     .setVersion('1.0')
     //.addBearerAuth()
+    .addTag('Quiz')
+    .addTag('Question')
     .addTag('Module')
     .addTag('Cell')
-    .addTag('Quiz')
+    .addTag('Skill Level')
     .build();
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('docs', app, document);

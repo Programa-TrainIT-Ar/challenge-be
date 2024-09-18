@@ -1,8 +1,9 @@
 import { Body, Controller, Delete, Get, Param, Patch, Post } from '@nestjs/common';
 import { SkillLevelService } from './skill-level.service';
 import { Prisma } from '@prisma/client';
+import { ApiTags } from '@nestjs/swagger';
 
-
+@ApiTags('Skill Level')
 @Controller('skill-level')
 export class SkillLevelController {
     constructor(private readonly skillLevelService: SkillLevelService ){}

@@ -16,21 +16,18 @@ export class QuestionService {
 
   //READ (FIND ALL)
   async findAll() {
-    return this.prisma.question.findMany({
-      include: { question: true }
-    });
+    return this.prisma.question.findMany();
   }
 
   //READ (FIND ONE BY ID)
-  async findOne(id: number) {
+  async findOne(id: string) {
     return this.prisma.question.findUnique({
-      where: { id },
-      include: { question: true },
+      where: { id }
     });
   }
 
   //UPDATE
-  async update(id: number, data: Prisma.QuestionUpdateInput) {
+  async update(id: string, data: Prisma.QuestionUpdateInput) {
     return this.prisma.question.update({
       where: { id },
       data,
@@ -38,7 +35,7 @@ export class QuestionService {
   }
 
   //DELETE
-  async delete(id: number) {
+  async delete(id: string) {
     return this.prisma.question.delete({
       where: { id }
     });
