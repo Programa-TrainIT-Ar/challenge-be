@@ -9,6 +9,7 @@ import {
   NotFoundException,
   HttpException,
   HttpStatus,
+  ConflictException,
 } from '@nestjs/common';
 import { CellService } from './cell.service';
 import { Cell } from '@prisma/client';
@@ -38,11 +39,7 @@ export class CellController {
   async createCell(
     @Body() data: { name: string; is_active: boolean; module_id: string },
   ) {
-    try {
-      return await this.cellService.createCell(data);
-    } catch (error) {
-      throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
-    }
+    return this.cellService.createCell(data);
   }
 
   @Get(':id')
@@ -75,7 +72,7 @@ export class CellController {
   })
   async updateCell(
     @Param('id') id: string,
-    @Body() data: { name: string; is_active: boolean; module_id:string },
+    @Body() data: { name: string; is_active: boolean; module_id: string },
   ) {
     return this.cellService.updateCell(id, data);
   }
