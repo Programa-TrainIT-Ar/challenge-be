@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Param } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { Quiz, Prisma } from '@prisma/client';
 import { CreateQuizDto } from './dto/create-quiz.dto';
@@ -13,8 +13,30 @@ export class QuizService {
     });
   }
 
-  findAllQuiz() {
-    return this.prisma.quiz.findMany();
+  async findQuizzes(params: {
+    skip?: number;
+    take?: number;
+    cursor?: Prisma.QuizWhereUniqueInput;
+    where?: Prisma.QuizWhereInput;
+    orderBy?: Prisma.QuizOrderByWithRelationInput;
+  }): Promise<{quizzes:Quiz[], total:number}> {
+    const {skip, take, cursor, where, orderBy} = params;
+
+    const [quizzes, total] = await Promise.all([
+      this.prisma.quiz.findMany({
+        skip,
+        take,
+        cursor,
+        where,
+        orderBy,
+        include: {
+          skill_level: true,
+          created_by: true,
+        },
+      }),
+      this.prisma.quiz.count({ where }),
+    ])
+    return { quizzes, total };
   }
 
   async findOneQuiz(

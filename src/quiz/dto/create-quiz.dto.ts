@@ -13,10 +13,6 @@ export class CreateQuizDto {
     @ApiProperty({ required: false })
     description?:string;
     
-    /* skill_level: {
-      connect: { id: string }
-    }; */
-    
     @IsUUID()
     @ApiProperty()
     skill_level_id: string;
@@ -30,10 +26,6 @@ export class CreateQuizDto {
     @IsOptional()
     @ApiProperty({ required: false })
     max_time?:number;
-
-   /*  created_by: {
-      connect: { id: string }
-    }; */
 
     @IsUUID()
     @ApiProperty()

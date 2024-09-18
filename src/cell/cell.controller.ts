@@ -11,7 +11,7 @@ import {
   HttpStatus,
 } from '@nestjs/common';
 import { CellService } from './cell.service';
-import { Cell } from '@prisma/client';
+//import { Cell } from '@prisma/client';
 import { ApiBody, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { CellDto, CreateCellDto, UpdateCellDto } from './dto/cell.dto';
 
