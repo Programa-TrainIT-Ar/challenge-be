@@ -99,3 +99,24 @@ enum Seniority {
   middle
   senior
 }
+
+model Question{
+  id Int @default(autoincrement()) @id
+  question QuestionCell @relation(fields: [questionId], references: [id])
+  questionId Int
+  seniority String
+  type String
+  options Int[]
+  correct_option Int
+  explanation String
+  link String
+  is_active Boolean
+}
+
+model QuestionCell{
+  id        Int @default(autoincrement()) @id
+  question  String
+  cell      String
+  questions Question[]
+}
+
