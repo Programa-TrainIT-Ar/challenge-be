@@ -5,6 +5,7 @@ import { UpdateQuizDto } from './dto/update-quiz.dto';
 import { ApiCreatedResponse, ApiOkResponse, ApiTags, ApiQuery } from '@nestjs/swagger';
 import { QuizEntity } from './entities/quiz.entity';
 import { Prisma } from '@prisma/client';
+import { get } from 'http';
 
 
 @ApiTags('Quiz')
@@ -19,6 +20,32 @@ export class QuizController {
   }
 
   @Get()
+  @ApiQuery({ name: 'search', required: false, type: String })
+  @ApiQuery({ name: 'createdBy', required: false, type: String })
+  @ApiQuery({ name: 'skillLevel', required: false, type: String })
+  @ApiOkResponse({ type: QuizEntity, isArray: true })
+  async findAll(
+    @Query('search') search? : string,
+    @Query('createdBy') createdBy?: string,
+    @Query('skillLevel') skillLevel?: string,
+  ) {
+    
+    let where: Prisma.QuizWhereInput = {};
+    let filter: any = {}
+
+    if (createdBy) {
+      filter.created_by = createdBy;
+    }
+    if (skillLevel) {
+      filter.skill_level = skillLevel;
+    }
+    if (search) {
+      filter.search = search;
+    }
+
+    return this.quizService.findQuizzes(filter)
+  }
+ /*  @Get()
   @ApiQuery({ name: 'page', required: false, type: Number })
   @ApiQuery({ name: 'limit', required: false, type: Number })
   @ApiQuery({ name: 'createdBy', required: false, type: String })
@@ -72,12 +99,12 @@ export class QuizController {
       },
     };
   }
-}
+} */
   
   @Get(':id')
   @ApiOkResponse({ type: QuizEntity })
-  findOne(@Param('id') id: string) {
-    return this.quizService.findOneQuiz({id});
+  async findOne(@Param('id') id: string) {
+    return await this.quizService.findOneQuiz({id});
   }
 
   @Put(':id')
