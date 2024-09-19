@@ -14,8 +14,8 @@ export class QuizController {
 
   @Post()
   @ApiCreatedResponse({ type: QuizEntity })
-  create(@Body() createQuizDto: CreateQuizDto) {
-    return this.quizService.createQuiz(createQuizDto);
+  async create(@Body() createQuizDto: CreateQuizDto) {
+    return await this.quizService.createQuiz(createQuizDto);
   }
 
   @Get()
@@ -52,6 +52,8 @@ export class QuizController {
       ];
       const orderByObject: Prisma.QuizOrderByWithRelationInput = {};
     orderByObject[orderBy] = orderDirection;
+    
+    console.log({ page, limit, createdBy, skillLevel, search, orderBy, orderDirection });
 
     const { quizzes, total } = await this.quizService.findQuizzes({
       skip,

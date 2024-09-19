@@ -9,11 +9,11 @@ export class CreateQuestionDto {
     question: string;
 
     @IsEnum(Seniority)
-    @ApiProperty()
+    @ApiProperty({ enum: Seniority })
     seniority: Seniority;
 
     @IsEnum(QuestionType)
-    @ApiProperty()
+    @ApiProperty({ enum: QuestionType })
     type: QuestionType;
 
     @IsArray()
@@ -35,7 +35,7 @@ export class CreateQuestionDto {
     link?: string;
 
     @IsBoolean()
-    @ApiProperty({ required: false, default:true })
+    @ApiProperty({ default:true })
     is_active: boolean = true;
 
 }

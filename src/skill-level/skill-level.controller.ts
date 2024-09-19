@@ -2,6 +2,8 @@ import { Body, Controller, Delete, Get, Param, Patch, Post } from '@nestjs/commo
 import { SkillLevelService } from './skill-level.service';
 import { Prisma } from '@prisma/client';
 import { ApiTags } from '@nestjs/swagger';
+import { CreateSkillLevelDto } from './dto/create-skilllevel.dto';
+import { UpdateSkillLevelDto } from './dto/update-skilllevel.dto';
 
 @ApiTags('Skill Level')
 @Controller('skill-level')
@@ -9,8 +11,8 @@ export class SkillLevelController {
     constructor(private readonly skillLevelService: SkillLevelService ){}
 
     @Post()
-    create(@Body() CreateSkillLevelDto: Prisma.SkillLevelCreateInput ){
-        return this.skillLevelService.create(CreateSkillLevelDto);
+    create(@Body() createSkillLevelDto: CreateSkillLevelDto ){
+        return this.skillLevelService.create(createSkillLevelDto);
     }
 
     @Get()
@@ -24,7 +26,7 @@ export class SkillLevelController {
     }
 
     @Patch(':id')
-    update(@Param('id') id:string, @Body() updateSkillLevelDto: Prisma.SkillLevelUpdateInput){
+    update(@Param('id') id:string, @Body() updateSkillLevelDto: UpdateSkillLevelDto){
         return this.skillLevelService.update(id, updateSkillLevelDto);
     }
 

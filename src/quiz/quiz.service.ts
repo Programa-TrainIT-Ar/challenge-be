@@ -21,7 +21,7 @@ export class QuizService {
     orderBy?: Prisma.QuizOrderByWithRelationInput;
   }): Promise<{quizzes:Quiz[], total:number}> {
     const {skip, take, cursor, where, orderBy} = params;
-
+    console.log({ skip, take, cursor, where, orderBy });
     const [quizzes, total] = await Promise.all([
       this.prisma.quiz.findMany({
         skip,

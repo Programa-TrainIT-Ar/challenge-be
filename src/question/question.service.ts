@@ -1,6 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
 import { PrismaService } from 'src/prisma/prisma.service';
+import { CreateQuestionDto } from './dto/create-question.dto';
+import { UpdateQuestionDto } from './dto/update-question.dto';
 
   
 @Injectable()
@@ -8,7 +10,7 @@ export class QuestionService {
   constructor ( private prisma: PrismaService ){}
 
   //CREATE
-  async create(data: Prisma.QuestionCreateInput) {
+  async create(data: CreateQuestionDto) {
     return this.prisma.question.create({
       data,
     });
@@ -27,7 +29,7 @@ export class QuestionService {
   }
 
   //UPDATE
-  async update(id: string, data: Prisma.QuestionUpdateInput) {
+  async update(id: string, data: UpdateQuestionDto) {
     return this.prisma.question.update({
       where: { id },
       data,

@@ -1,7 +1,8 @@
 import { Injectable, Delete } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateSkillLevelDto } from './dto/create-skilllevel.dto'
-import { Prisma } from '@prisma/client';
+import { Prisma, SkillLevel } from '@prisma/client';
+import { UpdateSkillLevelDto } from './dto/update-skilllevel.dto';
 
 
 @Injectable()
@@ -11,7 +12,7 @@ export class SkillLevelService {
     //READ (fIND ALL)
     async findAll(){
         return this.prisma.skillLevel.findMany({
-            include: { cell: true, quiz: true },
+            include: { cell: true },
         });
     }
 
@@ -19,19 +20,18 @@ export class SkillLevelService {
     async findOne(id: string){
         return this.prisma.skillLevel.findUnique({
             where: { id }, 
-            include: { cell: true, quiz: true },
+            include: { cell: true },
         });
     }
 
-
-    async create(data: Prisma.SkillLevelCreateInput){
+    async create(data: CreateSkillLevelDto): Promise<SkillLevel | null> {
         return this.prisma.skillLevel.create({
             data,
         });
     }
 
     //UPDATE 
-    async update(id: string, data: Prisma.SkillLevelUpdateInput){
+    async update(id: string, data: UpdateSkillLevelDto){
         return this.prisma.skillLevel.update({
             where: { id },
             data,
