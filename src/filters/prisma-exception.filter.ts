@@ -14,50 +14,36 @@ export class PrismaExceptionFilter implements ExceptionFilter {
     const ctx = host.switchToHttp();
     const response = ctx.getResponse<Response>();
     const request = ctx.getRequest<Request>();
-    const status =
-      exception instanceof HttpException
-        ? exception.getStatus()
-        : HttpStatus.INTERNAL_SERVER_ERROR;
 
-    // Manejo de errores de Prisma
+    let status = HttpStatus.INTERNAL_SERVER_ERROR;
+    let message = 'Internal server error';
+
+    // Si es una excepción de Prisma
     if (exception instanceof Prisma.PrismaClientKnownRequestError) {
       if (exception.code === 'P2002') {
-        // Manejar error de valor duplicado
-        response.status(HttpStatus.BAD_REQUEST).json({
-          statusCode: HttpStatus.BAD_REQUEST,
-          message: 'Unique constraint failed',
-          error: 'Bad Request',
-          path: request.url,
-          timestamp: new Date().toISOString(),
-        });
+        status = HttpStatus.BAD_REQUEST;
+        message = 'Unique constraint failed';
       } else if (exception.code === 'P2003') {
-        // Manejar error de clave foránea
-        response.status(HttpStatus.BAD_REQUEST).json({
-          statusCode: HttpStatus.BAD_REQUEST,
-          message: 'Foreign key constraint failed',
-          error: 'Bad Request',
-          path: request.url,
-          timestamp: new Date().toISOString(),
-        });
+        status = HttpStatus.BAD_REQUEST;
+        message = 'Foreign key constraint failed';
       } else if (exception.code === 'P2025') {
-        // Manejar error de registro no encontrado
-        response.status(HttpStatus.NOT_FOUND).json({
-          statusCode: HttpStatus.NOT_FOUND,
-          message: 'Record not found',
-          error: 'Not Found',
-          path: request.url,
-          timestamp: new Date().toISOString(),
-        });
+        status = HttpStatus.NOT_FOUND;
+        message = 'Record not found';
       }
-    } else {
-      // Otros errores
-      response.status(status).json({
-        statusCode: status,
-        message: exception.message || 'Internal server error',
-        error: exception.name || 'Error',
-        path: request.url,
-        timestamp: new Date().toISOString(),
-      });
     }
+    // Si es una excepción de tipo HttpException (como ConflictException)
+    else if (exception instanceof HttpException) {
+      status = exception.getStatus();
+      message = exception.message;
+    }
+
+    // Responder con el mensaje de error adecuado
+    response.status(status).json({
+      statusCode: status,
+      message: message,
+      error: exception.name || 'Error',
+      path: request.url,
+      timestamp: new Date().toISOString(),
+    });
   }
 }

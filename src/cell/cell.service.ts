@@ -1,4 +1,4 @@
-import { ConflictException, Injectable } from '@nestjs/common';
+import { ConflictException, HttpStatus, Injectable } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { Cell, Prisma } from '@prisma/client';
 @Injectable()
@@ -28,7 +28,6 @@ export class CellService {
       },
     );
   } */
-
   async createCell(data: {
     name: string;
     is_active: boolean;
@@ -42,8 +41,11 @@ export class CellService {
     });
 
     if (existingCell) {
-      // Lanza una excepción si el registro ya existe
-      throw new ConflictException('A cell with this name already exists');
+      throw new ConflictException({
+        status: HttpStatus.CONFLICT,
+        message: 'A cell with this name already exists',
+        error: 'Conflict',
+      });
     }
 
     // Crea un nuevo registro si no existe uno con el mismo nombre
