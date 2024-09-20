@@ -1,6 +1,6 @@
 import { Injectable, Param } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { Quiz, Prisma } from '@prisma/client';
+import { Quiz, Prisma, Seniority } from '@prisma/client';
 import { CreateQuizDto } from './dto/create-quiz.dto';
 
 @Injectable()
@@ -14,38 +14,44 @@ export class QuizService {
   }
 
   async findQuizzes(filters: {
-    searchTerm?: string;
-    createdBy?: string;
-    skillLevel?: string;
+    search?: string;
+    created_by?: string;
+    cell?: string;
+    seniority?: string;
   }): Promise<{quizzes:Quiz[], total:number}> {
-    const { searchTerm, createdBy, skillLevel } = filters;
-
+    const { search, created_by, cell, seniority } = filters;
+    //creo una variable where vacia para almacenar los terminos de busqueda y filtros
     let where: Prisma.QuizWhereInput = {};
-    
-    if (searchTerm) {
+    //si cada termino contiene algo lo asigna a where
+    if (search) {
       where.OR = [
-        { name: { contains: searchTerm, mode: 'insensitive' } },
-        { description: { contains: searchTerm, mode: 'insensitive' } },
+        { name: { contains: search, mode: 'insensitive' } },
+        { description: { contains: search, mode: 'insensitive' } },
       ];
     }
     
-    if (createdBy) {
+    if (created_by) {
       where.OR = [
         ...(where.OR || []),
-        { created_by: { first_name: { contains: createdBy, mode: 'insensitive' } } },
-        { created_by: { last_name: { contains: createdBy, mode: 'insensitive' } } },
-        { created_by: { email: { contains: createdBy, mode: 'insensitive' } } },
+        { created_by: { first_name: { contains: created_by, mode: 'insensitive' } } },
+        { created_by: { last_name: { contains: created_by, mode: 'insensitive' } } },
+        { created_by: { email: { contains: created_by, mode: 'insensitive' } } },
       ];
     }
     
-    if (skillLevel) {
+    if (cell) {
       where.skill_level = {
-        seniority: skillLevel as any,
+        cell: { name: { contains: cell, mode: 'insensitive' } }
       };
     }
-    const quizzes : Quiz[] = [];
-    const total: number = 0;
-    if (filters) {
+    
+    if (seniority) {
+      where.skill_level = {
+        seniority: seniority as Seniority,
+      };
+    }
+    
+    //genera la consulta a la base de datos
     const [quizzes, total] = await Promise.all([
       this.prisma.quiz.findMany({
         where,include: {
@@ -54,40 +60,11 @@ export class QuizService {
         },
       }),
       this.prisma.quiz.count({ where })
-    ])} else {
-      const [quizzes, total] = await Promise.all([
-        this.prisma.quiz.findMany(),
-        this.prisma.quiz.count({ where })
-      ])
-    }
-    
-    return {quizzes, total};
-  }
-  /* async findQuizzes(params: {
-    skip?: number;
-    take?: number;
-    cursor?: Prisma.QuizWhereUniqueInput;
-    where?: Prisma.QuizWhereInput;
-    orderBy?: Prisma.QuizOrderByWithRelationInput;
-  }): Promise<{quizzes:Quiz[], total:number}> {
-    const {skip, take, cursor, where, orderBy} = params;
-    console.log({ skip, take, cursor, where, orderBy });
-    const [quizzes, total] = await Promise.all([
-      this.prisma.quiz.findMany({
-        skip,
-        take,
-        cursor,
-        where,
-        orderBy,
-        include: {
-          skill_level: true,
-          created_by: true,
-        },
-      }),
-      this.prisma.quiz.count({ where }),
     ])
-    return { quizzes, total };
-  } */
+
+    return {quizzes, total};
+     
+  }
 
   async findOneQuiz(
     quizWhereUniqueInput: Prisma.QuizWhereUniqueInput,
