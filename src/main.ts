@@ -5,7 +5,7 @@ import { ValidationPipe } from '@nestjs/common';
 import { PrismaExceptionFilter } from './filters/prisma-exception.filter';
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
+  const app = await NestFactory.create(AppModule,{ logger: ['error', 'warn', 'log', 'debug'] });
 
   //Activa CORS
   app.enableCors();
@@ -26,7 +26,11 @@ async function bootstrap() {
   SwaggerModule.setup('docs', app, document);
 
   //Activa validaciones
-  app.useGlobalPipes(new ValidationPipe({ whitelist: true, transform: true }));
+  app.useGlobalPipes(new ValidationPipe({ 
+    whitelist: true, 
+    transform: true ,
+    disableErrorMessages: false
+  }));
 
   app.useGlobalFilters(new PrismaExceptionFilter());
 

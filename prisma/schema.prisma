@@ -35,7 +35,7 @@ model User {
 
 model Quiz {
   id              String        @id @default(uuid())
-  name            String
+  name            String        @unique
   description     String?
   skill_level     SkillLevel    @relation(fields: [skill_level_id], references: [id])
   skill_level_id  String
@@ -69,14 +69,14 @@ model Cell {
 
 model Module{
     id        String  @id @default(uuid()) 
-    name      String
+    name      String  @unique
     is_active Boolean @default(true)
     cell      Cell[]
   }
 
 model Question {
   id              String       @id @default(uuid()) 
-  question        String
+  question        String       @unique
   seniority       Seniority
   type            QuestionType
   options         String[]

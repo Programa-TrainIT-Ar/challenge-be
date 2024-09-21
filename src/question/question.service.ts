@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { Prisma } from '@prisma/client';
+import { Prisma, Question, QuestionType, Seniority } from '@prisma/client';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { CreateQuestionDto } from './dto/create-question.dto';
 import { UpdateQuestionDto } from './dto/update-question.dto';
@@ -10,15 +10,39 @@ export class QuestionService {
   constructor ( private prisma: PrismaService ){}
 
   //CREATE
-  async create(data: CreateQuestionDto) {
+  async create(data: CreateQuestionDto): Promise<Question | null> {
     return this.prisma.question.create({
       data,
     });
   }
 
   //READ (FIND ALL)
-  async findAll() {
-    return this.prisma.question.findMany();
+  async findQuestions(filter:{
+    search? : string,
+    type?: string,
+    seniority?: string,
+  }):Promise<{questions:Question[], total: number}> {
+    const {search, type, seniority}=filter;
+    //creo una variable where vacia para almacenar los terminos de busqueda y filtros
+    let where: Prisma.QuestionWhereInput= {};
+    //si cada termino contiene algo lo asigna a where
+    if (search) {
+      where = { question: { contains: search, mode: 'insensitive' } }
+    }
+    if (type) {
+      where = { type: type as QuestionType}
+    }
+    if (seniority) {
+      where = { seniority: seniority as Seniority}
+    }
+    //genera la consulta a la base de datos
+    const [questions, total] = await Promise.all([
+      this.prisma.question.findMany({
+        where,
+      }),
+      this.prisma.question.count({where})
+    ])
+    return {questions, total};
   }
 
   //READ (FIND ONE BY ID)

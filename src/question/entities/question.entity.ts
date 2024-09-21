@@ -1,1 +1,1 @@
-export class Question {}
+export class QuestionEntity {}

@@ -29,7 +29,7 @@ export class QuizController {
     @Query('cell') cell?: string,
   ) {
     
-    let filter: any = {}
+    let filter: any = {};
 
     if (createdBy) {
       filter.created_by = createdBy;
