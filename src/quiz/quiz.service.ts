@@ -54,7 +54,8 @@ export class QuizService {
     //genera la consulta a la base de datos
     const [quizzes, total] = await Promise.all([
       this.prisma.quiz.findMany({
-        where,include: {
+        where,
+        include: {
           created_by: true,
           skill_level: true,
         },
