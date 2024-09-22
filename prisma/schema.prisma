@@ -12,9 +12,10 @@ datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
+
 model User {
-  id           String    @id @default(uuid())
-  email        String    @unique
+  id           String      @id @default(uuid())
+  email        String      @unique
   password     String
   first_name   String
   last_name    String
@@ -22,52 +23,174 @@ model User {
   photo        String?
   phone_number String?
   timezone     String?
-  is_active    Boolean   @default(true)
-  is_staff     Boolean   @default(false)
-  is_superuser Boolean   @default(false)
-  created_at   DateTime  @default(now())
-  update_at    DateTime? @updatedAt
+  is_active    Boolean     @default(true)
+  is_staff     Boolean     @default(false)
+  is_superuser Boolean     @default(false)
+  created_at   DateTime    @default(now())
+  update_at    DateTime?   @updatedAt
   last_login   DateTime?
   birthdate    DateTime
-  Quiz         Quiz[]    // Relación uno a muchos con Quiz
-  // Comentadas: desafíos, habilidades duras y blandas, idiomas, roles, redes sociales
+  quizzes      Quiz[]
+  candidatos   Candidato[]
 }
 
 model Quiz {
-  id              String        @id @default(uuid())
-  name            String
-  description     String?
-  skill_level     SkillLevel    @relation(fields: [skill_level_id], references: [id])
-  skill_level_id  String
-  challenge_type  ChallengeType
-  max_time        Int?
-  created_by      User          @relation(fields: [created_by_id], references: [id])
-  created_by_id   String
-  is_active       Boolean       @default(true)
+  id             String         @id @default(uuid())
+  name           String
+  description    String?
+  skill_level_id String
+  challenge_type ChallengeType
+  max_time       Int?
+  created_by_id  String
+  created_at     DateTime       @default(now())
+  update_at      DateTime?      @updatedAt
+  is_active      Boolean        @default(true)
+  quiz_question  QuizQuestion[]
+
+  User         User?       @relation(fields: [userId], references: [id])
+  userId       String?
+  SkillLevel   SkillLevel? @relation(fields: [skillLevelId], references: [id])
+  skillLevelId String?
+  Candidato    Candidato?  @relation(fields: [candidatoId], references: [id])
+  candidatoId  String?
 }
 
 model SkillLevel {
-  id          String        @id @default(uuid())
-  cell        Cell          @relation(fields: [cell_id], references: [id])
-  cell_id     String    
-  seniority   Seniority
-  quiz        Quiz[]        // Relación uno a muchos con Quiz
+  id        String    @id @default(uuid())
+  cell_id   String
+  seniority Seniority
+  quiz      Quiz[]
+  Cell      Cell?     @relation(fields: [cellId], references: [id])
+  cellId    String?
+}
+
+model Candidato {
+  id         String          @id @default(uuid())
+  user_id    String
+  created_at DateTime        @default(now())
+  updated_at DateTime?       @updatedAt
+  is_active  Boolean         @default(true)
+  score      Int?
+  quizzes    Quiz[] 
+  challenges Challenge[]
+  hardSkills HardSkillUser[]
+  softSkills SoftSkillUser[]
+  languages  LanguageUser[]
+  roles      RolUser[]
+  socials    Socials[]
+  User       User?           @relation(fields: [userId], references: [id])
+  userId     String?
+}
+
+model Challenge {
+  id          String    @id @default(uuid())
+  name        String
+  description String?
+  created_at  DateTime  @default(now())
+  updated_at  DateTime? @updatedAt
+
+  Candidato   Candidato? @relation(fields: [candidatoId], references: [id])
+  candidatoId String?
+}
+
+model HardSkillUser {
+  id         String    @id @default(uuid())
+  skill_name String
+  level      String
+  created_at DateTime  @default(now())
+  updated_at DateTime? @updatedAt
+
+  Candidato   Candidato? @relation(fields: [candidatoId], references: [id])
+  candidatoId String?
+}
+
+model SoftSkillUser {
+  id         String    @id @default(uuid())
+  skill_name String
+  level      String
+  created_at DateTime  @default(now())
+  updated_at DateTime? @updatedAt
+
+  Candidato   Candidato? @relation(fields: [candidatoId], references: [id])
+  candidatoId String?
+}
+
+model LanguageUser {
+  id          String    @id @default(uuid())
+  language    String
+  proficiency String
+  created_at  DateTime  @default(now())
+  updated_at  DateTime? @updatedAt
+
+  Candidato   Candidato? @relation(fields: [candidatoId], references: [id])
+  candidatoId String?
+}
+
+model RolUser {
+  id          String    @id @default(uuid())
+  role_name   String
+  description String?
+  created_at  DateTime  @default(now())
+  updated_at  DateTime? @updatedAt
+
+  Candidato   Candidato? @relation(fields: [candidatoId], references: [id])
+  candidatoId String?
+}
+
+model Socials {
+  id         String    @id @default(uuid())
+  platform   String
+  url        String
+  created_at DateTime  @default(now())
+  updated_at DateTime? @updatedAt
+
+  Candidato   Candidato? @relation(fields: [candidatoId], references: [id])
+  candidatoId String?
 }
 
 model Cell {
-  id          String        @id @default(uuid())
+  id          String       @id @default(uuid())
   name        String
-  is_active   Boolean       @default(true)
-  module      Module        @relation(fields: [module_id], references: [id])
+  is_active   Boolean      @default(true)
   module_id   String
-  skill_level SkillLevel[]  // Relación uno a muchos con SkillLevel     
+  skill_level SkillLevel[]
+  question    Question[]
+  Module      Module?      @relation(fields: [moduleId], references: [id])
+  moduleId    String?
 }
 
 model Module {
-  id        String  @id @default(uuid()) 
+  id        String  @id @default(uuid())
   name      String
   is_active Boolean @default(true)
-  cell      Cell[]  // Relación uno a muchos con Cell
+  cell      Cell[]
+}
+
+model Question {
+  id             String         @id @default(uuid())
+  question       String
+  seniority      Seniority
+  type           QuestionType
+  options        String[]
+  correct_option Int[]
+  explanation    String?
+  link           String?
+  is_active      Boolean
+  created_at     DateTime       @default(now())
+  update_at      DateTime?      @updatedAt
+  quiz_question  QuizQuestion[]
+  cell           Cell[]
+}
+
+model QuizQuestion {
+  id          String    @id @default(uuid())
+  is_active   Boolean
+  quiz_id     String
+  question_id String
+  Quiz        Quiz?     @relation(fields: [quizId], references: [id])
+  quizId      String?
+  Question    Question? @relation(fields: [questionId], references: [id])
+  questionId  String?
 }
 
 enum ChallengeType {
