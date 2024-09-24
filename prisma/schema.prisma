@@ -1,6 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -141,6 +138,128 @@ model Question {
   update_at      DateTime?      @updatedAt
 
   cell           Cell[]
+}
+
+enum ChallengeType {
+  immediate
+  interview
+  collaborative
+  timed
+}
+
+enum QuestionType {
+  multiple_choice
+  simple_choice
+  true_false
+  open_ended
+  code
+}
+
+enum Seniority {
+  trainee
+  junior
+  middle
+  senior
+}
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           String    @id @default(uuid())
+  email        String    @unique
+  password     String
+  first_name   String
+  last_name    String
+  gender       String
+  photo        String?
+  phone_number String?
+  timezone     String?
+  is_active    Boolean    @default(true)
+  is_staff     Boolean    @default(false)
+  is_superuser Boolean    @default(false)
+  created_at   DateTime   @default(now())
+  update_at    DateTime?  @updatedAt
+  last_login   DateTime?
+  birthdate    DateTime
+  Quiz         Quiz[]
+  //  challenges    Challenge[]
+  //  hardSkills    HardSkillUser[]
+  //  softSkills    SoftSkillUser[]
+  //  languages     LanguageUser[]
+  //  roles         RolUser[]
+  //  socials       Socials[]
+}
+
+model Quiz {
+  id              String        @id @default(uuid())
+  name            String
+  description     String?
+  skill_level     SkillLevel    @relation(fields: [skill_level_id], references: [id])
+  skill_level_id  String
+  challenge_type  ChallengeType
+  max_time        Int?
+  created_by      User          @relation(fields: [created_by_id], references: [id])
+  created_by_id   String
+  created_at      DateTime      @default(now())
+  update_at       DateTime?     @updatedAt
+  is_active       Boolean       @default(true)
+  quiz_question   QuizQuestion[]
+}
+
+model SkillLevel {
+  id          String        @id @default(uuid())
+  cell        Cell          @relation(fields: [cell_id], references: [id])
+  cell_id     String    
+  seniority   Seniority
+  quiz        Quiz[]
+}
+
+model Cell {
+  id          String        @id @default(uuid())
+  name        String
+  is_active   Boolean       @default(true)
+  module      Module        @relation(fields: [module_id], references: [id])
+  module_id   String
+  skill_level SkillLevel[]
+  question    Question[]     
+}
+
+model Module{
+    id        String  @id @default(uuid()) 
+    name      String
+    is_active Boolean @default(true)
+    cell      Cell[]
+  }
+
+model Question {
+  id              String       @id @default(uuid()) 
+  question        String
+  seniority       Seniority
+  type            QuestionType
+  options         String[]
+  correct_option  Int[]
+  explanation     String?
+  link            String?
+  is_active       Boolean
+  created_at      DateTime      @default(now())
+  update_at       DateTime?     @updatedAt
+  quiz_question   QuizQuestion[]
+  cell            Cell[]
+}
+
+model QuizQuestion{
+  id        String      @id @default(uuid())
+  is_active Boolean
+  quiz          Quiz      @relation(fields: [quiz_id], references: [id])
+  quiz_id       String
+  questions     Question  @relation(fields: [question_id], references: [id])
+  question_id   String
 }
 
 enum ChallengeType {

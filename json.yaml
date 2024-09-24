@@ -1,0 +1,683 @@
+{
+  'openapi': '3.0.0',
+  'paths':
+    {
+      '/':
+        {
+          'get':
+            {
+              'operationId': 'AppController_getHello',
+              'parameters': [],
+              'responses': { '200': { 'description': '' } },
+            },
+        },
+      '/logout':
+        {
+          'get':
+            {
+              'operationId': 'AppController_getLogout',
+              'parameters': [],
+              'responses': { '200': { 'description': '' } },
+            },
+        },
+      '/callback':
+        {
+          'get':
+            {
+              'operationId': 'AppController_getCallBack',
+              'parameters': [],
+              'responses': { '200': { 'description': '' } },
+            },
+        },
+      '/protected':
+        {
+          'get':
+            {
+              'operationId': 'AppController_getProtected',
+              'parameters': [],
+              'responses': { '200': { 'description': '' } },
+            },
+        },
+      '/quiz':
+        {
+          'post':
+            {
+              'operationId': 'QuizController_create',
+              'parameters': [],
+              'requestBody':
+                {
+                  'required': true,
+                  'content':
+                    {
+                      'application/json':
+                        {
+                          'schema':
+                            { '$ref': '#/components/schemas/CreateQuizDto' },
+                        },
+                    },
+                },
+              'responses':
+                {
+                  '201':
+                    {
+                      'description': '',
+                      'content':
+                        {
+                          'application/json':
+                            {
+                              'schema':
+                                { '$ref': '#/components/schemas/QuizEntity' },
+                            },
+                        },
+                    },
+                },
+              'tags': ['Quiz'],
+            },
+          'get':
+            {
+              'operationId': 'QuizController_findAll',
+              'parameters': [],
+              'responses':
+                {
+                  '200':
+                    {
+                      'description': '',
+                      'content':
+                        {
+                          'application/json':
+                            {
+                              'schema':
+                                {
+                                  'type': 'array',
+                                  'items':
+                                    {
+                                      '$ref': '#/components/schemas/QuizEntity',
+                                    },
+                                },
+                            },
+                        },
+                    },
+                },
+              'tags': ['Quiz'],
+            },
+        },
+      '/quiz/{id}':
+        {
+          'get':
+            {
+              'operationId': 'QuizController_findOne',
+              'parameters':
+                [
+                  {
+                    'name': 'id',
+                    'required': true,
+                    'in': 'path',
+                    'schema': { 'type': 'string' },
+                  },
+                ],
+              'responses':
+                {
+                  '200':
+                    {
+                      'description': '',
+                      'content':
+                        {
+                          'application/json':
+                            {
+                              'schema':
+                                { '$ref': '#/components/schemas/QuizEntity' },
+                            },
+                        },
+                    },
+                },
+              'tags': ['Quiz'],
+            },
+          'put':
+            {
+              'operationId': 'QuizController_update',
+              'parameters':
+                [
+                  {
+                    'name': 'id',
+                    'required': true,
+                    'in': 'path',
+                    'schema': { 'type': 'string' },
+                  },
+                ],
+              'requestBody':
+                {
+                  'required': true,
+                  'content':
+                    {
+                      'application/json':
+                        {
+                          'schema':
+                            { '$ref': '#/components/schemas/UpdateQuizDto' },
+                        },
+                    },
+                },
+              'responses':
+                {
+                  '200':
+                    {
+                      'description': '',
+                      'content':
+                        {
+                          'application/json':
+                            {
+                              'schema':
+                                { '$ref': '#/components/schemas/QuizEntity' },
+                            },
+                        },
+                    },
+                },
+              'tags': ['Quiz'],
+            },
+          'delete':
+            {
+              'operationId': 'QuizController_remove',
+              'parameters':
+                [
+                  {
+                    'name': 'id',
+                    'required': true,
+                    'in': 'path',
+                    'schema': { 'type': 'string' },
+                  },
+                ],
+              'responses':
+                {
+                  '200':
+                    {
+                      'description': '',
+                      'content':
+                        {
+                          'application/json':
+                            {
+                              'schema':
+                                { '$ref': '#/components/schemas/QuizEntity' },
+                            },
+                        },
+                    },
+                },
+              'tags': ['Quiz'],
+            },
+        },
+      '/modules':
+        {
+          'get':
+            {
+              'operationId': 'ModuleController_getAllModules',
+              'summary': 'retornar todos los modulos',
+              'parameters': [],
+              'responses':
+                {
+                  '201':
+                    {
+                      'description': 'modulos retornado ok',
+                      'content':
+                        {
+                          'application/json':
+                            {
+                              'schema':
+                                { '$ref': '#/components/schemas/ModuleDto' },
+                            },
+                        },
+                    },
+                },
+              'tags': ['Module'],
+            },
+          'post':
+            {
+              'operationId': 'ModuleController_createModule',
+              'summary': 'crear un modulo',
+              'parameters': [],
+              'requestBody':
+                {
+                  'required': true,
+                  'content':
+                    {
+                      'application/json':
+                        {
+                          'schema':
+                            { '$ref': '#/components/schemas/CreateModuleDto' },
+                        },
+                    },
+                },
+              'responses':
+                {
+                  '201':
+                    {
+                      'description': 'modulo creada ok',
+                      'content':
+                        {
+                          'application/json':
+                            {
+                              'schema':
+                                { '$ref': '#/components/schemas/ModuleDto' },
+                            },
+                        },
+                    },
+                },
+              'tags': ['Module'],
+            },
+        },
+      '/modules/{id}':
+        {
+          'get':
+            {
+              'operationId': 'ModuleController_getModuleById',
+              'summary': 'retornar modulo segun id',
+              'parameters':
+                [
+                  {
+                    'name': 'id',
+                    'required': true,
+                    'in': 'path',
+                    'schema': { 'type': 'string' },
+                  },
+                ],
+              'responses':
+                {
+                  '201':
+                    {
+                      'description': 'modulo retornado ok',
+                      'content':
+                        {
+                          'application/json':
+                            {
+                              'schema':
+                                { '$ref': '#/components/schemas/ModuleDto' },
+                            },
+                        },
+                    },
+                },
+              'tags': ['Module'],
+            },
+          'delete':
+            {
+              'operationId': 'ModuleController_deleteModule',
+              'summary': 'eliminar modulo segun id',
+              'parameters':
+                [
+                  {
+                    'name': 'id',
+                    'required': true,
+                    'in': 'path',
+                    'schema': { 'type': 'string' },
+                  },
+                ],
+              'responses':
+                {
+                  '204':
+                    {
+                      'description': 'modulo eliminado ok',
+                      'content':
+                        {
+                          'application/json':
+                            {
+                              'schema':
+                                { '$ref': '#/components/schemas/ModuleDto' },
+                            },
+                        },
+                    },
+                },
+              'tags': ['Module'],
+            },
+          'put':
+            {
+              'operationId': 'ModuleController_updateModule',
+              'summary': 'actualizar un modulo',
+              'parameters':
+                [
+                  {
+                    'name': 'id',
+                    'required': true,
+                    'in': 'path',
+                    'schema': { 'type': 'string' },
+                  },
+                ],
+              'requestBody':
+                {
+                  'required': true,
+                  'content':
+                    {
+                      'application/json':
+                        {
+                          'schema':
+                            { '$ref': '#/components/schemas/UpdateModuleDto' },
+                        },
+                    },
+                },
+              'responses':
+                {
+                  '201':
+                    {
+                      'description': 'modulo actualizado ok',
+                      'content':
+                        {
+                          'application/json':
+                            {
+                              'schema':
+                                { '$ref': '#/components/schemas/ModuleDto' },
+                            },
+                        },
+                    },
+                },
+              'tags': ['Module'],
+            },
+        },
+      '/cells':
+        {
+          'get':
+            {
+              'operationId': 'CellController_getAllCells',
+              'summary': 'obtener todas las celulas',
+              'parameters': [],
+              'responses':
+                {
+                  '201':
+                    {
+                      'description': 'retornar todas las celulas',
+                      'content':
+                        {
+                          'application/json':
+                            {
+                              'schema':
+                                { '$ref': '#/components/schemas/CellDto' },
+                            },
+                        },
+                    },
+                },
+              'tags': ['Cell'],
+            },
+          'post':
+            {
+              'operationId': 'CellController_createCell',
+              'summary': 'crear una celula',
+              'parameters': [],
+              'requestBody':
+                {
+                  'required': true,
+                  'content':
+                    {
+                      'application/json':
+                        {
+                          'schema':
+                            { '$ref': '#/components/schemas/CreateCellDto' },
+                        },
+                    },
+                },
+              'responses':
+                {
+                  '201':
+                    {
+                      'description': 'celula creada ok',
+                      'content':
+                        {
+                          'application/json':
+                            {
+                              'schema':
+                                { '$ref': '#/components/schemas/CellDto' },
+                            },
+                        },
+                    },
+                },
+              'tags': ['Cell'],
+            },
+        },
+      '/cells/{id}':
+        {
+          'get':
+            {
+              'operationId': 'CellController_getCellById',
+              'summary': 'obtener celula segun id',
+              'parameters':
+                [
+                  {
+                    'name': 'id',
+                    'required': true,
+                    'in': 'path',
+                    'schema': { 'type': 'string' },
+                  },
+                ],
+              'responses':
+                {
+                  '201':
+                    {
+                      'description': 'retornar  celula por id',
+                      'content':
+                        {
+                          'application/json':
+                            {
+                              'schema':
+                                { '$ref': '#/components/schemas/CellDto' },
+                            },
+                        },
+                    },
+                },
+              'tags': ['Cell'],
+            },
+          'delete':
+            {
+              'operationId': 'CellController_deleteCell',
+              'parameters':
+                [
+                  {
+                    'name': 'id',
+                    'required': true,
+                    'in': 'path',
+                    'schema': { 'type': 'string' },
+                  },
+                ],
+              'responses': { '200': { 'description': '' } },
+              'tags': ['Cell'],
+            },
+          'put':
+            {
+              'operationId': 'CellController_updateCell',
+              'summary': 'actualizar una celula',
+              'parameters':
+                [
+                  {
+                    'name': 'id',
+                    'required': true,
+                    'in': 'path',
+                    'schema': { 'type': 'string' },
+                  },
+                ],
+              'requestBody':
+                {
+                  'required': true,
+                  'content':
+                    {
+                      'application/json':
+                        {
+                          'schema':
+                            { '$ref': '#/components/schemas/UpdateCellDto' },
+                        },
+                    },
+                },
+              'responses':
+                {
+                  '201':
+                    {
+                      'description': 'celula actualizada ok',
+                      'content':
+                        {
+                          'application/json':
+                            {
+                              'schema':
+                                { '$ref': '#/components/schemas/CellDto' },
+                            },
+                        },
+                    },
+                },
+              'tags': ['Cell'],
+            },
+        },
+    },
+  'info':
+    {
+      'title': 'Challenge',
+      'description': 'Proyecto creado en Nestjs Con Prisma ',
+      'version': '1.0',
+      'contact': {},
+    },
+  'tags':
+    [
+      { 'name': 'Module', 'description': '' },
+      { 'name': 'Cell', 'description': '' },
+      { 'name': 'Quiz', 'description': '' },
+    ],
+  'servers': [],
+  'components':
+    {
+      'schemas':
+        {
+          'CreateQuizDto':
+            {
+              'type': 'object',
+              'properties':
+                {
+                  'name': { 'type': 'string' },
+                  'description': { 'type': 'string' },
+                  'skill_level_id': { 'type': 'string' },
+                  'challenge_type':
+                    {
+                      'type': 'string',
+                      'enum':
+                        ['immediate', 'interview', 'collaborative', 'timed'],
+                    },
+                  'max_time': { 'type': 'number' },
+                  'created_by_id': { 'type': 'string' },
+                  'is_active': { 'type': 'boolean', 'default': true },
+                },
+              'required':
+                ['name', 'skill_level_id', 'challenge_type', 'created_by_id'],
+            },
+          'QuizEntity':
+            {
+              'type': 'object',
+              'properties':
+                {
+                  'id': { 'type': 'object' },
+                  'name': { 'type': 'string' },
+                  'description': { 'type': 'object', 'nullable': true },
+                  'skill_level_id': { 'type': 'string' },
+                  'challenge_type':
+                    {
+                      'type': 'string',
+                      'enum':
+                        ['immediate', 'interview', 'collaborative', 'timed'],
+                    },
+                  'max_time': { 'type': 'number' },
+                  'created_by_id': { 'type': 'string' },
+                  'is_active': { 'type': 'boolean', 'default': true },
+                },
+              'required':
+                [
+                  'id',
+                  'name',
+                  'skill_level_id',
+                  'challenge_type',
+                  'created_by_id',
+                ],
+            },
+          'UpdateQuizDto': { 'type': 'object', 'properties': {} },
+          'ModuleDto':
+            {
+              'type': 'object',
+              'properties':
+                {
+                  'id': { 'type': 'string', 'description': 'id del modulo' },
+                  'name':
+                    { 'type': 'string', 'description': 'nombre del modulo' },
+                  'is_active':
+                    {
+                      'type': 'boolean',
+                      'description': 'estado del modulo: activo o inactivo',
+                      'default': true,
+                    },
+                },
+              'required': ['id', 'name', 'is_active'],
+            },
+          'CreateModuleDto':
+            {
+              'type': 'object',
+              'properties':
+                {
+                  'name':
+                    { 'type': 'string', 'description': 'nombre del modulo' },
+                  'is_active':
+                    {
+                      'type': 'boolean',
+                      'description': 'estado del modulo: activo o inactivo',
+                    },
+                },
+              'required': ['name'],
+            },
+          'UpdateModuleDto':
+            {
+              'type': 'object',
+              'properties':
+                {
+                  'name':
+                    { 'type': 'string', 'description': 'nombre del modulo' },
+                  'is_active':
+                    {
+                      'type': 'boolean',
+                      'description': 'estado del modulo: activo o inactivo',
+                    },
+                },
+              'required': ['name'],
+            },
+          'CellDto':
+            {
+              'type': 'object',
+              'properties':
+                {
+                  'id': { 'type': 'string', 'description': 'id de la celula' },
+                  'name':
+                    { 'type': 'string', 'description': 'nombre de la celula' },
+                  'is_active':
+                    { 'type': 'boolean', 'description': 'esta activo' },
+                  'module':
+                    {
+                      'description': 'module asociado',
+                      'allOf': [{ '$ref': '#/components/schemas/ModuleDto' }],
+                    },
+                },
+              'required': ['id', 'name', 'is_active', 'module'],
+            },
+          'CreateCellDto':
+            {
+              'type': 'object',
+              'properties':
+                {
+                  'name':
+                    { 'type': 'string', 'description': 'nombre de la celula' },
+                  'is_active':
+                    { 'type': 'boolean', 'description': 'esta activo' },
+                  'module_id':
+                    { 'type': 'string', 'description': 'id de module' },
+                },
+              'required': ['name', 'is_active', 'module_id'],
+            },
+          'UpdateCellDto':
+            {
+              'type': 'object',
+              'properties':
+                {
+                  'name':
+                    { 'type': 'string', 'description': 'nombre de la celula' },
+                  'is_active':
+                    { 'type': 'boolean', 'description': 'esta activo' },
+                  'module_id':
+                    { 'type': 'string', 'description': 'id de module' },
+                },
+              'required': ['name', 'is_active', 'module_id'],
+            },
+        },
+    },
+}
