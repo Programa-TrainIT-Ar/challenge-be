@@ -1,9 +1,6 @@
 // This is your Prisma schema file,
 // learn more about it in the docs: https://pris.ly/d/prisma-schema
 
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -14,8 +11,8 @@ datasource db {
 }
 
 model User {
-  id           String      @id @default(uuid())
-  email        String      @unique
+  id           String        @id @default(uuid())
+  email        String        @unique
   password     String
   first_name   String
   last_name    String
@@ -23,63 +20,34 @@ model User {
   photo        String?
   phone_number String?
   timezone     String?
-  is_active    Boolean     @default(true)
-  is_staff     Boolean     @default(false)
-  is_superuser Boolean     @default(false)
-  created_at   DateTime    @default(now())
-  update_at    DateTime?   @updatedAt
+  is_active    Boolean       @default(true)
+  is_staff     Boolean       @default(false)
+  is_superuser Boolean       @default(false)
+  created_at   DateTime      @default(now())
+  update_at    DateTime?     @updatedAt
   last_login   DateTime?
   birthdate    DateTime
-  quizzes      Quiz[]
-  candidatos   Candidato[]
+
+  quizzes      Quiz[]        @relation("UserQuizzes")
+  challenges   Challenge[]    @relation("UserChallenges")
+  hardSkills   HardSkillUser[] @relation("UserHardSkills")
+  softSkills   SoftSkillUser[] @relation("UserSoftSkills")
+  languages    LanguageUser[] @relation("UserLanguages")
+  roles        RolUser[]      @relation("UserRoles")
+  socials      Socials[]      @relation("UserSocials")
 }
 
 model Quiz {
   id             String         @id @default(uuid())
   name           String
   description    String?
-  skill_level_id String
   challenge_type ChallengeType
   max_time       Int?
-  created_by_id  String
   created_at     DateTime       @default(now())
   update_at      DateTime?      @updatedAt
   is_active      Boolean        @default(true)
-  quiz_question  QuizQuestion[]
 
-  User         User?       @relation(fields: [userId], references: [id])
-  userId       String?
-  SkillLevel   SkillLevel? @relation(fields: [skillLevelId], references: [id])
-  skillLevelId String?
-  Candidato    Candidato?  @relation(fields: [candidatoId], references: [id])
-  candidatoId  String?
-}
-
-model SkillLevel {
-  id        String    @id @default(uuid())
-  cell_id   String
-  seniority Seniority
-  quiz      Quiz[]
-  Cell      Cell?     @relation(fields: [cellId], references: [id])
-  cellId    String?
-}
-
-model Candidato {
-  id         String          @id @default(uuid())
-  user_id    String
-  created_at DateTime        @default(now())
-  updated_at DateTime?       @updatedAt
-  is_active  Boolean         @default(true)
-  score      Int?
-  quizzes    Quiz[] 
-  challenges Challenge[]
-  hardSkills HardSkillUser[]
-  softSkills SoftSkillUser[]
-  languages  LanguageUser[]
-  roles      RolUser[]
-  socials    Socials[]
-  User       User?           @relation(fields: [userId], references: [id])
-  userId     String?
+  users          User[]         @relation("UserQuizzes")
 }
 
 model Challenge {
@@ -89,8 +57,7 @@ model Challenge {
   created_at  DateTime  @default(now())
   updated_at  DateTime? @updatedAt
 
-  Candidato   Candidato? @relation(fields: [candidatoId], references: [id])
-  candidatoId String?
+  users       User[]    @relation("UserChallenges")
 }
 
 model HardSkillUser {
@@ -100,8 +67,7 @@ model HardSkillUser {
   created_at DateTime  @default(now())
   updated_at DateTime? @updatedAt
 
-  Candidato   Candidato? @relation(fields: [candidatoId], references: [id])
-  candidatoId String?
+  users      User[]    @relation("UserHardSkills")
 }
 
 model SoftSkillUser {
@@ -111,8 +77,7 @@ model SoftSkillUser {
   created_at DateTime  @default(now())
   updated_at DateTime? @updatedAt
 
-  Candidato   Candidato? @relation(fields: [candidatoId], references: [id])
-  candidatoId String?
+  users      User[]    @relation("UserSoftSkills")
 }
 
 model LanguageUser {
@@ -122,8 +87,7 @@ model LanguageUser {
   created_at  DateTime  @default(now())
   updated_at  DateTime? @updatedAt
 
-  Candidato   Candidato? @relation(fields: [candidatoId], references: [id])
-  candidatoId String?
+  users       User[]    @relation("UserLanguages")
 }
 
 model RolUser {
@@ -133,8 +97,7 @@ model RolUser {
   created_at  DateTime  @default(now())
   updated_at  DateTime? @updatedAt
 
-  Candidato   Candidato? @relation(fields: [candidatoId], references: [id])
-  candidatoId String?
+  users       User[]    @relation("UserRoles")
 }
 
 model Socials {
@@ -144,8 +107,7 @@ model Socials {
   created_at DateTime  @default(now())
   updated_at DateTime? @updatedAt
 
-  Candidato   Candidato? @relation(fields: [candidatoId], references: [id])
-  candidatoId String?
+  users      User[]    @relation("UserSocials")
 }
 
 model Cell {
@@ -153,8 +115,7 @@ model Cell {
   name        String
   is_active   Boolean      @default(true)
   module_id   String
-  skill_level SkillLevel[]
-  question    Question[]
+  questions   Question[]
   Module      Module?      @relation(fields: [moduleId], references: [id])
   moduleId    String?
 }
@@ -178,19 +139,8 @@ model Question {
   is_active      Boolean
   created_at     DateTime       @default(now())
   update_at      DateTime?      @updatedAt
-  quiz_question  QuizQuestion[]
-  cell           Cell[]
-}
 
-model QuizQuestion {
-  id          String    @id @default(uuid())
-  is_active   Boolean
-  quiz_id     String
-  question_id String
-  Quiz        Quiz?     @relation(fields: [quizId], references: [id])
-  quizId      String?
-  Question    Question? @relation(fields: [questionId], references: [id])
-  questionId  String?
+  cell           Cell[]
 }
 
 enum ChallengeType {
