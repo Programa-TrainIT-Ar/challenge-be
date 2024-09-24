@@ -25,36 +25,13 @@ model User {
   last_login   DateTime?
   birthdate    DateTime
 
-  quizzes      Quiz[]        @relation("UserQuizzes")
-  challenges   Challenge[]    @relation("UserChallenges")
-  hardSkills   HardSkillUser[] @relation("UserHardSkills")
-  softSkills   SoftSkillUser[] @relation("UserSoftSkills")
-  languages    LanguageUser[] @relation("UserLanguages")
-  roles        RolUser[]      @relation("UserRoles")
-  socials      Socials[]      @relation("UserSocials")
-}
-
-model Quiz {
-  id             String         @id @default(uuid())
-  name           String
-  description    String?
-  challenge_type ChallengeType
-  max_time       Int?
-  created_at     DateTime       @default(now())
-  update_at      DateTime?      @updatedAt
-  is_active      Boolean        @default(true)
-
-  users          User[]         @relation("UserQuizzes")
-}
-
-model Challenge {
-  id          String    @id @default(uuid())
-  name        String
-  description String?
-  created_at  DateTime  @default(now())
-  updated_at  DateTime? @updatedAt
-
-  users       User[]    @relation("UserChallenges")
+  quizzes      Quiz[]        
+  challenges   Challenge[]    
+  hardSkills   HardSkillUser[]  @relation("UserHardSkills")
+  softSkills   SoftSkillUser[]  @relation("UserSoftSkills")
+  languages    LanguageUser[]   @relation("UserLanguages")
+  roles        RolUser[]        @relation("UserRoles")
+  socials      Socials[]        @relation("UserSocials")
 }
 
 model HardSkillUser {
@@ -106,15 +83,13 @@ model Socials {
 
   users      User[]    @relation("UserSocials")
 }
-
 model Cell {
-  id          String       @id @default(uuid())
+  id          String        @id @default(uuid())
   name        String
-  is_active   Boolean      @default(true)
+  is_active   Boolean       @default(true)
+  module      Module        @relation(fields: [module_id], references: [id])
   module_id   String
-  questions   Question[]
-  Module      Module?      @relation(fields: [moduleId], references: [id])
-  moduleId    String?
+  quizzes     Quiz[]     
 }
 
 model Module {
@@ -124,118 +99,23 @@ model Module {
   cell      Cell[]
 }
 
-model Question {
-  id             String         @id @default(uuid())
-  question       String
-  seniority      Seniority
-  type           QuestionType
-  options        String[]
-  correct_option Int[]
-  explanation    String?
-  link           String?
-  is_active      Boolean
-  created_at     DateTime       @default(now())
-  update_at      DateTime?      @updatedAt
-
-  cell           Cell[]
-}
-
-enum ChallengeType {
-  immediate
-  interview
-  collaborative
-  timed
-}
-
-enum QuestionType {
-  multiple_choice
-  simple_choice
-  true_false
-  open_ended
-  code
-}
-
-enum Seniority {
-  trainee
-  junior
-  middle
-  senior
-}
-generator client {
-  provider = "prisma-client-js"
-}
-
-datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
-}
-
-model User {
-  id           String    @id @default(uuid())
-  email        String    @unique
-  password     String
-  first_name   String
-  last_name    String
-  gender       String
-  photo        String?
-  phone_number String?
-  timezone     String?
-  is_active    Boolean    @default(true)
-  is_staff     Boolean    @default(false)
-  is_superuser Boolean    @default(false)
-  created_at   DateTime   @default(now())
-  update_at    DateTime?  @updatedAt
-  last_login   DateTime?
-  birthdate    DateTime
-  Quiz         Quiz[]
-  //  challenges    Challenge[]
-  //  hardSkills    HardSkillUser[]
-  //  softSkills    SoftSkillUser[]
-  //  languages     LanguageUser[]
-  //  roles         RolUser[]
-  //  socials       Socials[]
-}
-
 model Quiz {
-  id              String        @id @default(uuid())
+  id              String         @id @default(uuid())
   name            String
   description     String?
-  skill_level     SkillLevel    @relation(fields: [skill_level_id], references: [id])
-  skill_level_id  String
+  cell            Cell           @relation(fields: [cell_id], references: [id])
+  cell_id         String
+  seniority       Seniority
   challenge_type  ChallengeType
   max_time        Int?
-  created_by      User          @relation(fields: [created_by_id], references: [id])
+  created_by      User           @relation(fields: [created_by_id], references: [id])
   created_by_id   String
-  created_at      DateTime      @default(now())
-  update_at       DateTime?     @updatedAt
-  is_active       Boolean       @default(true)
-  quiz_question   QuizQuestion[]
+  created_at      DateTime       @default(now())
+  update_at       DateTime?      @updatedAt
+  is_active       Boolean        @default(true)
+  questions       Question[]
+  challenges      Challenge[]
 }
-
-model SkillLevel {
-  id          String        @id @default(uuid())
-  cell        Cell          @relation(fields: [cell_id], references: [id])
-  cell_id     String    
-  seniority   Seniority
-  quiz        Quiz[]
-}
-
-model Cell {
-  id          String        @id @default(uuid())
-  name        String
-  is_active   Boolean       @default(true)
-  module      Module        @relation(fields: [module_id], references: [id])
-  module_id   String
-  skill_level SkillLevel[]
-  question    Question[]     
-}
-
-model Module{
-    id        String  @id @default(uuid()) 
-    name      String
-    is_active Boolean @default(true)
-    cell      Cell[]
-  }
 
 model Question {
   id              String       @id @default(uuid()) 
@@ -249,24 +129,31 @@ model Question {
   is_active       Boolean
   created_at      DateTime      @default(now())
   update_at       DateTime?     @updatedAt
-  quiz_question   QuizQuestion[]
-  cell            Cell[]
+  quiz            Quiz          @relation(fields: [quiz_id], references: [id])
+  quiz_id         String
 }
 
-model QuizQuestion{
-  id        String      @id @default(uuid())
-  is_active Boolean
+model Challenge {
+  id            String    @id @default(uuid())
+  calification  Int
+  created_at    DateTime  @default(now())
+  updated_at    DateTime? @updatedAt
   quiz          Quiz      @relation(fields: [quiz_id], references: [id])
   quiz_id       String
-  questions     Question  @relation(fields: [question_id], references: [id])
-  question_id   String
+  user          User      @relation(fields: [user_id], references: [id])
+  user_id       String
 }
-
 enum ChallengeType {
   immediate
   interview
   collaborative
   timed
+}
+
+enum ChallengeState {
+  pending
+  assigned
+  evaluated
 }
 
 enum QuestionType {
@@ -282,4 +169,14 @@ enum Seniority {
   junior
   middle
   senior
+}
+
+enum Level {
+  native
+  A1
+  A2
+  B1
+  B2
+  C1
+  C2
 }
