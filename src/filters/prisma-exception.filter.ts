@@ -58,20 +58,28 @@ export class PrismaExceptionFilter implements ExceptionFilter {
         status = HttpStatus.NOT_FOUND;
         message = 'Record not found';
       }
-    }
-    // Manejo de excepciones de tipo HttpException como BadRequestException
-    else if (exception instanceof BadRequestException) {
-      const exceptionResponse: any = exception.getResponse();
-      status = exception.getStatus();
-      message = exceptionResponse.message || 'Validation failed';
     } else if (exception instanceof Prisma.PrismaClientValidationError) {
       status = HttpStatus.BAD_REQUEST;
-      // Verificar si hay errores antes de mapear
-      message = Array.isArray(exception.errors)
-        ? exception.errors.map((err) => err.message)
-        : ['Validation error in Prisma request'];
+
+      // Verifica si hay un mensaje detallado
+      if (exception.message) {
+        const detailedMessages = [];
+
+        // Simulación de análisis de error (esto puede variar dependiendo de la versión de Prisma)
+        if (exception.message.includes('Validation error')) {
+          // Extraer errores específicos de la validación si están disponibles
+          detailedMessages.push('Validation error in Prisma request');
+        } else {
+          // Si hay detalles sobre qué campos fallaron
+          detailedMessages.push(exception.message);
+        }
+
+        message = detailedMessages;
+      } else {
+        message = ['Validation error in Prisma request'];
+      }
     }
-    // Manejo de otras excepciones de tipo HttpException
+    // Si es una excepción de tipo HttpException
     else if (exception instanceof HttpException) {
       status = exception.getStatus();
       message = exception.message;
@@ -80,7 +88,7 @@ export class PrismaExceptionFilter implements ExceptionFilter {
     // Responder con el mensaje de error adecuado
     response.status(status).json({
       statusCode: status,
-      message: message,
+      message: Array.isArray(message) ? message : [message],
       error: exception.name || 'Error',
       path: request.url,
       timestamp: new Date().toISOString(),
