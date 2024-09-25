@@ -8,8 +8,8 @@ datasource db {
 }
 
 model User {
-  id           String    @id @default(uuid())
-  email        String    @unique
+  id           String        @id @default(uuid())
+  email        String        @unique
   password     String
   first_name   String
   last_name    String
@@ -17,44 +17,85 @@ model User {
   photo        String?
   phone_number String?
   timezone     String?
-  is_active    Boolean    @default(true)
-  is_staff     Boolean    @default(false)
-  is_superuser Boolean    @default(false)
-  created_at   DateTime   @default(now())
-  update_at    DateTime?  @updatedAt
+  is_active    Boolean       @default(true)
+  is_staff     Boolean       @default(false)
+  is_superuser Boolean       @default(false)
+  created_at   DateTime      @default(now())
+  update_at    DateTime?     @updatedAt
   last_login   DateTime?
   birthdate    DateTime
-  Quiz         Quiz[]
-  //  challenges    Challenge[]
-  //  hardSkills    HardSkillUser[]
-  //  softSkills    SoftSkillUser[]
-  //  languages     LanguageUser[]
-  //  roles         RolUser[]
-  //  socials       Socials[]
+
+  quizzes       Quiz[]        
+  challenges    Challenge[]    
+  hardSkills    HardSkill[]      @relation("HardSkillUser")
+  softSkills    SoftSkill[]      @relation("SoftSkillUser")
+  socials       SocialNetwork[]  @relation("SocialNetworkUser")
+  languagesUser LanguageUser[]
+  roles         RoleUser[]
 }
 
-model Quiz {
-  id              String        @id @default(uuid())
-  name            String        @unique
-  description     String?
-  skill_level     SkillLevel    @relation(fields: [skill_level_id], references: [id])
-  skill_level_id  String
-  challenge_type  ChallengeType
-  max_time        Int?
-  created_by      User          @relation(fields: [created_by_id], references: [id])
-  created_by_id   String
-  created_at      DateTime      @default(now())
-  update_at       DateTime?     @updatedAt
-  is_active       Boolean       @default(true)
-  quiz_question   QuizQuestion[]
+model HardSkill {
+  id         String    @id @default(uuid())
+  skill_name String
+  created_at DateTime  @default(now())
+  updated_at DateTime? @updatedAt
+
+  users      User[]    @relation("HardSkillUser")
 }
 
-model SkillLevel {
+model SoftSkill {
+  id         String    @id @default(uuid())
+  skill_name String
+  created_at DateTime  @default(now())
+  updated_at DateTime? @updatedAt
+
+  users      User[]    @relation("SoftSkillUser")
+}
+
+model SocialNetwork {
+  id         String    @id @default(uuid())
+  platform   String
+  url        String
+  created_at DateTime  @default(now())
+  updated_at DateTime? @updatedAt
+
+  users      User[]    @relation("SocialNetworkUser")
+}
+
+model Language {
+  id          String    @id @default(uuid())
+  language    String
+  created_at  DateTime  @default(now())
+  updated_at  DateTime? @updatedAt
+
+  language_user       LanguageUser[]
+}
+
+model LanguageUser {
+  id            String    @id @default(uuid())
+  language      Language  @relation(fields: [language_id], references: [id])
+  language_id   String
+  user          User      @relation(fields: [user_id], references: [id])
+  user_id       String
+  level         Level
+}
+
+model Role {
+  id          String    @id @default(uuid())
+  role_name   String
+  created_at  DateTime  @default(now())
+  updated_at  DateTime? @updatedAt
+
+  role_user   RoleUser[]
+}
+
+model RoleUser {
   id          String        @id @default(uuid())
-  cell        Cell          @relation(fields: [cell_id], references: [id])
-  cell_id     String    
+  role        Role      @relation(fields: [role_id], references: [id])
+  role_id     String
+  user        User      @relation(fields: [user_id], references: [id])
+  user_id     String
   seniority   Seniority
-  quiz        Quiz[]
 }
 
 model Cell {
@@ -63,16 +104,33 @@ model Cell {
   is_active   Boolean       @default(true)
   module      Module        @relation(fields: [module_id], references: [id])
   module_id   String
-  skill_level SkillLevel[]
-  question    Question[]     
+  quizzes     Quiz[]     
 }
 
-model Module{
-    id        String  @id @default(uuid()) 
-    name      String  @unique
-    is_active Boolean @default(true)
-    cell      Cell[]
-  }
+model Module {
+  id        String  @id @default(uuid())
+  name      String
+  is_active Boolean @default(true)
+  cell      Cell[]
+}
+
+model Quiz {
+  id              String         @id @default(uuid())
+  name            String
+  description     String?
+  cell            Cell           @relation(fields: [cell_id], references: [id])
+  cell_id         String
+  seniority       Seniority
+  challenge_type  ChallengeType
+  max_time        Int?
+  created_by      User           @relation(fields: [created_by_id], references: [id])
+  created_by_id   String
+  created_at      DateTime       @default(now())
+  update_at       DateTime?      @updatedAt
+  is_active       Boolean        @default(true)
+  questions       Question[]
+  challenges      Challenge[]
+}
 
 model Question {
   id              String       @id @default(uuid()) 
@@ -86,24 +144,31 @@ model Question {
   is_active       Boolean
   created_at      DateTime      @default(now())
   update_at       DateTime?     @updatedAt
-  quiz_question   QuizQuestion[]
-  cell            Cell[]
+  quiz            Quiz          @relation(fields: [quiz_id], references: [id])
+  quiz_id         String
 }
 
-model QuizQuestion{
-  id        String      @id @default(uuid())
-  is_active Boolean
+model Challenge {
+  id            String    @id @default(uuid())
+  calification  Int
+  created_at    DateTime  @default(now())
+  updated_at    DateTime? @updatedAt
   quiz          Quiz      @relation(fields: [quiz_id], references: [id])
   quiz_id       String
-  questions     Question  @relation(fields: [question_id], references: [id])
-  question_id   String
+  user          User      @relation(fields: [user_id], references: [id])
+  user_id       String
 }
-
 enum ChallengeType {
   immediate
   interview
   collaborative
   timed
+}
+
+enum ChallengeState {
+  pending
+  assigned
+  evaluated
 }
 
 enum QuestionType {
@@ -119,4 +184,14 @@ enum Seniority {
   junior
   middle
   senior
+}
+
+enum Level {
+  native
+  A1
+  A2
+  B1
+  B2
+  C1
+  C2
 }

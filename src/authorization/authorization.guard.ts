@@ -5,7 +5,7 @@ import { expressjwt } from 'express-jwt';
 import * as jwt from 'express-jwt'
 import { log } from 'console';
 
-// import { ConfigService } from '@nestjs/config';
+import { ConfigService } from '@nestjs/config';
 
 @Injectable()
 export class AuthorizationGuard implements CanActivate {
@@ -41,8 +41,7 @@ export class AuthorizationGuard implements CanActivate {
         console.log(this.ISSUER_BASE_URL);
         throw new UnauthorizedException(error)
 
-        // res.redirect('https://dev-anq6akqu2adna18f.us.auth0.com/u/login?state=hKFo2SBLWXBhWkt5b0s3TGxLNUJibEtlM18zTEtodnJoTklIQ6Fur3VuaXZlcnNhbC1sb2dpbqN0aWTZIEdMcW9vRUVjeVNNbERWdEdFanFkZkpXRkpCRW9GbXZNo2NpZNkgVFFycGNuMnlKdTkzdkxDRmZsaWJncjlYOThYNlRKYmc')
-        // return false
+        
       }
 
   }
