@@ -21,7 +21,7 @@ model User {
   is_staff     Boolean       @default(false)
   is_superuser Boolean       @default(false)
   created_at   DateTime      @default(now())
-  update_at    DateTime?     @updatedAt
+  updated_at    DateTime?     @updatedAt
   last_login   DateTime?
   birthdate    DateTime
 
@@ -36,7 +36,7 @@ model User {
 
 model HardSkill {
   id         String    @id @default(uuid())
-  skill_name String
+  name String    @unique
   created_at DateTime  @default(now())
   updated_at DateTime? @updatedAt
 
@@ -45,7 +45,7 @@ model HardSkill {
 
 model SoftSkill {
   id         String    @id @default(uuid())
-  skill_name String
+  name String
   created_at DateTime  @default(now())
   updated_at DateTime? @updatedAt
 
@@ -64,7 +64,7 @@ model SocialNetwork {
 
 model Language {
   id          String    @id @default(uuid())
-  language    String
+  language    String    @unique
   created_at  DateTime  @default(now())
   updated_at  DateTime? @updatedAt
 
@@ -82,7 +82,7 @@ model LanguageUser {
 
 model Role {
   id          String    @id @default(uuid())
-  role_name   String
+  name        String    @unique
   created_at  DateTime  @default(now())
   updated_at  DateTime? @updatedAt
 
@@ -104,19 +104,25 @@ model Cell {
   is_active   Boolean       @default(true)
   module      Module        @relation(fields: [module_id], references: [id])
   module_id   String
+  created_at DateTime  @default(now())
+  updated_at DateTime? @updatedAt
+
   quizzes     Quiz[]     
 }
 
 model Module {
   id        String  @id @default(uuid())
-  name      String
+  name      String  @unique
   is_active Boolean @default(true)
+  created_at DateTime  @default(now())
+  updated_at DateTime? @updatedAt
+
   cell      Cell[]
 }
 
 model Quiz {
   id              String         @id @default(uuid())
-  name            String
+  name            String         @unique
   description     String?
   cell            Cell           @relation(fields: [cell_id], references: [id])
   cell_id         String
@@ -126,7 +132,7 @@ model Quiz {
   created_by      User           @relation(fields: [created_by_id], references: [id])
   created_by_id   String
   created_at      DateTime       @default(now())
-  update_at       DateTime?      @updatedAt
+  updated_at       DateTime?      @updatedAt
   is_active       Boolean        @default(true)
   questions       Question[]
   challenges      Challenge[]
@@ -143,7 +149,7 @@ model Question {
   link            String?
   is_active       Boolean
   created_at      DateTime      @default(now())
-  update_at       DateTime?     @updatedAt
+  updated_at       DateTime?    @updatedAt
   quiz            Quiz          @relation(fields: [quiz_id], references: [id])
   quiz_id         String
 }

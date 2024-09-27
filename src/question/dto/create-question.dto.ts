@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Seniority, QuestionType } from '@prisma/client';
-import { IsArray, IsBoolean, IsEnum, IsInt, IsOctal, IsOptional, IsPositive, IsString } from 'class-validator';
+import { IsArray, IsBoolean, IsEnum, IsInt, IsOctal, IsOptional, IsPositive, IsString, IsUUID } from 'class-validator';
 
 
 export class CreateQuestionDto {
@@ -40,4 +40,7 @@ export class CreateQuestionDto {
     @ApiProperty({ default:true })
     is_active: boolean = true;
 
+    @IsUUID()
+    @ApiProperty()
+    quiz_id: string;
 }

@@ -1,6 +1,6 @@
-import { ChallengeType } from '@prisma/client'
+import { ChallengeType, Seniority } from '@prisma/client'
 import { ApiProperty } from '@nestjs/swagger';
-import { IsBoolean, IsEnum, IsInt, IsNotEmpty, IsOptional, IsPositive, IsString, IsUUID } from 'class-validator';
+import { IsBoolean, isEnum, IsEnum, IsInt, IsNotEmpty, IsOptional, IsPositive, IsString, IsUUID } from 'class-validator';
 
 export class CreateQuizDto {
     @IsString()
@@ -15,8 +15,12 @@ export class CreateQuizDto {
     
     @IsUUID()
     @ApiProperty()
-    skill_level_id: string;
+    cell_id: string;
     
+    @IsEnum(Seniority)
+    @ApiProperty({ enum: Seniority })
+    seniority: Seniority;
+
     @IsEnum(ChallengeType)
     @ApiProperty({ enum: ChallengeType })
     challenge_type:ChallengeType;
