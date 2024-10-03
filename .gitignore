@@ -58,5 +58,5 @@ report.[0-9]*.[0-9]*.[0-9]*.[0-9]*.json
 # Migrations
 /prisma/migrations
 
-# Local Netlify folder
-.netlify
+# auth0 config CLI
+.config

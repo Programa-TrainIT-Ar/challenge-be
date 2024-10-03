@@ -14,7 +14,19 @@ import { QuestionModule } from './question/question.module';
 
 
 @Module({
-  imports: [],
+  imports: [
+    ConfigModule.forRoot({
+      isGlobal: true,
+      envFilePath: '.env',
+    }),
+    AuthorizationModule,
+    QuizModule,
+    PrismaModule,
+    ModuleModule,
+    CellModule,
+    QuestionModule, 
+    UsuariosModule,
+  ],
   controllers: [AppController],
   providers: [AppService],
 })

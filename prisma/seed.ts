@@ -4,7 +4,7 @@ const prisma = new PrismaClient();
 
 async function main() {
   // Crear usuarios
-  const user = await prisma.user.upsert({
+  const user1 = await prisma.user.upsert({
     where: { email: 'daniela@mail.com' },
     update: {},
     create: {
@@ -19,7 +19,20 @@ async function main() {
     },
   });
 
-  console.log({ user });
+  const user2 = await prisma.user.upsert({
+    where: { email: 'javier@mail.com' },
+    update: {},
+    create: {
+        email: "javier@mail.com",
+        password: "contraseña",
+        first_name: "javier",
+        last_name: "brizuela",
+        gender: "male",
+        phone_number: "2615859635",
+        is_superuser: true,
+        birthdate: "1976-06-05T14:30:00Z",
+    },
+  });
 }
 
 

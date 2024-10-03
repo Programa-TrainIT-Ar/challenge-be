@@ -20,7 +20,8 @@ async function bootstrap() {
     .addTag('Question')
     .addTag('Module')
     .addTag('Cell')
-    .addTag('Skill Level')
+    .addTag('User')
+    .addTag('Auth')
     .build();
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('docs', app, document);

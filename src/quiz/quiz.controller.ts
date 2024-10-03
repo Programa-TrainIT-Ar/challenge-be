@@ -21,11 +21,13 @@ export class QuizController {
   @ApiQuery({ name: 'createdBy', required: false, type: String })
   @ApiQuery({ name: 'seniority', required: false, type: String, enum: ['trainee', 'junior', 'middle', 'senior']})
   @ApiQuery({ name: 'cell', required: false, type: String })
+  @ApiQuery({ name: 'module', required: false, type: String })
   @ApiOkResponse({ type: QuizEntity, isArray: true })
   async findAll(
     @Query('search') search? : string,
     @Query('createdBy') createdBy?: string,
     @Query('seniority') seniority?: string,
+    @Query('module') module?: string,
     @Query('cell') cell?: string,
   ) {
     
@@ -42,6 +44,10 @@ export class QuizController {
     }
     if (cell) {
       filter.cell = cell;
+    }
+
+    if (module) {
+      filter.module = module;
     }
 
     return this.quizService.findQuizzes(filter)

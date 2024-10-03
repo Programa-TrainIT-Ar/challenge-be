@@ -21,7 +21,7 @@ model User {
   is_staff     Boolean       @default(false)
   is_superuser Boolean       @default(false)
   created_at   DateTime      @default(now())
-  updated_at    DateTime?     @updatedAt
+  updated_at   DateTime?     @updatedAt
   last_login   DateTime?
   birthdate    DateTime
 
@@ -35,21 +35,21 @@ model User {
 }
 
 model HardSkill {
-  id         String    @id @default(uuid())
-  name String    @unique
-  created_at DateTime  @default(now())
-  updated_at DateTime? @updatedAt
+  id          String    @id @default(uuid())
+  name        String    @unique
+  created_at  DateTime  @default(now())
+  updated_at  DateTime? @updatedAt
 
-  users      User[]    @relation("HardSkillUser")
+  users       User[]    @relation("HardSkillUser")
 }
 
 model SoftSkill {
-  id         String    @id @default(uuid())
-  name String
-  created_at DateTime  @default(now())
-  updated_at DateTime? @updatedAt
+  id          String    @id @default(uuid())
+  name        String    @unique   
+  created_at  DateTime  @default(now())
+  updated_at  DateTime? @updatedAt
 
-  users      User[]    @relation("SoftSkillUser")
+  users       User[]    @relation("SoftSkillUser")
 }
 
 model SocialNetwork {
@@ -132,7 +132,7 @@ model Quiz {
   created_by      User           @relation(fields: [created_by_id], references: [id])
   created_by_id   String
   created_at      DateTime       @default(now())
-  updated_at       DateTime?      @updatedAt
+  updated_at      DateTime?      @updatedAt
   is_active       Boolean        @default(true)
   questions       Question[]
   challenges      Challenge[]
@@ -149,7 +149,7 @@ model Question {
   link            String?
   is_active       Boolean
   created_at      DateTime      @default(now())
-  updated_at       DateTime?    @updatedAt
+  updated_at      DateTime?     @updatedAt
   quiz            Quiz          @relation(fields: [quiz_id], references: [id])
   quiz_id         String
 }

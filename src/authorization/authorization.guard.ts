@@ -1,25 +1,18 @@
 import { CanActivate, ExecutionContext, Injectable, Redirect, UnauthorizedException } from '@nestjs/common';
-import { expressJwtSecret } from 'jwks-rsa';
+import { expressJwtSecret, GetVerificationKey } from 'jwks-rsa';
 import { promisify } from 'util';
 import { expressjwt } from 'express-jwt';
-import * as jwt from 'express-jwt'
-import { log } from 'console';
-
-import { ConfigService } from '@nestjs/config';
 
 @Injectable()
 export class AuthorizationGuard implements CanActivate {
 
-  private CLIENT_ID: string = process.env.CLIENT_ID
-  private ISSUER_BASE_URL: string = process.env.ISSUER_BASE_URL
-
+  private AUTH0_AUDIENCE: string = process.env.AUTH0_AUDIENCE
+  private AUTH0_DOMAIN: string = process.env.AUTH0_DOMAIN
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
 
       const req = context.getArgByIndex(0)
       const res = context.getArgByIndex(1)
-
-      
 
       const checkJwt = promisify (
         expressjwt({
@@ -27,10 +20,10 @@ export class AuthorizationGuard implements CanActivate {
             cache: true,
             rateLimit: true,
             jwksRequestsPerMinute: 5,
-            jwksUri: `${this.ISSUER_BASE_URL}.well-know/jwks.json`
-          })as any,
-          audience: this.CLIENT_ID,
-          issuer: this.ISSUER_BASE_URL,
+            jwksUri: `${this.AUTH0_DOMAIN}.well-known/jwks.json`,
+          })as GetVerificationKey,
+          audience: this.AUTH0_AUDIENCE,
+          issuer: this.AUTH0_DOMAIN,
           algorithms: ['RS256']
         })
       );
@@ -38,10 +31,9 @@ export class AuthorizationGuard implements CanActivate {
         await checkJwt(req, res)
         return true;
       } catch (error) {
-        console.log(this.ISSUER_BASE_URL);
+        console.log(this.AUTH0_DOMAIN);
+        console.log(this.AUTH0_AUDIENCE);
         throw new UnauthorizedException(error)
-
-        
       }
 
   }

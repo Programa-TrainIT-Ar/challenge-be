@@ -1,9 +1,11 @@
-import { Controller, Get, Post, Put, Delete, Body, Param } from '@nestjs/common';
+import { Controller, Get, Post, Put, Delete, Body, Param, UseGuards } from '@nestjs/common';
 import { UsuariosService } from './usuarios.service';
 import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
+import { AuthorizationGuard } from 'src/authorization/authorization.guard';
 
-@ApiTags('usuarios')
-@Controller('usuarios')
+@UseGuards(AuthorizationGuard)
+@ApiTags('User')
+@Controller('user')
 export class UsuariosController {
   constructor(private readonly usuariosService: UsuariosService) {}
 

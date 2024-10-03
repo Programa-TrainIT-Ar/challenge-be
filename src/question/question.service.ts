@@ -27,13 +27,17 @@ export class QuestionService {
     let where: Prisma.QuestionWhereInput= {};
     //si cada termino contiene algo lo asigna a where
     if (search) {
-      where = { question: { contains: search, mode: 'insensitive' } }
+      where.OR = [
+        ...(where.OR || []),
+        { question: { contains: search, mode: 'insensitive' } },
+        { quiz_id: search },
+    ];
     }
     if (type) {
-      where = { type: type as QuestionType}
+      where.type = type as QuestionType
     }
     if (seniority) {
-      where = { seniority: seniority as Seniority}
+      where.seniority = seniority as Seniority
     }
     //genera la consulta a la base de datos
     const [questions, total] = await Promise.all([

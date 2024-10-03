@@ -16,10 +16,11 @@ export class QuizService {
   async findQuizzes(filters: {
     search?: string;
     created_by?: string;
+    module?: string;
     cell?: string;
     seniority?: string;
   }): Promise<{quizzes:Quiz[], total:number}> {
-    const { search, created_by, cell, seniority } = filters;
+    const { search, created_by, cell, seniority, module } = filters;
     //creo una variable where vacia para almacenar los terminos de busqueda y filtros
     let where: Prisma.QuizWhereInput = {};
     //si cada termino contiene algo lo asigna a where
@@ -39,26 +40,36 @@ export class QuizService {
       ];
     }
     
+    if (module) {
+      where.cell = {
+        module: {
+          name: { contains: module, mode: 'insensitive' }
+        }
+      };
+    }
+
     if (cell) {
-      where.skill_level = {
-        cell: { name: { contains: cell, mode: 'insensitive' } }
+      where.cell = {
+        name: { contains: cell, mode: 'insensitive' }
       };
     }
     
     if (seniority) {
-      where.skill_level = {
-        seniority: seniority as Seniority,
-      };
+      where.seniority = seniority as Seniority;
     }
-    
+        
     //genera la consulta a la base de datos
     const [quizzes, total] = await Promise.all([
       this.prisma.quiz.findMany({
         where,
         include: {
           created_by: true,
-          skill_level: true,
+          cell: {
+            include: {
+              module: true
+            }
         },
+      }
       }),
       this.prisma.quiz.count({ where })
     ])
@@ -72,7 +83,16 @@ export class QuizService {
   ): Promise<Quiz | null> {
     return await this.prisma.quiz.findUnique({
       where: quizWhereUniqueInput,
-    });
+      include: {
+        created_by: true,
+        cell: {
+          include: {
+            module: true
+          }
+        },
+        questions: true,
+    }
+  });
   }
 
   updateQuiz(
