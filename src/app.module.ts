@@ -8,7 +8,15 @@ import { ConfigModule } from '@nestjs/config';
 
 
 @Module({
-  imports: [PrismaModule, UsuariosModule, AuthorizationModule,ConfigModule.forRoot()],
+  imports: [
+    ConfigModule.forRoot({
+      isGlobal: true,
+      envFilePath: '.env',
+    }),
+    PrismaModule, 
+    UsuariosModule, 
+    AuthorizationModule,
+  ],
   controllers: [AppController],
   providers: [AppService],
 })
