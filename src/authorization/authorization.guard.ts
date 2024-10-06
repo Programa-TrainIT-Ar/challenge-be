@@ -1,7 +1,8 @@
 import { CanActivate, ExecutionContext, Injectable, UnauthorizedException } from '@nestjs/common';
+import { expressjwt } from 'express-jwt';
 import { expressJwtSecret, GetVerificationKey } from 'jwks-rsa';
 import { promisify } from 'util';
-import { expressjwt } from 'express-jwt';
+
 
 @Injectable()
 export class AuthorizationGuard implements CanActivate {

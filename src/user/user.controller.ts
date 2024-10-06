@@ -1,17 +1,19 @@
-import { Controller, Get, Post, Put, Delete, Body, Param } from '@nestjs/common';
-import { UsuariosService } from './usuarios.service';
+import { Controller, Get, Post, Put, Delete, Body, Param, UseGuards } from '@nestjs/common';
+import { UserService } from './user.service';
 import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
+import { AuthorizationGuard } from 'src/authorization/authorization.guard';
 
-@ApiTags('usuarios')
-@Controller('usuarios')
-export class UsuariosController {
-  constructor(private readonly usuariosService: UsuariosService) {}
+//@UseGuards(AuthorizationGuard)
+@ApiTags('User')
+@Controller('user')
+export class UserController {
+  constructor(private readonly userService: UserService) {}
 
   @Get()
   @ApiOperation({ summary: 'Obtener todos los usuarios' })
   @ApiResponse({ status: 200, description: 'Lista de usuarios.' })
   async findAll() {
-    return this.usuariosService.findAll();
+    return this.userService.findAll();
   }
 
   @Get(':id')
@@ -19,7 +21,7 @@ export class UsuariosController {
   @ApiResponse({ status: 200, description: 'Usuario encontrado.' })
   @ApiResponse({ status: 404, description: 'Usuario no encontrado.' })
   async findOne(@Param('id') id: string) {
-    return this.usuariosService.findOne(id);
+    return this.userService.findOne(id);
   }
 
   @Post()
@@ -37,7 +39,7 @@ export class UsuariosController {
     timezone?: string; 
     birthdate: Date;
   }) {
-    return this.usuariosService.create(data);
+    return this.userService.create(data);
   }
 
   @Put(':id')
@@ -55,7 +57,7 @@ export class UsuariosController {
     timezone?: string; 
     birthdate?: Date;
   }) {
-    return this.usuariosService.update(id, data);
+    return this.userService.update(id, data);
   }
 
   @Delete(':id')
@@ -63,6 +65,6 @@ export class UsuariosController {
   @ApiResponse({ status: 200, description: 'Usuario eliminado.' })
   @ApiResponse({ status: 404, description: 'Usuario no encontrado.' })
   async remove(@Param('id') id: string) {
-    return this.usuariosService.remove(id);
+    return this.userService.remove(id);
   }
 }

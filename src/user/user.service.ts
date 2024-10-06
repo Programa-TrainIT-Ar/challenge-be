@@ -1,13 +1,13 @@
 // src/usuarios/usuarios.service.ts
 import { Injectable } from '@nestjs/common';
-import { PrismaService } from '../prisma-module/prisma.service';
+import { PrismaService } from 'src/prisma/prisma.service'; 
 
 @Injectable()
-export class UsuariosService {
+export class UserService {
   constructor(private readonly prisma: PrismaService) {}
 
   async findAll() {
-    return this.prisma.user.findMany(); // Usa el nombre correcto del modelo
+    return this.prisma.user.findMany();// Usa el nombre correcto del modelo
   }
 
   async findOne(id: string) {

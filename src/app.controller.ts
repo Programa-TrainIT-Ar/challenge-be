@@ -1,6 +1,7 @@
-import { Controller, Get, SetMetadata, UseGuards } from '@nestjs/common';
+import { Controller, Get, UseGuards } from '@nestjs/common';
 import { AppService } from './app.service';
 import { AuthorizationGuard } from './authorization/authorization.guard';
+import { ApiBearerAuth } from '@nestjs/swagger'
 
 @Controller()
 export class AppController {
@@ -10,22 +11,11 @@ export class AppController {
   getHello(): string {
     return this.appService.getHello();
   }
-  @Get('/logout')
-  getLogout(){
-    return this.appService.getLogout()
-  }
 
-  @Get('/callback')
-  getCallBack(): string {
-    return this.appService.callBack()
-  }
-
+  @ApiBearerAuth()
   @UseGuards(AuthorizationGuard)
   @Get('/protected')
-  getProtected():string {
-    return this.appService.getPrivate()
+  getProtected(): string {
+    return this.appService.getPrivate();
   }
-
-
-  
 }
