@@ -1,4 +1,4 @@
-import { NestFactory } from '@nestjs/core';
+import { HttpAdapterHost, NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { ValidationPipe } from '@nestjs/common';
 import { PrismaExceptionFilter } from './filters/prisma-exception.filter';
@@ -18,7 +18,8 @@ async function bootstrap() {
   }));
 
   //Activa el manejo de errores
-  app.useGlobalFilters(new PrismaExceptionFilter());
+  const { httpAdapter } = app.get(HttpAdapterHost);
+  app.useGlobalFilters(new PrismaExceptionFilter(httpAdapter));
   
   //Genera la documentacio con swagger
   const config = new DocumentBuilder()

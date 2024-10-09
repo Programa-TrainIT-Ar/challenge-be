@@ -21,22 +21,7 @@ export class CellService {
     is_active: boolean;
     module_id: string;
   }): Promise<Cell> {
-    // Verifica si ya existe una celda con el mismo nombre
-    const existingCell = await this.prisma.cell.findFirst({
-      where: {
-        name: data.name,
-      },
-    });
 
-    if (existingCell) {
-      throw new ConflictException({
-        status: HttpStatus.CONFLICT,
-        message: 'A cell with this name already exists',
-        error: 'Conflict',
-      });
-    }
-
-    // Crea un nuevo registro si no existe uno con el mismo nombre
     return this.prisma.cell.create({
       data: {
         name: data.name,
