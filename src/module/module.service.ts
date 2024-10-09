@@ -6,12 +6,19 @@ export class ModuleService {
   constructor(private prisma: PrismaService) {}
 
   async getAllModules(): Promise<Module[]> {
-    return this.prisma.module.findMany();
+    return this.prisma.module.findMany({
+      include: {
+        cell: true
+      }
+    });
   }
 
   async getModuleById(id: string): Promise<Module> {
     return this.prisma.module.findUnique({
       where: { id },
+      include: {
+        cell: true
+      },
     });
   }
 

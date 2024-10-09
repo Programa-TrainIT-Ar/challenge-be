@@ -16,12 +16,11 @@ export class QuizService {
 
   async findQuizzes(filters: {
     search?: string;
-    created_by?: string;
     module?: string;
     cell?: string;
     seniority?: string;
   }): Promise<{quizzes:Quiz[], total:number}> {
-    const { search, created_by, cell, seniority, module } = filters;
+    const { search, cell, seniority, module } = filters;
     //creo una variable where vacia para almacenar los terminos de busqueda y filtros
     let where: Prisma.QuizWhereInput = {};
     //si cada termino contiene algo lo asigna a where
@@ -29,15 +28,9 @@ export class QuizService {
       where.OR = [
         { name: { contains: search, mode: 'insensitive' } },
         { description: { contains: search, mode: 'insensitive' } },
-      ];
-    }
-    
-    if (created_by) {
-      where.OR = [
-        ...(where.OR || []),
-        { created_by: { first_name: { contains: created_by, mode: 'insensitive' } } },
-        { created_by: { last_name: { contains: created_by, mode: 'insensitive' } } },
-        { created_by: { email: { contains: created_by, mode: 'insensitive' } } },
+        { created_by: { first_name: { contains: search, mode: 'insensitive' } } },
+        { created_by: { last_name: { contains: search, mode: 'insensitive' } } },
+        { created_by: { email: { contains: search, mode: 'insensitive' } } },
       ];
     }
     
