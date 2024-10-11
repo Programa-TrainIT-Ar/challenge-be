@@ -30,10 +30,10 @@ export class UserController {
   @ApiResponse({ status: 400, description: 'Error al crear el usuario.' })
   async create(@Body() data: {
     email: string; 
-    password: string; 
+    password?: string; 
     first_name: string; 
     last_name: string; 
-    gender: string; 
+    gender?: string; 
     photo?: string; 
     phone_number?: string; 
     timezone?: string; 

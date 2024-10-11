@@ -16,14 +16,14 @@ export class UserService {
 
   async create(data: { 
     email: string; 
-    password: string; 
+    password?: string; 
     first_name: string; 
     last_name: string; 
-    gender: string; 
+    gender?: string; 
     photo?: string; 
     phone_number?: string; 
     timezone?: string; 
-    birthdate: Date 
+    birthdate?: Date 
   }) {
     return this.prisma.user.create({ data });
   }
