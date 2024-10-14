@@ -112,7 +112,7 @@ model Cell {
   id          String        @id @default(uuid())
   name        String
   is_active   Boolean       @default(true)
-  module      Module        @relation(fields: [module_id], references: [id])
+  module      Module        @relation(fields: [module_id], references: [id], onDelete: Cascade, onUpdate: Cascade )
   module_id   String
   created_at DateTime  @default(now())
   updated_at DateTime? @updatedAt
@@ -150,7 +150,7 @@ model Question {
   is_active       Boolean
   created_at      DateTime      @default(now())
   updated_at      DateTime?     @updatedAt
-  quiz            Quiz          @relation(fields: [quiz_id], references: [id])
+  quiz            Quiz          @relation(fields: [quiz_id], references: [id], onDelete: Cascade, onUpdate: Cascade )
   quiz_id         String
 }
 
