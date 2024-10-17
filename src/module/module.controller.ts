@@ -11,7 +11,8 @@ import {
 import { ModuleService } from './module.service';
 import { Module } from '@prisma/client';
 import { ApiBody, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
-import { CreateModuleDto,  ModuleDto, UpdateModuleDto } from './dto/module.dto'; 
+import { CreateModuleDto,  UpdateModuleDto } from './dto/module.dto'; 
+import { ModuleEntity, ModuleEntityNested } from './entities/module.entity';
 
 @ApiTags('Module')
 @Controller('modules')
@@ -23,7 +24,8 @@ export class ModuleController {
   @ApiResponse({
     status: 201,
     description: 'modulos retornado ok',
-    type: ModuleDto,
+    type: ModuleEntityNested,
+    isArray: true
   })
   async getAllModules() {
     return this.moduleService.getAllModules();
@@ -35,7 +37,7 @@ export class ModuleController {
   @ApiResponse({
     status: 201,
     description: 'modulo creada ok',
-    type: ModuleDto,
+    type: ModuleEntity,
   })
   createModule(@Body() data: Module) {
     return this.moduleService.createModule(data);
@@ -46,7 +48,7 @@ export class ModuleController {
   @ApiResponse({
     status: 201,
     description: 'modulo retornado ok',
-    type: ModuleDto,
+    type: ModuleEntityNested,
   })
   async getModuleById(@Param('id') id: string) {
     const module = await this.moduleService.getModuleById(id);
@@ -58,11 +60,8 @@ export class ModuleController {
 
   @Delete(':id')
   @ApiOperation({ summary: 'eliminar modulo segun id' })
-  @ApiResponse({
-    status: 204,
-    description: 'modulo eliminado ok',
-    type: ModuleDto,
-  })
+  @ApiResponse({ status: 200, description: 'modulo eliminado ok' })
+  @ApiResponse({ status: 404, description: 'Modulo no encontrado.' })
   async deleteModule(@Param('id') id: string) {
     this.moduleService.deleteModule(id);
   }
@@ -73,7 +72,7 @@ export class ModuleController {
   @ApiResponse({
     status: 201,
     description: 'modulo actualizado ok',
-    type: ModuleDto,
+    type: ModuleEntity,
   })
   async updateModule(@Param('id') id: string, @Body() data: Module) {
     return this.moduleService.updateModule(id, data);

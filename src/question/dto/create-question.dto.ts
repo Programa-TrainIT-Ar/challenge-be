@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Seniority, QuestionType } from '@prisma/client';
-import { IsArray, IsBoolean, IsEnum, IsInt, IsOctal, IsOptional, IsPositive, IsString, IsUUID } from 'class-validator';
+import { IsArray, IsBoolean, IsEnum, IsInt, IsOptional, IsString, IsUUID } from 'class-validator';
 
 
 export class CreateQuestionDto {
@@ -21,7 +21,6 @@ export class CreateQuestionDto {
     options: string[];
 
     @IsInt({ each: true })
-    @IsPositive({ each: true })
     @IsArray()
     @ApiProperty({ type: [Number] })
     correct_option: number[];

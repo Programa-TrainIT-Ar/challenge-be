@@ -10,7 +10,8 @@ import {
 } from '@nestjs/common';
 import { CellService } from './cell.service';
 import { ApiBody, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
-import { CellDto, CreateCellDto, UpdateCellDto } from './dto/cell.dto';
+import { CreateCellDto, UpdateCellDto } from './dto/cell.dto';
+import { CellEntity } from './entities/cell.entity';
 
 @ApiTags('Cell')
 @Controller('cells')
@@ -22,7 +23,8 @@ export class CellController {
   @ApiResponse({
     status: 201,
     description: 'retornar todas las celulas',
-    type: CellDto,
+    type: CellEntity,
+    isArray: true
   })
   async getAllCells() {
     return this.cellService.getAllCells();
@@ -31,7 +33,11 @@ export class CellController {
   @Post()
   @ApiOperation({ summary: 'crear una celula' })
   @ApiBody({ type: CreateCellDto })
-  @ApiResponse({ status: 201, description: 'celula creada ok', type: CellDto })
+  @ApiResponse({
+    status: 201, 
+    description: 'celula creada ok', 
+    type: CellEntity 
+  })
   async createCell(
     @Body() data: { name: string; is_active: boolean; module_id: string },
   ) {
@@ -43,7 +49,7 @@ export class CellController {
   @ApiResponse({
     status: 201,
     description: 'retornar  celula por id',
-    type: CellDto,
+    type: CellEntity,
   })
   async getCellById(@Param('id') id: string) {
     const cell = await this.cellService.getCellById(id);
@@ -54,6 +60,8 @@ export class CellController {
   }
 
   @Delete(':id')
+  @ApiResponse({ status: 200, description: 'Celula eliminada ok' })
+  @ApiResponse({ status: 404, description: 'Celula no encontrada.' })
   async deleteCell(@Param('id') id: string) {
     this.cellService.deleteCell(id);
   }
@@ -64,7 +72,7 @@ export class CellController {
   @ApiResponse({
     status: 201,
     description: 'celula actualizada ok',
-    type: CellDto,
+    type: CellEntity,
   })
   async updateCell(
     @Param('id') id: string,
