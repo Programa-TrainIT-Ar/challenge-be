@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Seniority, QuestionType } from '@prisma/client';
-import { IsArray, IsBoolean, IsEnum, IsInt, IsOptional, IsString, IsUUID } from 'class-validator';
+import { ArrayMinSize, IsArray, IsBoolean, IsEnum, IsInt, IsOptional, IsString, IsUUID, ValidateIf } from 'class-validator';
 
 
 export class CreateQuestionDto {
@@ -22,6 +22,8 @@ export class CreateQuestionDto {
 
     @IsInt({ each: true })
     @IsArray()
+    @ValidateIf(o => o.type === QuestionType.multiple_choice)
+    @ArrayMinSize(2, { message: 'Para preguntas de opción múltiple, debes seleccionar al menos 2 respuestas correctas' })
     @ApiProperty({ type: [Number] })
     correct_option: number[];
 

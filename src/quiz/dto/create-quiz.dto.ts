@@ -1,11 +1,15 @@
 import { ChallengeType, Seniority } from '@prisma/client'
 import { ApiProperty } from '@nestjs/swagger';
-import { IsBoolean, IsEnum, IsInt, IsNotEmpty, IsOptional, IsPositive, IsString, IsUUID } from 'class-validator';
+import { IsBoolean, IsEnum, IsInt, IsNotEmpty, IsOptional, IsPositive, IsString, IsUUID, MinLength } from 'class-validator';
+import { Transform } from 'class-transformer';
 
 export class CreateQuizDto {
+    
     @IsString()
     @IsNotEmpty()
-    @ApiProperty()
+    @Transform(({ value }) => value?.trim())
+    @MinLength(3, { message: 'El campo debe tener al menos 3 caracteres' })
+    @ApiProperty({minLength: 3, description: 'El nombre debe tener al menos 3 caracteres'})
     name:string;
 
     @IsString()

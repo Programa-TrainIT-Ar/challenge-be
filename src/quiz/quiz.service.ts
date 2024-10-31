@@ -27,7 +27,6 @@ export class QuizService {
     if (search) {
       where.OR = [
         { name: { contains: search, mode: 'insensitive' } },
-        { description: { contains: search, mode: 'insensitive' } },
         { created_by: { first_name: { contains: search, mode: 'insensitive' } } },
         { created_by: { last_name: { contains: search, mode: 'insensitive' } } },
         { created_by: { email: { contains: search, mode: 'insensitive' } } },
