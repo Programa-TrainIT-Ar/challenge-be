@@ -9,8 +9,17 @@ export class QuizService {
   constructor(private prisma: PrismaService) {}
 
   async createQuiz(data: CreateQuizDto): Promise<Quiz | null> {
+    const { questions, ...quizData } = data;
+    
     return this.prisma.quiz.create({
-      data,
+      data: {
+        ...quizData,
+        questions: {
+          create: questions.map(question => ({
+            ...question
+          }))
+        }
+      }
     });
   }
 

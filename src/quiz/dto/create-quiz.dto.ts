@@ -1,7 +1,47 @@
-import { ChallengeType, Seniority } from '@prisma/client'
+import { ChallengeType, QuestionType, Seniority } from '@prisma/client'
 import { ApiProperty } from '@nestjs/swagger';
-import { IsBoolean, IsEnum, IsInt, IsNotEmpty, IsOptional, IsPositive, IsString, IsUUID, MinLength } from 'class-validator';
-import { Transform } from 'class-transformer';
+import { ArrayMaxSize, ArrayMinSize, IsArray, IsBoolean, IsEnum, IsInt, IsNotEmpty, IsOptional, IsPositive, IsString, IsUUID, MinLength, ValidateIf, ValidateNested } from 'class-validator';
+import { Transform, Type } from 'class-transformer';
+
+// Define CreateQuestionNestedDto para anidar las preguntas en Quiz
+export class CreateQuestionNestedDto {
+    @IsString()
+    @ApiProperty()
+    question: string;
+
+    @IsEnum(Seniority)
+    @ApiProperty({ enum: Seniority })
+    seniority: Seniority;
+
+    @IsEnum(QuestionType)
+    @ApiProperty({ enum: QuestionType })
+    type: QuestionType;
+
+    @IsArray()
+    @ApiProperty()
+    options: string[];
+
+    @IsInt({ each: true })
+    @IsArray()
+    @ValidateIf(o => o.type === QuestionType.multiple_choice)
+    @ArrayMinSize(2, { message: 'Para preguntas de opción múltiple, debes seleccionar al menos 2 respuestas correctas' })
+    @ApiProperty({ type: [Number] })
+    correct_option: number[];
+
+    @IsString()
+    @IsOptional()
+    @ApiProperty({ required: false })
+    explanation?: string;
+
+    @IsString()
+    @IsOptional()
+    @ApiProperty({ required: false })
+    link?: string;
+
+    @IsBoolean()
+    @ApiProperty({ default:true })
+    is_active: boolean = true;
+}
 
 export class CreateQuizDto {
     
@@ -37,9 +77,17 @@ export class CreateQuizDto {
 
     @IsUUID()
     @ApiProperty()
-    created_by_id: string
+    created_by_id: string;
 
     @IsBoolean()
     @ApiProperty({ required: false, default:true })
-    is_active: boolean=true
+    is_active: boolean=true;
+
+    //Este campo anida las 10 question
+    @IsArray()
+    @ValidateNested({ each: true })
+    @ArrayMinSize(10)
+    @ArrayMaxSize(10)
+    @Type(() => CreateQuestionNestedDto)
+    questions: CreateQuestionNestedDto[];
 }
