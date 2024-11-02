@@ -62,7 +62,10 @@ export class QuizService {
               module: true
             }
         },
-      }
+      },
+      orderBy: {
+        created_at: 'desc', // o 'asc' para orden descendente
+      },
       }),
       this.prisma.quiz.count({ where })
     ])
