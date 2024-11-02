@@ -1,8 +1,9 @@
 
-import { Injectable, Param } from '@nestjs/common';
+import { Injectable, NotFoundException, Param } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { Quiz, Prisma, Seniority } from '@prisma/client';
 import { CreateQuizDto } from './dto/create-quiz.dto';
+import { UpdateQuizDto } from './dto/update-quiz.dto';
 
 @Injectable()
 export class QuizService {
@@ -19,6 +20,11 @@ export class QuizService {
             ...question
           }))
         }
+      },
+      include: {
+        created_by: true,
+        cell: true,
+        questions: true
       }
     });
   }
@@ -97,15 +103,34 @@ export class QuizService {
   });
   }
 
-  updateQuiz(
-    where: Prisma.QuizWhereUniqueInput,
-    data: Prisma.QuizUpdateInput,
-  ): Promise<Quiz> {
+  async updateQuiz(where: { id: string }, updateQuizDto: UpdateQuizDto){
+      // Primero verificamos que el quiz existe
+      const existingQuiz = await this.prisma.quiz.findUnique({
+          where,
+          include: { questions: true }
+      });
+
+      if (!existingQuiz) {
+          throw new NotFoundException(`Quiz with ID ${where.id} not found`);
+      }
+    const { questions, ...quizData } = updateQuizDto;
+    
     return this.prisma.quiz.update({
-      where,
-      data,
+        where,
+        data: {
+            ...quizData,
+            questions: {
+                update: questions.map(question => ({
+                    where: { id: question.id || '' },
+                    data: question,
+                }))
+              }
+        },
+        include: {
+          questions: true
+        }
     });
-  }
+}
 
   async removeQuiz(where: Prisma.QuizWhereUniqueInput): Promise<Quiz> {
     return this.prisma.quiz.delete({

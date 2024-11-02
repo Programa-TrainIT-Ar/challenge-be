@@ -43,7 +43,7 @@ export class QuizController {
   }
 
   @Post()
-  @ApiCreatedResponse({ type: QuizEntity })
+  @ApiCreatedResponse({ type: QuizEntityQuestion })
   async create(@Body() createQuizDto: CreateQuizDto) {
     return await this.quizService.createQuiz(createQuizDto);
   }
@@ -55,7 +55,7 @@ export class QuizController {
   }
 
   @Put(':id')
-  @ApiOkResponse({ type: QuizEntity })
+  @ApiOkResponse({ type: QuizEntityQuestion })
   update(@Param('id') id: string, @Body() updateQuizDto: UpdateQuizDto) {
     return this.quizService.updateQuiz({id}, updateQuizDto);
   }

@@ -1,0 +1,131 @@
+{
+  "name": "Quiz de prueba",
+  "description": "probando la nueva version de quiz con las 10 preguntas",
+  "cell_id": "6c88f9e9-ee68-423f-bbf9-cb8af183924f",
+  "seniority": "trainee",
+  "challenge_type": "immediate",
+  "created_by_id": "abb92ed1-19b8-4e74-9fe4-a6be0607cfb8",
+  "is_active": true,
+  "questions": [
+    {
+      "question": "Primera pregunta",
+      "seniority": "trainee",
+      "type": "multiple_choice",
+      "options": [
+        "opcion 1", "opcion 2", "opcion 3","opcion 4"
+      ],
+      "correct_option": [
+        0,2
+      ],
+      "is_active": true
+    },
+    {
+      "question": "Segunda pregunta",
+      "seniority": "trainee",
+      "type": "simple_choice",
+      "options": [
+        "opcion 1", "opcion 2", "opcion 3","opcion 4"
+      ],
+      "correct_option": [
+        3
+      ],
+      "is_active": true
+    },
+    {
+      "question": "Tercera pregunta",
+      "seniority": "trainee",
+      "type": "true_false",
+      "options": [
+        "falso", "verdadero"
+      ],
+      "correct_option": [
+        1
+      ],
+      "is_active": true
+    },
+    {
+      "question": "Cuarta pregunta",
+      "seniority": "trainee",
+      "type": "multiple_choice",
+      "options": [
+        "opcion 1", "opcion 2", "opcion 3","opcion 4","opcion 5"
+      ],
+      "correct_option": [
+        2,3,4
+      ],
+      "is_active": true
+    },
+    {
+      "question": "Quinta pregunta",
+      "seniority": "trainee",
+      "type": "simple_choice",
+      "options": [
+        "opcion 1", "opcion 2", "opcion 3"
+      ],
+      "correct_option": [
+        2
+      ],
+      "is_active": true
+    },
+    {
+      "question": "Sexta pregunta",
+      "seniority": "trainee",
+      "type": "true_false",
+      "options": [
+        "falso", "verdadero"
+      ],
+      "correct_option": [
+        0
+      ],
+      "is_active": true
+    },
+    {
+      "question": "Septima pregunta",
+      "seniority": "trainee",
+      "type": "multiple_choice",
+      "options": [
+        "opcion 1", "opcion 2", "opcion 3","opcion 4"
+      ],
+      "correct_option": [
+        0,3
+      ],
+      "is_active": true
+    },
+    {
+      "question": "Octava pregunta",
+      "seniority": "trainee",
+      "type": "simple_choice",
+      "options": [
+        "opcion 1", "opcion 2", "opcion 3","opcion 4"
+      ],
+      "correct_option": [
+        4
+      ],
+      "is_active": true
+    },
+    {
+      "question": "Novena pregunta",
+      "seniority": "trainee",
+      "type": "true_false",
+      "options": [
+        "falso", "verdadero"
+      ],
+      "correct_option": [
+        1
+      ],
+      "is_active": true
+    },
+    {
+      "question": "Decima pregunta",
+      "seniority": "trainee",
+      "type": "multiple_choice",
+      "options": [
+        "opcion 1", "opcion 2", "opcion 3","opcion 4"
+      ],
+      "correct_option": [
+        2,3
+      ],
+      "is_active": true
+    }
+  ]
+}
