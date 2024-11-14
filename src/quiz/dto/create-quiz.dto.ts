@@ -2,6 +2,7 @@ import { ChallengeType, QuestionType, Seniority } from '@prisma/client'
 import { ApiProperty } from '@nestjs/swagger';
 import { ArrayMaxSize, ArrayMinSize, IsArray, IsBoolean, IsEnum, IsInt, IsNotEmpty, IsOptional, IsPositive, IsString, IsUUID, MinLength, ValidateIf, ValidateNested } from 'class-validator';
 import { Transform, Type } from 'class-transformer';
+import { ValidateCorrectOption } from '../quiz.validator';
 
 // Define CreateQuestionNestedDto para anidar las preguntas en Quiz
 export class CreateQuestionNestedDto {
@@ -27,10 +28,7 @@ export class CreateQuestionNestedDto {
     @ApiProperty()
     options: string[];
 
-    @IsInt({ each: true })
-    @IsArray()
-    @ValidateIf(o => o.type === QuestionType.multiple_choice)
-    @ArrayMinSize(2, { message: 'Para preguntas de opción múltiple, debes seleccionar al menos 2 respuestas correctas' })
+    @ValidateCorrectOption()
     @ApiProperty({ type: [Number] })
     correct_option: number[];
 
@@ -88,7 +86,10 @@ export class CreateQuizDto {
     @IsBoolean()
     @ApiProperty({ required: false, default:true })
     is_active: boolean=true;
+}
 
+export class CreateQuizNestedDto extends CreateQuizDto {
+    
     //Este campo anida las 10 question
     @IsArray()
     @ValidateNested({ each: true })

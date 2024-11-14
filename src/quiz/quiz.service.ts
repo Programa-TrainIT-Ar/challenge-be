@@ -2,14 +2,22 @@
 import { Injectable, NotFoundException, Param } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { Quiz, Prisma, Seniority } from '@prisma/client';
-import { CreateQuizDto } from './dto/create-quiz.dto';
-import { UpdateQuizDto } from './dto/update-quiz.dto';
+import { CreateQuizDto, CreateQuizNestedDto } from './dto/create-quiz.dto';
+import { UpdateQuizDto, UpdateQuizNestedDto } from './dto/update-quiz.dto';
 
 @Injectable()
 export class QuizService {
   constructor(private prisma: PrismaService) {}
 
   async createQuiz(data: CreateQuizDto): Promise<Quiz | null> {
+    //Crea un quiz
+    return this.prisma.quiz.create({
+      data,
+    });
+  }
+
+  async createQuizNested(data: CreateQuizNestedDto): Promise<Quiz | null> {
+    //crea un quiz con 10 preguntas anidadas
     const { questions, ...quizData } = data;
     
     return this.prisma.quiz.create({
@@ -103,7 +111,19 @@ export class QuizService {
   });
   }
 
-  async updateQuiz(where: { id: string }, updateQuizDto: UpdateQuizDto){
+  async updateQuiz(
+    // Actualiza un quiz
+    where: Prisma.QuizWhereUniqueInput,
+    data: Prisma.QuizUpdateInput,
+  ): Promise<Quiz> {
+    return this.prisma.quiz.update({
+      where,
+      data,
+    });
+  }
+
+  async updateQuizNested(where: { id: string }, updateQuizDto: UpdateQuizNestedDto){
+      // Actualiza un quiz con sus preguntas anidadas
       // Primero verificamos que el quiz existe
       const existingQuiz = await this.prisma.quiz.findUnique({
           where,
