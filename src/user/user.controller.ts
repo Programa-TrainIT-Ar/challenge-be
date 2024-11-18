@@ -32,19 +32,19 @@ export class UserController {
     return this.userService.findAll(); // Llama al servicio para obtener todos los usuarios
   }
 
-  /**
-   * Obtiene un usuario por su ID.
-   * @param id - El ID del usuario a buscar.
+    /**
+   * Obtiene un usuario por su email.
+   * @param email - El email del usuario a buscar.
    * @returns El usuario encontrado.
    */
-  @Get(':id') // Define la ruta para obtener un usuario por ID
-  @UseGuards(AuthorizationGuard) // Solo requiere autorización
-  @ApiOperation({ summary: 'Obtener un usuario por ID' })
-  @ApiResponse({ status: 200, description: 'Usuario encontrado.' })
-  @ApiResponse({ status: 404, description: 'Usuario no encontrado.' })
-  async findOne(@Param('id') id: string) {
-    return this.userService.findOne(id); // Llama al servicio para obtener el usuario por ID
-  }
+    @Get(':email') // Define la ruta para obtener un usuario por email
+    //@UseGuards(AuthorizationGuard) // Solo requiere autorización
+    @ApiOperation({ summary: 'Obtener un usuario por email' })
+    @ApiResponse({ status: 200, description: 'Usuario encontrado.' })
+    @ApiResponse({ status: 404, description: 'Usuario no encontrado.' })
+    async findOne(@Param('email') email: string) {
+      return this.userService.findOne(email); // Llama al servicio para obtener el usuario por ID
+    }
 
   /**
    * Crea un nuevo usuario.
