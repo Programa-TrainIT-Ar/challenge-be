@@ -59,14 +59,14 @@ export class QuizService {
     if (module) {
       where.cell = {
         module: {
-          name: { contains: module, mode: 'insensitive' }
+          name: { equals: module, mode: 'insensitive' }
         }
       };
     }
 
     if (cell) {
       where.cell = {
-        name: { contains: cell, mode: 'insensitive' }
+        name: { equals: cell, mode: 'insensitive' }
       };
     }
     
