@@ -1,14 +1,21 @@
 import { ApiProperty, PartialType } from '@nestjs/swagger';
+import { IsBoolean, IsNotEmpty, IsString, IsUUID, MinLength } from 'class-validator';
 
 export class CreateCellDto {
+  
+  @IsString()
+  @IsNotEmpty()
+  @MinLength(3, { message: 'El campo debe tener al menos 3 caracteres' })
   @ApiProperty({ description: 'nombre de la celula' })
-  readonly name: string;
+  name: string;
 
+  @IsBoolean()
   @ApiProperty({ description: 'esta activo' })
-  readonly is_active: boolean;
+  is_active: boolean;
 
+  @IsUUID()
   @ApiProperty({ description: 'id de module' })
-  readonly module_id: string;
+  module_id: string;
 }
 
 export class UpdateCellDto extends PartialType(CreateCellDto){}
