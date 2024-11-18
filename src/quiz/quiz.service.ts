@@ -1,16 +1,39 @@
 
-import { Injectable, Param } from '@nestjs/common';
+import { Injectable, NotFoundException, Param } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { Quiz, Prisma, Seniority } from '@prisma/client';
-import { CreateQuizDto } from './dto/create-quiz.dto';
+import { CreateQuizDto, CreateQuizNestedDto } from './dto/create-quiz.dto';
+import { UpdateQuizDto, UpdateQuizNestedDto } from './dto/update-quiz.dto';
 
 @Injectable()
 export class QuizService {
   constructor(private prisma: PrismaService) {}
 
   async createQuiz(data: CreateQuizDto): Promise<Quiz | null> {
+    //Crea un quiz
     return this.prisma.quiz.create({
       data,
+    });
+  }
+
+  async createQuizNested(data: CreateQuizNestedDto): Promise<Quiz | null> {
+    //crea un quiz con 10 preguntas anidadas
+    const { questions, ...quizData } = data;
+    
+    return this.prisma.quiz.create({
+      data: {
+        ...quizData,
+        questions: {
+          create: questions.map(question => ({
+            ...question
+          }))
+        }
+      },
+      include: {
+        created_by: true,
+        cell: true,
+        questions: true
+      }
     });
   }
 
@@ -27,7 +50,6 @@ export class QuizService {
     if (search) {
       where.OR = [
         { name: { contains: search, mode: 'insensitive' } },
-        { description: { contains: search, mode: 'insensitive' } },
         { created_by: { first_name: { contains: search, mode: 'insensitive' } } },
         { created_by: { last_name: { contains: search, mode: 'insensitive' } } },
         { created_by: { email: { contains: search, mode: 'insensitive' } } },
@@ -63,7 +85,10 @@ export class QuizService {
               module: true
             }
         },
-      }
+      },
+      orderBy: {
+        created_at: 'desc', // o 'asc' para orden descendente
+      },
       }),
       this.prisma.quiz.count({ where })
     ])
@@ -89,7 +114,8 @@ export class QuizService {
   });
   }
 
-  updateQuiz(
+  async updateQuiz(
+    // Actualiza un quiz
     where: Prisma.QuizWhereUniqueInput,
     data: Prisma.QuizUpdateInput,
   ): Promise<Quiz> {
@@ -98,6 +124,36 @@ export class QuizService {
       data,
     });
   }
+
+  async updateQuizNested(where: { id: string }, updateQuizDto: UpdateQuizNestedDto){
+      // Actualiza un quiz con sus preguntas anidadas
+      // Primero verificamos que el quiz existe
+      const existingQuiz = await this.prisma.quiz.findUnique({
+          where,
+          include: { questions: true }
+      });
+
+      if (!existingQuiz) {
+          throw new NotFoundException(`Quiz with ID ${where.id} not found`);
+      }
+    const { questions, ...quizData } = updateQuizDto;
+    
+    return this.prisma.quiz.update({
+        where,
+        data: {
+            ...quizData,
+            questions: {
+                update: questions.map(question => ({
+                    where: { id: question.id || '' },
+                    data: question,
+                }))
+              }
+        },
+        include: {
+          questions: true
+        }
+    });
+}
 
   async removeQuiz(where: Prisma.QuizWhereUniqueInput): Promise<Quiz> {
     return this.prisma.quiz.delete({

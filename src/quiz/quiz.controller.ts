@@ -1,7 +1,7 @@
 import { Controller, Get, Post, Body, Put, Param, Delete, Query } from '@nestjs/common';
 import { QuizService } from './quiz.service';
-import { CreateQuizDto } from './dto/create-quiz.dto'; 
-import { UpdateQuizDto } from './dto/update-quiz.dto';
+import { CreateQuizDto, CreateQuizNestedDto } from './dto/create-quiz.dto'; 
+import { UpdateQuizDto, UpdateQuizNestedDto } from './dto/update-quiz.dto';
 import { ApiCreatedResponse, ApiOkResponse, ApiTags, ApiQuery, ApiResponse } from '@nestjs/swagger';
 import { QuizEntity, QuizEntityNested, QuizEntityQuestion } from './entities/quiz.entity';
 
@@ -48,6 +48,13 @@ export class QuizController {
     return await this.quizService.createQuiz(createQuizDto);
   }
   
+
+  @Post('nested')
+  @ApiCreatedResponse({ type: QuizEntityQuestion })
+  async createNested(@Body() createQuizDto: CreateQuizNestedDto) {
+    return await this.quizService.createQuizNested(createQuizDto);
+  }
+  
   @Get(':id')
   @ApiOkResponse({ type: QuizEntityQuestion })
   async findOne(@Param('id') id: string) {
@@ -58,6 +65,12 @@ export class QuizController {
   @ApiOkResponse({ type: QuizEntity })
   update(@Param('id') id: string, @Body() updateQuizDto: UpdateQuizDto) {
     return this.quizService.updateQuiz({id}, updateQuizDto);
+  }
+
+  @Put('nested/:id')
+  @ApiOkResponse({ type: QuizEntityQuestion })
+  updateNested(@Param('id') id: string, @Body() updateQuizDto: UpdateQuizNestedDto) {
+    return this.quizService.updateQuizNested({id}, updateQuizDto);
   }
 
   @Delete(':id')

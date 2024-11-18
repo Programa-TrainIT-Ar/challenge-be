@@ -2,7 +2,7 @@ import { ChallengeType, Seniority } from '@prisma/client';
 import { ApiProperty } from '@nestjs/swagger';
 import { UUID } from 'crypto';
 import { UserEntity } from 'src/user/entities/user.entity';
-import { CellEntity, CellEntityNested } from 'src/cell/entities/cell.entity';
+import { CellEntityNested } from 'src/cell/entities/cell.entity';
 import { QuestionEntity } from 'src/question/entities/question.entity';
 
 export class QuizEntity  {
@@ -42,19 +42,20 @@ export class QuizEntity  {
 }
 
 export class QuizEntityNested  extends QuizEntity{
-    
+    //Anida el creador y la celula a la que esta relacionada 
     @ApiProperty({ type: () => UserEntity })
     created_by: UserEntity;
 
     @ApiProperty({ type: () => CellEntityNested })
-    Cell: CellEntityNested;
+    cell: CellEntityNested;
 }
 
 export class QuizEntityQuestion extends QuizEntityNested{
+    //Anida todas las preguntas relacionadas al quiz
     @ApiProperty({ 
         type: () => QuestionEntity,
         isArray: true,
         description: 'Array de Questions asociadas al Quiz' 
     })
-    Question: QuestionEntity[];
+    questions: QuestionEntity[];
 }
