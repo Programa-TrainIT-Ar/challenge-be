@@ -23,8 +23,8 @@ import { RolesGuard } from 'src/authorization/roles/roles.guard';
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
-  // Mover la ruta findByEmail ANTES de la ruta con parámetro :id
-  @Get('findByEmail')
+  
+  @Get('FindByEmail')
   // @UseGuards(AuthorizationGuard) // Agregar el guard de autorización
   @ApiOperation({ summary: 'Buscar usuario por email' })
   @ApiResponse({ status: 200, description: 'Usuario encontrado.' })
