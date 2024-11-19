@@ -18,12 +18,12 @@ export class UserService {
   }
 
   /**
-   * Obtiene un usuario por su ID.
-   * @param id - El ID del usuario a buscar.
+   * Obtiene un usuario por su email.
+   * @param id - El email del usuario a buscar.
    * @returns El usuario encontrado o null si no existe.
    */
-  async findOne(id: string) {
-    return this.prisma.user.findUnique({ where: { id } }); // Llama al método findUnique para buscar un usuario por ID
+  async findOne(email: string) {
+    return this.prisma.user.findUnique({ where: { email } }); // Llama al método findUnique para buscar un usuario por email
   }
   async findByEmail(email: string) {
     try {
