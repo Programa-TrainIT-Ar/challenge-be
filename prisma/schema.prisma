@@ -140,7 +140,7 @@ model Quiz {
 
 model Question {
   id              String       @id @default(uuid()) 
-  question        String       @unique
+  question        String       
   seniority       Seniority
   type            QuestionType
   options         String[]
