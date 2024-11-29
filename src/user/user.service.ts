@@ -2,6 +2,8 @@
 import { Injectable } from '@nestjs/common'; // Importa el decorador Injectable de NestJS
 import { PrismaService } from 'src/prisma/prisma.service'; // Importa el servicio Prisma para acceder a la base de datos
 import { CreateUserDto } from './dto/create-user.dto';
+import { HttpException } from '@nestjs/common';
+import { HttpStatus } from '@nestjs/common';
 
 @Injectable() // Decorador que marca esta clase como un servicio que puede ser inyectado
 export class UserService {
@@ -23,7 +25,25 @@ export class UserService {
   async findOne(email: string) {
     return this.prisma.user.findUnique({ where: { email } }); // Llama al método findUnique para buscar un usuario por email
   }
+  async findByEmail(email: string) {
+    try {
+      const user = await this.prisma.user.findUnique({
+        where: { email },
+        
+      });
 
+      if (!user) {
+        throw new HttpException('Usuario no encontrado', HttpStatus.NOT_FOUND);
+      }
+
+      return user;
+    } catch (error) {
+      throw new HttpException(
+        error.message || 'Error al buscar usuario',
+        error.status || HttpStatus.INTERNAL_SERVER_ERROR
+      );
+    }
+  }
   
   async create(data: CreateUserDto) {
     try {

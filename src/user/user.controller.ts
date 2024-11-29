@@ -7,18 +7,42 @@ import {
   Body,
   Param,
   UseGuards,
-} from '@nestjs/common'; // Importa decoradores y tipos de NestJS
-import { UserService } from './user.service'; // Importa el servicio de usuarios
-import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger'; // Importa decoradores para la documentación Swagger
-import { AuthorizationGuard } from 'src/authorization/authorization.guard'; // Importa el guardia de autorización
+  Query,
+  HttpException,
+  HttpStatus,
+} from '@nestjs/common';
+import { UserService } from './user.service';
+import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
+import { AuthorizationGuard } from 'src/authorization/authorization.guard';
 import { CreateUserDto } from './dto/create-user.dto';
-import { Roles } from '../authorization/roles/roles.decorator'; // Importa el decorador de roles
-import { RolesGuard } from 'src/authorization/roles/roles.guard'; // Importa el guardia de roles
+import { Roles } from '../authorization/roles/roles.decorator';
+import { RolesGuard } from 'src/authorization/roles/roles.guard';
 
-@ApiTags('User') // Etiqueta para agrupar las rutas en la documentación de Swagger
-@Controller('user') // Define el controlador con la ruta base 'user'
+@ApiTags('User')
+@Controller('user')
 export class UserController {
-  constructor(private readonly userService: UserService) {} // Inyección del servicio de usuarios
+  constructor(private readonly userService: UserService) {}
+
+  
+  @Get('FindByEmail')
+  // @UseGuards(AuthorizationGuard) // Agregar el guard de autorización
+  @ApiOperation({ summary: 'Buscar usuario por email' })
+  @ApiResponse({ status: 200, description: 'Usuario encontrado.' })
+  @ApiResponse({ status: 404, description: 'Usuario no encontrado.' })
+  async findByEmail(@Query('email') email: string) {
+    try {
+      const user = await this.userService.findByEmail(email);
+      if (!user) {
+        throw new HttpException('Usuario no encontrado', HttpStatus.NOT_FOUND);
+      }
+      return user;
+    } catch (error) {
+      throw new HttpException(
+        error.message || 'Error al buscar usuario',
+        error.status || HttpStatus.INTERNAL_SERVER_ERROR
+      );
+    }
+  }
 
   /**
    * Obtiene todos los usuarios.
@@ -105,6 +129,6 @@ export class UserController {
     await this.userService.remove(id);
     return {
       message: 'Usuario eliminado exitosamente.',
-    }; 
+    };
   }
 }
