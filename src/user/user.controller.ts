@@ -17,6 +17,7 @@ import { AuthorizationGuard } from 'src/authorization/authorization.guard';
 import { CreateUserDto } from './dto/create-user.dto';
 import { Roles } from '../authorization/roles/roles.decorator';
 import { RolesGuard } from 'src/authorization/roles/roles.guard';
+import { UserEntity } from './entities/user.entity';
 
 @ApiTags('User')
 @Controller('user')
@@ -25,9 +26,13 @@ export class UserController {
 
   
   @Get('FindByEmail')
-  // @UseGuards(AuthorizationGuard) // Agregar el guard de autorización
+  @UseGuards(AuthorizationGuard) // Agregar el guard de autorización
   @ApiOperation({ summary: 'Buscar usuario por email' })
-  @ApiResponse({ status: 200, description: 'Usuario encontrado.' })
+  @ApiResponse({
+      status: 201,
+      description: 'Usuario encontrado.',
+      type: UserEntity
+    })
   @ApiResponse({ status: 404, description: 'Usuario no encontrado.' })
   async findByEmail(@Query('email') email: string) {
     try {
@@ -51,7 +56,11 @@ export class UserController {
   @Get() // Define la ruta para obtener todos los usuarios
   @UseGuards(AuthorizationGuard) // Solo requiere autorización
   @ApiOperation({ summary: 'Obtener todos los usuarios' }) // Resumen de la operación para Swagger
-  @ApiResponse({ status: 200, description: 'Lista de usuarios.' }) // Respuesta esperada en caso de éxito
+  @ApiResponse({
+      status: 200,
+      description: 'Lista de usuarios.',
+      type: [UserEntity], // Tipo de respuesta esperada
+    }) // Respuesta esperada en caso de éxito
   async findAll() {
     return this.userService.findAll(); // Llama al servicio para obtener todos los usuarios
   }
@@ -78,6 +87,7 @@ export class UserController {
   @ApiResponse({
     status: 200,
     description: 'Usuario autenticado o registrado.',
+    type: CreateUserDto,
   })
   @ApiResponse({
     status: 400,

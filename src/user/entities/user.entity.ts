@@ -33,7 +33,12 @@ export class UserEntity {
   @ApiProperty({ required: false }) // Define una columna para la zona horaria, que es opcional
   timezone?: string;
 
-  // Aquí podrías agregar un campo para la fecha de nacimiento si es necesario
-  @ApiProperty({ required: false }) 
+  @ApiProperty({ required: false }) // Aquí podrías agregar un campo para la fecha de nacimiento si es necesario
   birthdate?: Date;
+
+  @ApiProperty({ required: false }) // Define una columna para el token de restablecimiento de contraseña, que es opcional
+  resetPasswordToken?: string;
+
+  @ApiProperty({ required: false }) // Define una columna para la fecha de expiración del token de restablecimiento de contraseña, que es opcional
+  resetPasswordExpires?: Date;
 }
