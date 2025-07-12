@@ -32,6 +32,11 @@ export class CreateUserDto {
   @IsOptional()
   @IsString()
   @ApiProperty({ required: false })
+  confirmPassword?: string;
+
+  @IsOptional()
+  @IsString()
+  @ApiProperty({ required: false })
   phone_number?: string;
 
   @IsOptional()

@@ -10,6 +10,7 @@ import {
   Query,
   HttpException,
   HttpStatus,
+  Patch,
 } from '@nestjs/common';
 import { UserService } from './user.service';
 import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
@@ -23,7 +24,45 @@ import { RolesGuard } from 'src/authorization/roles/roles.guard';
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
-  
+  //registra un nuevo usuario
+  @Post('register')
+  @ApiOperation({ summary: 'Registrar un nuevo usuario' })
+  @ApiResponse({
+    status: 201,
+    description: 'Usuario registrado exitosamente.',
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Error al registrar el usuario.',
+  })
+  async register(@Body() createUserDto: CreateUserDto) {
+    try {
+      const user = await this.userService.register(createUserDto);
+      return {
+        statusCode: 201,
+        message: 'Usuario registrado exitosamente.',
+        user,
+      };
+    } catch (error) {
+      throw new HttpException(
+        error.message || 'Error al registrar el usuario.',
+        error.status || HttpStatus.BAD_REQUEST,
+      );
+    }
+  }
+
+  /**
+   * Obtiene todos los usuarios.
+   * @returns Una lista de usuarios.
+   */
+  @Get() // Define la ruta para obtener todos los usuarios
+  //@UseGuards(AuthorizationGuard) // Solo requiere autorización
+  @ApiOperation({ summary: 'Obtener todos los usuarios' }) // Resumen de la operación para Swagger
+  @ApiResponse({ status: 200, description: 'Lista de usuarios.' }) // Respuesta esperada en caso de éxito
+  async findAll() {
+    return this.userService.findAll(); // Llama al servicio para obtener todos los usuarios
+  }
+
   @Get('FindByEmail')
   // @UseGuards(AuthorizationGuard) // Agregar el guard de autorización
   @ApiOperation({ summary: 'Buscar usuario por email' })
@@ -39,59 +78,8 @@ export class UserController {
     } catch (error) {
       throw new HttpException(
         error.message || 'Error al buscar usuario',
-        error.status || HttpStatus.INTERNAL_SERVER_ERROR
+        error.status || HttpStatus.INTERNAL_SERVER_ERROR,
       );
-    }
-  }
-
-  /**
-   * Obtiene todos los usuarios.
-   * @returns Una lista de usuarios.
-   */
-  @Get() // Define la ruta para obtener todos los usuarios
-  @UseGuards(AuthorizationGuard) // Solo requiere autorización
-  @ApiOperation({ summary: 'Obtener todos los usuarios' }) // Resumen de la operación para Swagger
-  @ApiResponse({ status: 200, description: 'Lista de usuarios.' }) // Respuesta esperada en caso de éxito
-  async findAll() {
-    return this.userService.findAll(); // Llama al servicio para obtener todos los usuarios
-  }
-
-    /**
-   * Obtiene un usuario por su email.
-   * @param email - El email del usuario a buscar.
-   * @returns El usuario encontrado.
-   */
-    @Get(':email') // Define la ruta para obtener un usuario por email
-    //@UseGuards(AuthorizationGuard) // Solo requiere autorización
-    @ApiOperation({ summary: 'Obtener un usuario por email' })
-    @ApiResponse({ status: 200, description: 'Usuario encontrado.' })
-    @ApiResponse({ status: 404, description: 'Usuario no encontrado.' })
-    async findOne(@Param('email') email: string) {
-      return this.userService.findOne(email); // Llama al servicio para obtener el usuario por ID
-    }
-
-  /**
-   * Crea un nuevo usuario.
-   */
-  @Post()
-  @ApiOperation({ summary: 'Crear o autenticar un usuario' })
-  @ApiResponse({
-    status: 200,
-    description: 'Usuario autenticado o registrado.',
-  })
-  @ApiResponse({
-    status: 400,
-    description: 'Error al crear o autenticar el usuario.',
-  })
-  async create(@Body() data: CreateUserDto) {
-    try {
-      const result = await this.userService.create(data);
-      return result; // Devuelve el mensaje y el usuario si corresponde
-    } catch (error) {
-      return {
-        statusCode: 400,
-        message: error.message,
-      };
     }
   }
 
@@ -102,7 +90,7 @@ export class UserController {
    * @returns El usuario actualizado.
    */
   @Put(':id') // Define la ruta para actualizar un usuario por ID
-  @UseGuards(AuthorizationGuard, RolesGuard) // Requiere autorización y verificación de roles
+  //@UseGuards(AuthorizationGuard, RolesGuard) // Requiere autorización y verificación de roles
   @Roles('admin') // Solo permite a los administradores
   @ApiOperation({ summary: 'Actualizar un usuario por ID' })
   @ApiResponse({ status: 200, description: 'Usuario actualizado.' })

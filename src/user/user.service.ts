@@ -4,10 +4,56 @@ import { PrismaService } from 'src/prisma/prisma.service'; // Importa el servici
 import { CreateUserDto } from './dto/create-user.dto';
 import { HttpException } from '@nestjs/common';
 import { HttpStatus } from '@nestjs/common';
+import * as bcrypt from 'bcrypt'; // Importa bcrypt para el hash de contraseñas
 
 @Injectable() // Decorador que marca esta clase como un servicio que puede ser inyectado
 export class UserService {
   constructor(private readonly prisma: PrismaService) {} // Inyección del servicio Prisma
+
+  async register(data: CreateUserDto) {
+    try {
+      // 1. Verificar si el usuario ya existe por email
+      const existingUser = await this.prisma.user.findUnique({
+        where: { email: data.email },
+      });
+
+      if (existingUser) {
+        throw new HttpException('El usuario ya existe.', HttpStatus.CONFLICT);
+      }
+
+      // 2. Verificar que las contraseñas coincidan
+      if (data.password !== data.confirmPassword) {
+        throw new HttpException(
+          'Las contraseñas no coinciden.',
+          HttpStatus.BAD_REQUEST,
+        );
+      }
+
+      // 3. Hashear la contraseña
+      const hashedPassword = await bcrypt.hash(data.password, 10);
+
+      // 4. Crear usuario SOLO con los campos del formulario
+      const newUser = await this.prisma.user.create({
+        data: {
+          email: data.email,
+          first_name: data.first_name,
+          last_name: data.last_name,
+          phone_number: data.phone_number,
+          password: hashedPassword,
+        },
+      });
+
+      // 5. Retornar al usuario sin la contraseña
+      const { password, ...userWithoutPassword } = newUser;
+      return userWithoutPassword;
+    } catch (error) {
+      console.error('Error en registro de usuario:', error);
+      throw new HttpException(
+        error.message || 'Error al registrar el usuario',
+        error.status || HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
 
   /**
    * Obtiene todos los usuarios.
@@ -22,14 +68,11 @@ export class UserService {
    * @param id - El email del usuario a buscar.
    * @returns El usuario encontrado o null si no existe.
    */
-  async findOne(email: string) {
-    return this.prisma.user.findUnique({ where: { email } }); // Llama al método findUnique para buscar un usuario por email
-  }
+
   async findByEmail(email: string) {
     try {
       const user = await this.prisma.user.findUnique({
         where: { email },
-        
       });
 
       if (!user) {
@@ -40,69 +83,31 @@ export class UserService {
     } catch (error) {
       throw new HttpException(
         error.message || 'Error al buscar usuario',
-        error.status || HttpStatus.INTERNAL_SERVER_ERROR
+        error.status || HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }
   }
-  
-  async create(data: CreateUserDto) {
-    try {
-      console.log('Buscando el usuario', data.email);
-      const existingUser = await this.prisma.user.findUnique({
-        where: {
-          email: data.email,
-        },
-      });
 
-      if (existingUser) {
-        console.log('el usuario ya existe:',existingUser);
-        return {
-          user: existingUser,
-        };
-      }
-
-      const newUser = await this.prisma.user.create({
-        data: {
-          email: data.email,
-          first_name: data.first_name,
-          last_name: data.last_name,
-          photo: data.photo,
-          phone_number: data.phone_number,
-          timezone: data.timezone,
-          password: data.password, 
-          gender: data.gender,
-          birthdate: data.birthdate, 
-        },
-      });
-
-      return {
-        message: 'Usuario registrado exitosamente.',
-        user: newUser,
-      };
-    } catch (error) {
-      console.error('Error al crear el usuario:', error);
-      throw new Error('No se pudo crear el usuario');
-    }
-  }
-  
-  
   /**
    * Actualiza un usuario existente por su ID.
    * @param id - El ID del usuario a actualizar.
    * @param data - Los nuevos datos del usuario.
    * @returns El usuario actualizado.
    */
-  async update(id: string, data: { 
-    email?: string; 
-    password?: string; 
-    first_name?: string; 
-    last_name?: string; 
-    gender?: string; 
-    photo?: string; 
-    phone_number?: string; 
-    timezone?: string; 
-    birthdate?: Date 
-  }) {
+  async update(
+    id: string,
+    data: {
+      email?: string;
+      password?: string;
+      first_name?: string;
+      last_name?: string;
+      gender?: string;
+      photo?: string;
+      phone_number?: string;
+      timezone?: string;
+      birthdate?: Date;
+    },
+  ) {
     return this.prisma.user.update({
       where: { id }, // Especifica el usuario a actualizar por ID
       data, // Proporciona los nuevos datos
