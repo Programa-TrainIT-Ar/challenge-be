@@ -9,7 +9,6 @@ import { CellModule } from './cell/cell.module';
 import { QuizModule } from './quiz/quiz.module';
 import { QuestionModule } from './question/question.module';
 import { UserModule } from './user/user.module';
-import { ResetPasswordModule } from './reset_password/reset_password.module';
 
 @Module({
   imports: [
@@ -23,8 +22,7 @@ import { ResetPasswordModule } from './reset_password/reset_password.module';
     CellModule,
     QuizModule,
     QuestionModule,
-    UserModule,
-    ResetPasswordModule
+    UserModule
   ],
   controllers: [AppController],
   providers: [AppService],

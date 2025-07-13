@@ -34,7 +34,10 @@ async function bootstrap() {
     .addTag('User')
     .build();
   const document = SwaggerModule.createDocument(app, config);
-  SwaggerModule.setup('docs', app, document);
+  SwaggerModule.setup('docs', app, document, {
+    jsonDocumentUrl: '/api-json', // URL para descargar el JSON
+    yamlDocumentUrl: '/api-yaml', // URL para descargar el YAML
+  });
 
   const PORT = process.env.PORT;
   await app.listen(PORT, () => {
