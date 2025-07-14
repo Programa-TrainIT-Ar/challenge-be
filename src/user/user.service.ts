@@ -4,11 +4,16 @@ import { PrismaService } from 'src/prisma/prisma.service'; // Importa el servici
 import { CreateUserDto } from './dto/create-user.dto';
 import { HttpException } from '@nestjs/common';
 import { HttpStatus } from '@nestjs/common';
-import * as bcrypt from 'bcrypt'; // Importa bcrypt para el hash de contraseñas
+import * as crypto from 'crypto'; // Importa el módulo crypto para generar tokens
+import * as bcrypt from 'bcrypt'; // Importa el módulo bcrypt para hashear contraseñas
+import { EmailService } from './email.service';
 
 @Injectable() // Decorador que marca esta clase como un servicio que puede ser inyectado
 export class UserService {
-  constructor(private readonly prisma: PrismaService) {} // Inyección del servicio Prisma
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly emailService: EmailService
+  ) {} // Inyección del servicio Prisma
 
   async register(data: CreateUserDto) {
     try {
@@ -65,7 +70,7 @@ export class UserService {
 
   /**
    * Obtiene un usuario por su email.
-   * @param id - El email del usuario a buscar.
+   * @param email - El email del usuario a buscar.
    * @returns El usuario encontrado o null si no existe.
    */
 
@@ -121,5 +126,105 @@ export class UserService {
    */
   async remove(id: string) {
     return this.prisma.user.delete({ where: { id } }); // Llama al método delete para eliminar el usuario por ID
+  }
+  /**
+   * Solicita el restablecimiento de contraseña para un usuario.
+   * @param email - El email del usuario para solicitar el restablecimiento de contraseña.
+   * @returns Un mensaje de confirmación.
+   */
+  async requestPasswordReset(email: string) {
+    const user = await this.prisma.user.findUnique({ where: { email } });
+    if (!user) {
+      throw new HttpException('Usuario no encontrado', HttpStatus.NOT_FOUND);
+    }
+    user.resetPasswordToken = crypto.randomBytes(32).toString('hex'); // Genera un token aleatorio
+    user.resetPasswordExpires = new Date(Date.now() + 3600000); // Establece la expiración del token a 1 hora
+    
+    await this.prisma.user.update({
+      where: { email },
+      data: {
+        resetPasswordToken: user.resetPasswordToken,
+        resetPasswordExpires: user.resetPasswordExpires,
+      },
+    });
+
+    // Enviar email con el enlace
+    await this.emailService.sendPasswordResetEmail(user.email, user.resetPasswordToken);
+
+    return { message: 'Si el email existe, recibirás un enlace de reseteo' };
+    
+  }
+
+  /**
+   * Restablece la contraseña de un usuario.
+   * @param token - El token de restablecimiento de contraseña.
+   * @param newPassword - La nueva contraseña del usuario.
+   * @returns Un mensaje de confirmación.
+   */
+  async resetPassword(token: string, newPassword: string) {
+    const user = await this.prisma.user.findFirst({
+      where: {
+        resetPasswordToken: token,
+        resetPasswordExpires: {
+          gte: new Date(), // Verifica que el token no haya expirado
+        },
+      },
+    });
+
+    if (!user) {
+      throw new HttpException('Token inválido o expirado', HttpStatus.BAD_REQUEST);
+    }
+
+    const hashedPassword = await bcrypt.hash(newPassword, 10); // Hashea la nueva contraseña
+
+    await this.prisma.user.update({
+      where: { id: user.id },
+      data: {
+        password: hashedPassword,
+        resetPasswordToken: null, // Limpia el token de restablecimiento
+        resetPasswordExpires: null, // Limpia la fecha de expiración
+      },
+    });
+
+    return { message: 'Contraseña restablecida exitosamente' };
+  }
+
+  async sendEmailConfirmation(email: string) {
+    const user = await this.prisma.user.findUnique({ where: { email } });
+    if (!user) {
+      throw new HttpException('Usuario no encontrado', HttpStatus.NOT_FOUND);
+    }
+    user.emailConfirmationToken = crypto.randomBytes(32).toString('hex'); // Genera un token aleatorio
+    await this.prisma.user.update({
+      where: { email },
+      data: { emailConfirmationToken: user.emailConfirmationToken },
+    });
+
+    // Enviar email de confirmación
+    await this.emailService.sendEmailConfirmation(user.email, user.emailConfirmationToken);
+
+    return { message: 'Se ha enviado un email de confirmación' };
+  }
+
+  async confirmEmail(token: string) {
+    const user = await this.prisma.user.findFirst({
+      where: {
+        emailConfirmationToken: token,
+      },
+    });
+
+    if (!user) {
+      throw new HttpException('Token inválido', HttpStatus.BAD_REQUEST);
+    }
+
+    await this.prisma.user.update({
+      where: { id: user.id },
+      data: {
+        emailConfirmed: true, // Marca el email como confirmado
+        emailConfirmationToken: null, // Limpia el token de confirmación
+      },
+    });
+
+    return { message: 'Email confirmado exitosamente' };
   }
 }

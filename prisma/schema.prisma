@@ -24,6 +24,10 @@ model User {
   updated_at   DateTime?     @updatedAt
   last_login   DateTime?
   birthdate    DateTime?
+  emailConfirmationToken String?
+  emailConfirmed         Boolean   @default(false)
+  resetPasswordToken     String?
+  resetPasswordExpires   DateTime?
 
   quizzes       Quiz[]        
   challenges    Challenge[]    

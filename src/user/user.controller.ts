@@ -10,14 +10,16 @@ import {
   Query,
   HttpException,
   HttpStatus,
-  Patch,
+  HttpCode,
 } from '@nestjs/common';
 import { UserService } from './user.service';
-import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
+import { ApiTags, ApiOperation, ApiResponse, ApiBody, ApiBearerAuth } from '@nestjs/swagger';
 import { AuthorizationGuard } from 'src/authorization/authorization.guard';
 import { CreateUserDto } from './dto/create-user.dto';
+import { EmailDto, TokenDto, TokenWithPasswordDto } from './dto/base.dto';
 import { Roles } from '../authorization/roles/roles.decorator';
 import { RolesGuard } from 'src/authorization/roles/roles.guard';
+import { UserEntity } from './entities/user.entity';
 
 @ApiTags('User')
 @Controller('user')
@@ -30,6 +32,7 @@ export class UserController {
   @ApiResponse({
     status: 201,
     description: 'Usuario registrado exitosamente.',
+    type: UserEntity,
   })
   @ApiResponse({
     status: 400,
@@ -56,17 +59,25 @@ export class UserController {
    * @returns Una lista de usuarios.
    */
   @Get() // Define la ruta para obtener todos los usuarios
-  //@UseGuards(AuthorizationGuard) // Solo requiere autorización
-  @ApiOperation({ summary: 'Obtener todos los usuarios' }) // Resumen de la operación para Swagger
+  @ApiBearerAuth()
+  @UseGuards(AuthorizationGuard, RolesGuard) // Requiere autorización y verificación de roles
+  @Roles('admin') // Solo permite a los administradores
+  @ApiOperation({ 
+    summary: 'Obtener todos los usuarios',
+    description: '🔒 **REQUIERE ROL DE ADMINISTRADOR** \n'
+   }) // Resumen de la operación para Swagger
   @ApiResponse({ status: 200, description: 'Lista de usuarios.' }) // Respuesta esperada en caso de éxito
   async findAll() {
     return this.userService.findAll(); // Llama al servicio para obtener todos los usuarios
   }
 
   @Get('FindByEmail')
-  // @UseGuards(AuthorizationGuard) // Agregar el guard de autorización
   @ApiOperation({ summary: 'Buscar usuario por email' })
-  @ApiResponse({ status: 200, description: 'Usuario encontrado.' })
+  @ApiResponse({
+      status: 201,
+      description: 'Usuario encontrado.',
+      type: UserEntity
+    })
   @ApiResponse({ status: 404, description: 'Usuario no encontrado.' })
   async findByEmail(@Query('email') email: string) {
     try {
@@ -86,18 +97,18 @@ export class UserController {
   /**
    * Actualiza un usuario existente por su ID.
    * @param id - El ID del usuario a actualizar.
-   * @param data - Los nuevos datos del usuario.
+   * @body data - Los nuevos datos del usuario.
    * @returns El usuario actualizado.
    */
   @Put(':id') // Define la ruta para actualizar un usuario por ID
-  //@UseGuards(AuthorizationGuard, RolesGuard) // Requiere autorización y verificación de roles
-  @Roles('admin') // Solo permite a los administradores
+  @ApiBearerAuth()
+  @UseGuards(AuthorizationGuard) // Requiere autorización y verificación de roles
   @ApiOperation({ summary: 'Actualizar un usuario por ID' })
   @ApiResponse({ status: 200, description: 'Usuario actualizado.' })
   @ApiResponse({ status: 404, description: 'Usuario no encontrado.' })
   async update(
     @Param('id') id: string,
-    @Body() data: CreateUserDto, // Puedes usar el DTO si es aplicable
+    @Body() data: CreateUserDto,
   ) {
     return this.userService.update(id, data); // Llama al servicio para actualizar el usuario por ID
   }
@@ -108,9 +119,12 @@ export class UserController {
    * @returns Mensaje de confirmación.
    */
   @Delete(':id') // Define la ruta para eliminar un usuario por ID
+  @ApiBearerAuth()
   @UseGuards(AuthorizationGuard, RolesGuard) // Requiere autorización y verificación de roles
   @Roles('admin') // Solo permite a los administradores
-  @ApiOperation({ summary: 'Eliminar un usuario por ID' })
+  @ApiOperation({ summary: 'Eliminar un usuario por ID',
+    description: '🔒 **REQUIERE ROL DE ADMINISTRADOR** \n'
+   }) // Resumen de la operación para Swagger
   @ApiResponse({ status: 200, description: 'Usuario eliminado.' })
   @ApiResponse({ status: 404, description: 'Usuario no encontrado.' })
   async remove(@Param('id') id: string) {
@@ -118,5 +132,57 @@ export class UserController {
     return {
       message: 'Usuario eliminado exitosamente.',
     };
+  }
+ 
+  @Post('forgot-password') // Endpoint para solicitar restablecimiento de contraseña
+  @ApiOperation({ summary: 'Solicitar restablecimiento de contraseña' })
+  @ApiBody({ type: EmailDto }) // Define el cuerpo de la solicitud
+  @ApiResponse({
+    status: 200,
+    description: 'Si el email existe, se enviará un enlace de restablecimiento.',
+  })
+  @HttpCode(HttpStatus.OK)
+  async forgotPassword(@Body() body: EmailDto) {
+    return this.userService.requestPasswordReset(body.email);
+  }
+
+  @Post('reset-password') // Endpoint para restablecer la contraseña
+  @ApiOperation({ summary: 'Restablecer la contraseña' })
+  @ApiBody({ type: TokenWithPasswordDto }) // Define el cuerpo de la solicitud
+  @ApiResponse({
+    status: 200,
+    description: 'Contraseña restablecida exitosamente.',
+  })
+  @HttpCode(HttpStatus.OK)
+  async resetPassword(@Body() body: TokenWithPasswordDto) {
+    return this.userService.resetPassword(body.token, body.password);
+  }
+
+  @Post('send-email-confirmation')
+  @ApiBearerAuth()
+  @UseGuards(AuthorizationGuard)
+  @ApiOperation({ summary: 'Enviar confirmación de email' })
+  @ApiBody({ type: EmailDto })
+  @ApiResponse({
+    status: 200,
+    description: 'Email de confirmación enviado exitosamente.',
+  })
+  @HttpCode(HttpStatus.OK)
+  async sendEmailConfirmation(@Body() body: EmailDto) {
+    return this.userService.sendEmailConfirmation(body.email);
+  }
+
+  @Post('confirm-email')
+  @ApiBearerAuth()
+  @UseGuards(AuthorizationGuard)
+  @ApiOperation({ summary: 'Confirmar email' })
+  @ApiBody({ type: TokenDto })
+  @ApiResponse({
+    status: 200,
+    description: 'Email confirmado exitosamente.',
+  })
+  @HttpCode(HttpStatus.OK)
+  async confirmEmail(@Body() body: TokenDto) {
+    return this.userService.confirmEmail(body.token);
   }
 }
