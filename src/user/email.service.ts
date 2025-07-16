@@ -11,7 +11,7 @@ export class EmailService {
     async sendPasswordResetEmail(email: string, token: string) {
         const resetUrl = `${this.configService.get('FRONTEND_URL')}/reset-password?token=${token}`;
         const mailOptions = {
-            from: 'Acme <onboarding@resend.dev>',
+            from: 'Train IT <onboarding@resend.dev>',
             to: [email],
             subject: 'Restablecimiento de contraseña',
             html: `<p>Para restablecer tu contraseña, haz clic en el siguiente enlace: ${resetUrl}</p>`,
@@ -29,7 +29,7 @@ export class EmailService {
         async sendEmailConfirmation(email: string, token: string) {
             const confirmationUrl = `${this.configService.get('FRONTEND_URL')}/confirm-email?token=${token}`;
             const mailOptions = {
-                from: 'Acme <onboarding@resend.dev>',
+                from: 'Train IT <onboarding@resend.dev>',
                 to: email,
                 subject: 'Confirmación de Email',
                 html: `<p>Por favor, confirma tu email haciendo clic en el siguiente enlace: ${confirmationUrl}</p>`,

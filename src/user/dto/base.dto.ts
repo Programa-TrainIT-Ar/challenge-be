@@ -18,4 +18,8 @@ export class TokenWithPasswordDto extends TokenDto {
   @ApiProperty({ description: 'Nueva contraseña del usuario' })
   @IsNotEmpty()
   password: string;
+
+  @ApiProperty({ description: 'Confirmar nueva contraseña del usuario' })
+  @IsNotEmpty()
+  confirmPassword: string;
 }

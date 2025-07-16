@@ -15,6 +15,19 @@ export class UserService {
     private readonly emailService: EmailService
   ) {} // Inyección del servicio Prisma
 
+  private static REGEX_PASSWORD = /^(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]).{8,}$/; // Expresión regular para validar contraseñas
+
+  private validatePassword(password: string): boolean {
+    // Verifica si la contraseña cumple con los requisitos
+    if (!UserService.REGEX_PASSWORD.test(password)) {
+      throw new HttpException(
+        'La contraseña no cumple con los requisitos.',
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+    return true;
+  }
+
   async register(data: CreateUserDto) {
     try {
       // 1. Verificar si el usuario ya existe por email
@@ -25,8 +38,9 @@ export class UserService {
       if (existingUser) {
         throw new HttpException('El usuario ya existe.', HttpStatus.CONFLICT);
       }
-
-      // 2. Verificar que las contraseñas coincidan
+      
+      // 2.  Validar la contraseña y verificar que coincidan
+      this.validatePassword(data.password);
       if (data.password !== data.confirmPassword) {
         throw new HttpException(
           'Las contraseñas no coinciden.',
@@ -161,7 +175,11 @@ export class UserService {
    * @param newPassword - La nueva contraseña del usuario.
    * @returns Un mensaje de confirmación.
    */
-  async resetPassword(token: string, newPassword: string) {
+  async resetPassword(token: string, newPassword: string, confirmNewPassword: string) {
+    this.validatePassword(newPassword);
+    if (newPassword !== confirmNewPassword) {
+      throw new HttpException('Las contraseñas no coinciden', HttpStatus.BAD_REQUEST);
+    }
     const user = await this.prisma.user.findFirst({
       where: {
         resetPasswordToken: token,

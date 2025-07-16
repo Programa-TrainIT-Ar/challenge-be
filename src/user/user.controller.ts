@@ -155,7 +155,7 @@ export class UserController {
   })
   @HttpCode(HttpStatus.OK)
   async resetPassword(@Body() body: TokenWithPasswordDto) {
-    return this.userService.resetPassword(body.token, body.password);
+    return this.userService.resetPassword(body.token, body.password, body.confirmPassword);
   }
 
   @Post('send-email-confirmation')
