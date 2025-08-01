@@ -139,7 +139,7 @@ export class UserService {
    * @returns El usuario eliminado.
    */
   async remove(id: string) {
-    return this.prisma.user.delete({ where: { id } }); // Llama al método delete para eliminar el usuario por ID
+    return this.prisma.user.update({ where: { id }, data: { is_active: false } }); // cambia el estado del usuario a inactivo en lugar de eliminarlo físicamente
   }
   /**
    * Solicita el restablecimiento de contraseña para un usuario.
@@ -209,8 +209,8 @@ export class UserService {
 
   async sendEmailConfirmation(email: string) {
     const user = await this.prisma.user.findUnique({ where: { email } });
-    if (!user) {
-      throw new HttpException('Usuario no encontrado', HttpStatus.NOT_FOUND);
+    if (user.emailConfirmed) {
+      throw new HttpException('Email ya confirmado', HttpStatus.BAD_REQUEST);
     }
     user.emailConfirmationToken = crypto.randomBytes(32).toString('hex'); // Genera un token aleatorio
     await this.prisma.user.update({

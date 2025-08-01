@@ -160,7 +160,6 @@ export class UserController {
 
   @Post('send-email-confirmation')
   @ApiBearerAuth()
-  @UseGuards(AuthorizationGuard)
   @ApiOperation({ summary: 'Enviar confirmación de email' })
   @ApiBody({ type: EmailDto })
   @ApiResponse({
@@ -174,7 +173,6 @@ export class UserController {
 
   @Post('confirm-email')
   @ApiBearerAuth()
-  @UseGuards(AuthorizationGuard)
   @ApiOperation({ summary: 'Confirmar email' })
   @ApiBody({ type: TokenDto })
   @ApiResponse({

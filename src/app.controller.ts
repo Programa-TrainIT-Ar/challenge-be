@@ -1,4 +1,4 @@
-import { Controller, Get, UseGuards } from '@nestjs/common';
+import { Controller, Get, UseGuards, Request } from '@nestjs/common';
 import { AppService } from './app.service';
 import { AuthorizationGuard } from './authorization/authorization.guard';
 import { ApiBearerAuth } from '@nestjs/swagger'
@@ -15,7 +15,12 @@ export class AppController {
   @ApiBearerAuth()
   @UseGuards(AuthorizationGuard)
   @Get('/protected')
-  getProtected(): string {
+  getProtected(@Request() req): string {
+    console.log('=== DEBUG INFO ===');
+    console.log('Full request.user:', JSON.stringify(req.user, null, 2));
+    console.log('Type of user:', typeof req.user);
+    console.log('User keys:', Object.keys(req.user || {}));
+    console.log('==================');
     return this.appService.getPrivate();
   }
 }

@@ -7,18 +7,32 @@ export class RolesGuard implements CanActivate {
 
   canActivate(context: ExecutionContext): boolean {
     const requiredRoles = this.reflector.get<string[]>('roles', context.getHandler());
+    
     if (!requiredRoles) {
       return true; // Si no se requieren roles, permite el acceso
     }
 
     const request = context.switchToHttp().getRequest();
     const user = request.user; 
-
+    //const scope = 
+    
+    if (user && user.permissions) {
+      const hasRequiredPermissions = () => requiredRoles.some(role => user.permissions.includes(role));
+      if (!hasRequiredPermissions) {
+        throw new ForbiddenException('No tienes permiso para acceder a este recurso');
+      }
+    }
+    // Verifica que la consulta machine to machine tenga el scope requerido 
+    else if (user.scope) {
+      const scopes = user.scope.split(' ');
+      const hasRequiredScope = () => requiredRoles.some(role => scopes.includes(role));
+      if (!hasRequiredScope()) {
+        throw new ForbiddenException('No tienes el alcance para acceder a este recurso');
+      }
     // Verifica si el usuario tiene alguno de los roles requeridos
-    const hasRole = () => user && user.permissions && requiredRoles.some(role => user.permissions.includes(role));
-    if (!(user && hasRole())) {
-      throw new ForbiddenException('No tienes permiso para acceder a este recurso');
+    } else {
+      throw new ForbiddenException('Error en el token de acceso');
     }
     return true;
-  }
-}
+    }
+   }
