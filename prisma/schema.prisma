@@ -25,6 +25,7 @@ model User {
   last_login   DateTime?
   birthdate    DateTime?
   emailConfirmationToken String?
+  emailConfirmationExpires DateTime?
   emailConfirmed         Boolean   @default(false)
   resetPasswordToken     String?
   resetPasswordExpires   DateTime?

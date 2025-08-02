@@ -213,9 +213,10 @@ export class UserService {
       throw new HttpException('Email ya confirmado', HttpStatus.BAD_REQUEST);
     }
     user.emailConfirmationToken = crypto.randomBytes(32).toString('hex'); // Genera un token aleatorio
+    user.emailConfirmationExpires = new Date(Date.now() + 86400000); // Establece la expiración del token a 24 horas
     await this.prisma.user.update({
       where: { email },
-      data: { emailConfirmationToken: user.emailConfirmationToken },
+      data: { emailConfirmationToken: user.emailConfirmationToken, emailConfirmationExpires: user.emailConfirmationExpires },
     });
 
     // Enviar email de confirmación
@@ -228,6 +229,9 @@ export class UserService {
     const user = await this.prisma.user.findFirst({
       where: {
         emailConfirmationToken: token,
+        emailConfirmationExpires: {
+          gte: new Date(), // Verifica que el token no haya expirado
+        },
       },
     });
 
@@ -239,6 +243,7 @@ export class UserService {
       where: { id: user.id },
       data: {
         emailConfirmed: true, // Marca el email como confirmado
+        emailConfirmationExpires: null, // Limpia la fecha de expiración
         emailConfirmationToken: null, // Limpia el token de confirmación
       },
     });

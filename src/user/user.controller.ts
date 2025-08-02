@@ -158,7 +158,7 @@ export class UserController {
     return this.userService.resetPassword(body.token, body.password, body.confirmPassword);
   }
 
-  @Post('send-email-confirmation')
+  @Post('send-email-confirmation')// Endpoint para enviar confirmación de email
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Enviar confirmación de email' })
   @ApiBody({ type: EmailDto })
@@ -171,7 +171,7 @@ export class UserController {
     return this.userService.sendEmailConfirmation(body.email);
   }
 
-  @Post('confirm-email')
+  @Post('confirm-email')// Endpoint para confirmar email
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Confirmar email' })
   @ApiBody({ type: TokenDto })
