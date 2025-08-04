@@ -35,7 +35,7 @@ export class EmailService {
       from: 'Train IT <onboarding@resend.dev>',
       to: email,
       subject: 'Confirmación de Email',
-      html: `<p>Por favor, confirma tu email haciendo clic en el siguiente enlace: 
+      html: `<p> Por favor, confirma tu email haciendo clic en el siguiente enlace: 
       <a href="https://challenge-fe-development.netlify.app/register?token=abc123">Confirmar Email</a></p>
       `,
     };
