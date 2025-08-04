@@ -287,7 +287,10 @@ export class UserService {
     });
 
     if (!user) {
-      throw new HttpException('Token inválido', HttpStatus.BAD_REQUEST);
+      throw new HttpException(
+        'Token inválido o vencido',
+        HttpStatus.BAD_REQUEST,
+      );
     }
 
     await this.prisma.user.update({
@@ -299,6 +302,11 @@ export class UserService {
       },
     });
 
-    return { message: 'Email confirmado exitosamente' };
+    return {
+      message: 'Email confirmado exitosamente',
+      user_id: user.id,
+      email: user.email,
+      name: user.first_name,
+    };
   }
 }
