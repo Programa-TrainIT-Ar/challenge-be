@@ -276,28 +276,6 @@ export class UserService {
     return { message: 'Se ha enviado un email de confirmación' };
   }
 
-  async verifyToken(token: string) {
-    const user = await this.prisma.user.findFirst({
-      where: {
-        emailConfirmationToken: token,
-        emailConfirmationExpires: { gte: new Date() },
-      },
-    });
-
-    if (!user) {
-      throw new HttpException(
-        'Token inválido o expirado',
-        HttpStatus.BAD_REQUEST,
-      );
-    }
-
-    return {
-      message: 'Token válido',
-      name: user.first_name,
-      email: user.email,
-    };
-  }
-
   async confirmEmail(token: string) {
     const user = await this.prisma.user.findFirst({
       where: {
@@ -309,7 +287,10 @@ export class UserService {
     });
 
     if (!user) {
-      throw new HttpException('Token inválido o vencido', HttpStatus.BAD_REQUEST);
+      throw new HttpException(
+        'Token inválido o vencido',
+        HttpStatus.BAD_REQUEST,
+      );
     }
 
     await this.prisma.user.update({
@@ -321,11 +302,11 @@ export class UserService {
       },
     });
 
-    return { 
+    return {
       message: 'Email confirmado exitosamente',
       user_id: user.id,
       email: user.email,
-      name: user.first_name
+      name: user.first_name,
     };
   }
 }

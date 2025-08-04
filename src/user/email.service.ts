@@ -30,14 +30,14 @@ export class EmailService {
   }
 
   async sendEmailConfirmation(email: string, token: string) {
-    const confirmationUrl = `${this.configService.get('FRONTEND_URL')}/sign-up?token=${token}`;
+const confirmationUrl = `${this.configService.get('FRONTEND_URL')}/verify-email?token=${token}`;
     const mailOptions = {
       from: 'Train IT <onboarding@resend.dev>',
       to: email,
       subject: 'Confirmación de Email',
-      html: `<p> Por favor, confirma tu email haciendo clic en el siguiente enlace: 
-      <a href="https://challenge-fe-development.netlify.app/register?token=abc123">Confirmar Email</a></p>
-      `,
+      html: `<p>Por favor, confirma tu email haciendo clic en el siguiente enlace:
+      <a href="${confirmationUrl}">Confirmar Email</a>
+    </p>`,
     };
 
     try {

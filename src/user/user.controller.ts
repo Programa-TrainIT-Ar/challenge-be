@@ -70,7 +70,7 @@ export class UserController {
   @Roles('admin') // Solo permite a los administradores
   @ApiOperation({
     summary: 'Obtener todos los usuarios',
-    description: '🔒 **REQUIERE ROL DE ADMINISTRADOR** \n'
+    description: '🔒 **REQUIERE ROL DE ADMINISTRADOR** \n',
   }) // Resumen de la operación para Swagger
   @ApiResponse({ status: 200, description: 'Lista de usuarios.' }) // Respuesta esperada en caso de éxito
   async findAll() {
@@ -167,7 +167,7 @@ export class UserController {
     );
   }
 
-  @Post('send-email-confirmation') 
+  @Post('send-email-confirmation')
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Enviar confirmación de email' })
   @ApiBody({ type: EmailDto })
@@ -178,15 +178,6 @@ export class UserController {
   @HttpCode(HttpStatus.OK)
   async sendEmailConfirmation(@Body() body: EmailDto) {
     return this.userService.sendEmailConfirmation(body.email, body.first_name);
-  }
-
-  @Get('verify-token')
-  @ApiOperation({
-    summary: 'Obtener token de verificación',
-  })
-  @ApiResponse({ status: 200, description: 'token valido' })
-  async verifyToken(@Query('token') token: string) {
-    return this.userService.verifyToken(token);
   }
 
   @Post('confirm-email') // Endpoint para confirmar email
