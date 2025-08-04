@@ -276,28 +276,6 @@ export class UserService {
     return { message: 'Se ha enviado un email de confirmación' };
   }
 
-  async verifyToken(token: string) {
-    const user = await this.prisma.user.findFirst({
-      where: {
-        emailConfirmationToken: token,
-        emailConfirmationExpires: { gte: new Date() },
-      },
-    });
-
-    if (!user) {
-      throw new HttpException(
-        'Token inválido o expirado',
-        HttpStatus.BAD_REQUEST,
-      );
-    }
-
-    return {
-      message: 'Token válido',
-      name: user.first_name,
-      email: user.email,
-    };
-  }
-
   async confirmEmail(token: string) {
     const user = await this.prisma.user.findFirst({
       where: {
