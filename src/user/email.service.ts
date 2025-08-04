@@ -33,16 +33,18 @@ export class EmailService {
     const confirmationUrl = `${this.configService.get('FRONTEND_URL')}/sign-up?token=${token}`;
     const mailOptions = {
       from: 'Train IT <onboarding@resend.dev>',
-      to: email, 
-      subject: 'Confirmación de Email',                       
-      html: `<p>Por favor, confirma tu email haciendo clic en el siguiente enlace: ${confirmationUrl}</p>`,
+      to: email,
+      subject: 'Confirmación de Email',
+      html: `<p>Por favor, confirma tu email haciendo clic en el siguiente enlace: 
+      <a href="https://challenge-fe-development.netlify.app/register?token=abc123">Confirmar Email</a></p>
+      `,
     };
 
     try {
       const result = await this.resendClient.emails.send(mailOptions);
-      return { success: true, result }; 
+      return { success: true, result };
     } catch (error) {
-      return { success: false, error }; 
+      return { success: false, error };
     }
   }
 }
