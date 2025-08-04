@@ -12,10 +12,11 @@ import { EmailService } from './email.service';
 export class UserService {
   constructor(
     private readonly prisma: PrismaService,
-    private readonly emailService: EmailService
+    private readonly emailService: EmailService,
   ) {} // Inyección del servicio Prisma
 
-  private static REGEX_PASSWORD = /^(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]).{8,}$/; // Expresión regular para validar contraseñas
+  private static REGEX_PASSWORD =
+    /^(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]).{8,}$/; // Expresión regular para validar contraseñas
 
   private validatePassword(password: string): boolean {
     // Verifica si la contraseña cumple con los requisitos
@@ -38,7 +39,7 @@ export class UserService {
       if (existingUser) {
         throw new HttpException('El usuario ya existe.', HttpStatus.CONFLICT);
       }
-      
+
       // 2.  Validar la contraseña y verificar que coincidan
       this.validatePassword(data.password);
       if (data.password !== data.confirmPassword) {
@@ -139,7 +140,10 @@ export class UserService {
    * @returns El usuario eliminado.
    */
   async remove(id: string) {
-    return this.prisma.user.update({ where: { id }, data: { is_active: false } }); // cambia el estado del usuario a inactivo en lugar de eliminarlo físicamente
+    return this.prisma.user.update({
+      where: { id },
+      data: { is_active: false },
+    }); // cambia el estado del usuario a inactivo en lugar de eliminarlo físicamente
   }
   /**
    * Solicita el restablecimiento de contraseña para un usuario.
@@ -153,7 +157,7 @@ export class UserService {
     }
     user.resetPasswordToken = crypto.randomBytes(32).toString('hex'); // Genera un token aleatorio
     user.resetPasswordExpires = new Date(Date.now() + 3600000); // Establece la expiración del token a 1 hora
-    
+
     await this.prisma.user.update({
       where: { email },
       data: {
@@ -163,10 +167,12 @@ export class UserService {
     });
 
     // Enviar email con el enlace
-    await this.emailService.sendPasswordResetEmail(user.email, user.resetPasswordToken);
+    await this.emailService.sendPasswordResetEmail(
+      user.email,
+      user.resetPasswordToken,
+    );
 
     return { message: 'Si el email existe, recibirás un enlace de reseteo' };
-    
   }
 
   /**
@@ -175,10 +181,17 @@ export class UserService {
    * @param newPassword - La nueva contraseña del usuario.
    * @returns Un mensaje de confirmación.
    */
-  async resetPassword(token: string, newPassword: string, confirmNewPassword: string) {
+  async resetPassword(
+    token: string,
+    newPassword: string,
+    confirmNewPassword: string,
+  ) {
     this.validatePassword(newPassword);
     if (newPassword !== confirmNewPassword) {
-      throw new HttpException('Las contraseñas no coinciden', HttpStatus.BAD_REQUEST);
+      throw new HttpException(
+        'Las contraseñas no coinciden',
+        HttpStatus.BAD_REQUEST,
+      );
     }
     const user = await this.prisma.user.findFirst({
       where: {
@@ -190,7 +203,10 @@ export class UserService {
     });
 
     if (!user) {
-      throw new HttpException('Token inválido o expirado', HttpStatus.BAD_REQUEST);
+      throw new HttpException(
+        'Token inválido o expirado',
+        HttpStatus.BAD_REQUEST,
+      );
     }
 
     const hashedPassword = await bcrypt.hash(newPassword, 10); // Hashea la nueva contraseña
@@ -207,22 +223,84 @@ export class UserService {
     return { message: 'Contraseña restablecida exitosamente' };
   }
 
-  async sendEmailConfirmation(email: string) {
-    const user = await this.prisma.user.findUnique({ where: { email } });
-    if (user.emailConfirmed) {
-      throw new HttpException('Email ya confirmado', HttpStatus.BAD_REQUEST);
-    }
-    user.emailConfirmationToken = crypto.randomBytes(32).toString('hex'); // Genera un token aleatorio
-    user.emailConfirmationExpires = new Date(Date.now() + 86400000); // Establece la expiración del token a 24 horas
-    await this.prisma.user.update({
-      where: { email },
-      data: { emailConfirmationToken: user.emailConfirmationToken, emailConfirmationExpires: user.emailConfirmationExpires },
-    });
+  async sendEmailConfirmation(email: string, name: string) {
+    let user = await this.prisma.user.findUnique({ where: { email } });
 
-    // Enviar email de confirmación
-    await this.emailService.sendEmailConfirmation(user.email, user.emailConfirmationToken);
+    if (user && user.emailConfirmed) {
+      throw new HttpException(
+        'El correo ya ha sido confirmado.',
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+
+    const now = new Date();
+
+    // Si ya existe un token válido, no reenviar email
+    if (
+      user &&
+      user.emailConfirmationToken &&
+      user.emailConfirmationExpires &&
+      user.emailConfirmationExpires > now
+    ) {
+      return {
+        message:
+          'Ya se ha enviado un correo de confirmación. Revisa tu bandeja de entrada.',
+      };
+    }
+
+    const token = crypto.randomBytes(32).toString('hex');
+    const expires = new Date(now.getTime() + 2 * 60 * 1000); // 5 minutos
+
+    if (!user) {
+      user = await this.prisma.user.create({
+        data: {
+          email,
+          first_name: name,
+          emailConfirmed: false,
+          emailConfirmationToken: token,
+          emailConfirmationExpires: expires,
+        },
+      });
+    } else {
+      await this.prisma.user.update({
+        where: { email },
+        data: {
+          emailConfirmationToken: token,
+          emailConfirmationExpires: expires,
+        },
+      });
+    }
+
+    await this.emailService.sendEmailConfirmation(email, token);
+    
+    console.log(
+      'Calling emailService.sendEmailConfirmation with token:',
+      token,
+    ); // <-- Aquí
 
     return { message: 'Se ha enviado un email de confirmación' };
+  }
+
+  async verifyToken(token: string) {
+    const user = await this.prisma.user.findFirst({
+      where: {
+        emailConfirmationToken: token,
+        emailConfirmationExpires: { gte: new Date() },
+      },
+    });
+
+    if (!user) {
+      throw new HttpException(
+        'Token inválido o expirado',
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+
+    return {
+      message: 'Token válido',
+      name: user.first_name,
+      email: user.email,
+    };
   }
 
   async confirmEmail(token: string) {
