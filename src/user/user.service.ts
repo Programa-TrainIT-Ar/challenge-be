@@ -323,6 +323,7 @@ export class UserService {
 
     return { 
       message: 'Email confirmado exitosamente',
+      user_id: user.id,
       email: user.email,
       name: user.first_name
     };
