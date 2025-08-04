@@ -272,12 +272,7 @@ export class UserService {
     }
 
     await this.emailService.sendEmailConfirmation(email, token);
-    
-    console.log(
-      'Calling emailService.sendEmailConfirmation with token:',
-      token,
-    ); // <-- Aquí
-
+    console.log('Correo de confirmación enviado a:', email);
     return { message: 'Se ha enviado un email de confirmación' };
   }
 

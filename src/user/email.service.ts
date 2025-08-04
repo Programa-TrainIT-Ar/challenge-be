@@ -34,15 +34,15 @@ export class EmailService {
     const mailOptions = {
       from: 'Train IT <onboarding@resend.dev>',
       to: email, 
-      subject: 'Confirmación de Email',
+      subject: 'Confirmación de Email',                       
       html: `<p>Por favor, confirma tu email haciendo clic en el siguiente enlace: ${confirmationUrl}</p>`,
     };
 
     try {
       const result = await this.resendClient.emails.send(mailOptions);
-      return { success: true, result }; // <-- 🔥 Asegura que el método retorne algo útil
+      return { success: true, result }; 
     } catch (error) {
-      return { success: false, error }; // <-- 🔥 Y en caso de error, también algo útil
+      return { success: false, error }; 
     }
   }
 }
