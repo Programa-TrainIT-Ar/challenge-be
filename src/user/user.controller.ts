@@ -13,7 +13,13 @@ import {
   HttpCode,
 } from '@nestjs/common';
 import { UserService } from './user.service';
-import { ApiTags, ApiOperation, ApiResponse, ApiBody, ApiBearerAuth } from '@nestjs/swagger';
+import {
+  ApiTags,
+  ApiOperation,
+  ApiResponse,
+  ApiBody,
+  ApiBearerAuth,
+} from '@nestjs/swagger';
 import { AuthorizationGuard } from 'src/authorization/authorization.guard';
 import { CreateUserDto } from './dto/create-user.dto';
 import { EmailDto, TokenDto, TokenWithPasswordDto } from './dto/base.dto';
@@ -62,10 +68,10 @@ export class UserController {
   @ApiBearerAuth()
   @UseGuards(AuthorizationGuard, RolesGuard) // Requiere autorización y verificación de roles
   @Roles('admin') // Solo permite a los administradores
-  @ApiOperation({ 
+  @ApiOperation({
     summary: 'Obtener todos los usuarios',
     description: '🔒 **REQUIERE ROL DE ADMINISTRADOR** \n'
-   }) // Resumen de la operación para Swagger
+  }) // Resumen de la operación para Swagger
   @ApiResponse({ status: 200, description: 'Lista de usuarios.' }) // Respuesta esperada en caso de éxito
   async findAll() {
     return this.userService.findAll(); // Llama al servicio para obtener todos los usuarios
@@ -74,10 +80,10 @@ export class UserController {
   @Get('FindByEmail')
   @ApiOperation({ summary: 'Buscar usuario por email' })
   @ApiResponse({
-      status: 201,
-      description: 'Usuario encontrado.',
-      type: UserEntity
-    })
+    status: 201,
+    description: 'Usuario encontrado.',
+    type: UserEntity,
+  })
   @ApiResponse({ status: 404, description: 'Usuario no encontrado.' })
   async findByEmail(@Query('email') email: string) {
     try {
@@ -106,10 +112,7 @@ export class UserController {
   @ApiOperation({ summary: 'Actualizar un usuario por ID' })
   @ApiResponse({ status: 200, description: 'Usuario actualizado.' })
   @ApiResponse({ status: 404, description: 'Usuario no encontrado.' })
-  async update(
-    @Param('id') id: string,
-    @Body() data: CreateUserDto,
-  ) {
+  async update(@Param('id') id: string, @Body() data: CreateUserDto) {
     return this.userService.update(id, data); // Llama al servicio para actualizar el usuario por ID
   }
 
@@ -122,9 +125,10 @@ export class UserController {
   @ApiBearerAuth()
   @UseGuards(AuthorizationGuard, RolesGuard) // Requiere autorización y verificación de roles
   @Roles('admin') // Solo permite a los administradores
-  @ApiOperation({ summary: 'Eliminar un usuario por ID',
-    description: '🔒 **REQUIERE ROL DE ADMINISTRADOR** \n'
-   }) // Resumen de la operación para Swagger
+  @ApiOperation({
+    summary: 'Eliminar un usuario por ID',
+    description: '🔒 **REQUIERE ROL DE ADMINISTRADOR** \n',
+  }) // Resumen de la operación para Swagger
   @ApiResponse({ status: 200, description: 'Usuario eliminado.' })
   @ApiResponse({ status: 404, description: 'Usuario no encontrado.' })
   async remove(@Param('id') id: string) {
@@ -133,13 +137,14 @@ export class UserController {
       message: 'Usuario eliminado exitosamente.',
     };
   }
- 
+
   @Post('forgot-password') // Endpoint para solicitar restablecimiento de contraseña
   @ApiOperation({ summary: 'Solicitar restablecimiento de contraseña' })
   @ApiBody({ type: EmailDto }) // Define el cuerpo de la solicitud
   @ApiResponse({
     status: 200,
-    description: 'Si el email existe, se enviará un enlace de restablecimiento.',
+    description:
+      'Si el email existe, se enviará un enlace de restablecimiento.',
   })
   @HttpCode(HttpStatus.OK)
   async forgotPassword(@Body() body: EmailDto) {
@@ -155,10 +160,14 @@ export class UserController {
   })
   @HttpCode(HttpStatus.OK)
   async resetPassword(@Body() body: TokenWithPasswordDto) {
-    return this.userService.resetPassword(body.token, body.password, body.confirmPassword);
+    return this.userService.resetPassword(
+      body.token,
+      body.password,
+      body.confirmPassword,
+    );
   }
 
-  @Post('send-email-confirmation')// Endpoint para enviar confirmación de email
+  @Post('send-email-confirmation') 
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Enviar confirmación de email' })
   @ApiBody({ type: EmailDto })
@@ -168,10 +177,19 @@ export class UserController {
   })
   @HttpCode(HttpStatus.OK)
   async sendEmailConfirmation(@Body() body: EmailDto) {
-    return this.userService.sendEmailConfirmation(body.email);
+    return this.userService.sendEmailConfirmation(body.email, body.first_name);
   }
 
-  @Post('confirm-email')// Endpoint para confirmar email
+  @Get('verify-token')
+  @ApiOperation({
+    summary: 'Obtener token de verificación',
+  })
+  @ApiResponse({ status: 200, description: 'token valido' })
+  async verifyToken(@Query('token') token: string) {
+    return this.userService.verifyToken(token);
+  }
+
+  @Post('confirm-email') // Endpoint para confirmar email
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Confirmar email' })
   @ApiBody({ type: TokenDto })
