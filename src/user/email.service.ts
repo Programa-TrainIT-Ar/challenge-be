@@ -5,9 +5,20 @@ import { Resend } from 'resend';
 @Injectable()
 export class EmailService {
   private resendClient: Resend;
+  private resendAudience: string = this.configService.get('RESEND_AUDIENCE');
+  
   constructor(private configService: ConfigService) {
     this.resendClient = new Resend(this.configService.get('RESEND_API'));
   }
+  async addContact(email: string) {
+    resend.contacts.create({
+      email: mail,
+      unsubscribed: false,
+      audienceId: resendAudience,
+    });
+    console.log('Contacto agregado')
+  }
+  
   async sendPasswordResetEmail(email: string, token: string) {
     const resetUrl = `${this.configService.get('FRONTEND_URL')}/reset-password?token=${token}`;
     const mailOptions = {
