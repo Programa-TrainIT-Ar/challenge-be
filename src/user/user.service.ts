@@ -227,15 +227,15 @@ export class UserService {
     let user = await this.prisma.user.findUnique({ where: { email } });
 
     if (user && user.emailConfirmed) {
-      throw new HttpException(
-        'El correo ya ha sido confirmado.',
-        HttpStatus.BAD_REQUEST,
-      );
+      // Ya confirmado → login
+      return {
+        action: 'login',
+        message: 'El correo ya ha sido confirmado. Inicia sesión.',
+      };
     }
 
     const now = new Date();
 
-    // Si ya existe un token válido, no reenviar email
     if (
       user &&
       user.emailConfirmationToken &&
@@ -243,13 +243,14 @@ export class UserService {
       user.emailConfirmationExpires > now
     ) {
       return {
+        action: 'pending',
         message:
-          'Ya se ha enviado un correo de confirmación. Revisa tu bandeja de entrada.',
+          'Ya se ha enviado un correo de confirmación. Revisa tu bandeja.',
       };
     }
 
     const token = crypto.randomBytes(32).toString('hex');
-    const expires = new Date(now.getTime() + 2 * 60 * 1000); // 5 minutos
+    const expires = new Date(now.getTime() + 60 * 60 * 1000); 
 
     if (!user) {
       user = await this.prisma.user.create({
@@ -273,7 +274,10 @@ export class UserService {
 
     await this.emailService.sendEmailConfirmation(email, token);
     console.log('Correo de confirmación enviado a:', email);
-    return { message: 'Se ha enviado un email de confirmación' };
+    return {
+      action: 'verification_sent',
+      message: 'Se ha enviado un email de confirmación',
+    };
   }
 
   async confirmEmail(token: string) {

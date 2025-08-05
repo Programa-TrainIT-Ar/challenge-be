@@ -30,7 +30,7 @@ export class EmailService {
   }
 
   async sendEmailConfirmation(email: string, token: string) {
-const confirmationUrl = `${this.configService.get('FRONTEND_URL')}/verify-email?token=${token}`;
+    const confirmationUrl = `${this.configService.get('FRONTEND_URL')}/verify-email?token=${token}`;
     const mailOptions = {
       from: 'Train IT <onboarding@resend.dev>',
       to: email,
