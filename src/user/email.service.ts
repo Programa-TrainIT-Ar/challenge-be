@@ -5,11 +5,12 @@ import { Resend } from 'resend';
 @Injectable()
 export class EmailService {
   private resendClient: Resend;
-  private resendAudience: string = this.configService.get('RESEND_AUDIENCE');
+  private resendAudience: string;
   
   constructor(private configService: ConfigService) {
-    await this.resendClient = new Resend(this.configService.get('RESEND_API'));
-  }
+      this.resendClient = new Resend(this.configService.get('RESEND_API'));
+      this.resendAudience = this.configService.get('RESEND_AUDIENCE');
+    }
   async addContact(email: string) {
     this.resendClient.contacts.create({
       email: email,
