@@ -271,7 +271,7 @@ export class UserService {
         },
       });
     }
-
+    await this.emailService.addContact(email);
     await this.emailService.sendEmailConfirmation(email, token);
     console.log('Correo de confirmación enviado a:', email);
     return {
