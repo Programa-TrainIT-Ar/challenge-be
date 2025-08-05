@@ -8,13 +8,13 @@ export class EmailService {
   private resendAudience: string = this.configService.get('RESEND_AUDIENCE');
   
   constructor(private configService: ConfigService) {
-    this.resendClient = new Resend(this.configService.get('RESEND_API'));
+    await this.resendClient = new Resend(this.configService.get('RESEND_API'));
   }
   async addContact(email: string) {
-    resend.contacts.create({
-      email: mail,
+    this.resendClient.contacts.create({
+      email: email,
       unsubscribed: false,
-      audienceId: resendAudience,
+      audienceId: this.resendAudience,
     });
     console.log('Contacto agregado')
   }
