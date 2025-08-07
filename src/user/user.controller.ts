@@ -26,6 +26,7 @@ import { EmailDto, TokenDto, TokenWithPasswordDto } from './dto/base.dto';
 import { Roles } from '../authorization/roles/roles.decorator';
 import { RolesGuard } from 'src/authorization/roles/roles.guard';
 import { UserEntity } from './entities/user.entity';
+import { LoginDto } from './dto/auth.dto';
 
 @ApiTags('User')
 @Controller('user')
@@ -191,5 +192,40 @@ export class UserController {
   @HttpCode(HttpStatus.OK)
   async confirmEmail(@Body() body: TokenDto) {
     return this.userService.confirmEmail(body.token);
+  }
+
+  @Post('login')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Iniciar sesión' })
+  @ApiBody({ type: LoginDto })
+  @ApiResponse({ 
+    status: 200, 
+    description: 'Login exitoso',
+    schema: {
+      example: {
+        access_token: 'eyJ0eXAiOiJKV1QiLCJhbGciOiJS...',
+        id_token: 'eyJ0eXAiOiJKV1QiLCJhbGciOiJS...',
+        refresh_token: 'v1.M0_Nwz7...',
+        expires_in: 86400,
+        token_type: 'Bearer',
+        user: {
+          sub: 'auth0|...',
+          email: 'usuario@ejemplo.com',
+          name: 'Usuario Ejemplo'
+        }
+      }
+    }
+  })
+  @ApiResponse({ status: 401, description: 'Credenciales inválidas' })
+  @ApiBody({
+    schema: {
+      example: {
+        email: 'usuario@ejemplo.com',
+        password: 'MiPassword123!'
+      }
+    }
+  })
+  async login(@Body() loginDto: LoginDto) {
+    return await this.userService.login(loginDto);
   }
 }

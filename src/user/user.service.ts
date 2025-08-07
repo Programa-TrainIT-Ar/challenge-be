@@ -4,15 +4,20 @@ import { PrismaService } from 'src/prisma/prisma.service'; // Importa el servici
 import { CreateUserDto } from './dto/create-user.dto';
 import { HttpException } from '@nestjs/common';
 import { HttpStatus } from '@nestjs/common';
+import { HttpService } from '@nestjs/axios'; // Importa el servicio HTTP para realizar peticiones externas
 import * as crypto from 'crypto'; // Importa el módulo crypto para generar tokens
 import * as bcrypt from 'bcrypt'; // Importa el módulo bcrypt para hashear contraseñas
 import { EmailService } from './email.service';
+import { LoginDto } from './dto/auth.dto';
+import { ConfigService } from '@nestjs/config';
 
 @Injectable() // Decorador que marca esta clase como un servicio que puede ser inyectado
 export class UserService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly emailService: EmailService,
+    private readonly configService: ConfigService,
+    private readonly httpService: HttpService, // Inyecta el servicio HTTP para realizar peticiones externas
   ) {} // Inyección del servicio Prisma
 
   private static REGEX_PASSWORD =
@@ -271,9 +276,8 @@ export class UserService {
         },
       });
     }
-    await this.emailService.addContact(email);
+    // Enviar correo de confirmación
     await this.emailService.sendEmailConfirmation(email, token);
-    console.log('Correo de confirmación enviado a:', email);
     return {
       action: 'verification_sent',
       message: 'Se ha enviado un email de confirmación',
@@ -312,5 +316,33 @@ export class UserService {
       email: user.email,
       name: user.first_name,
     };
+  }
+
+  async login(loginDto: LoginDto) {
+    
+    const { email, password } = loginDto;
+    console.log('Login attempt for email:', email);
+    const domain = this.configService.get<string>('AUTH0_DOMAIN');
+    const clientId = this.configService.get<string>('CLIENT_ID');
+    const clientSecret = this.configService.get<string>('CLIENT_SECRET');
+    const audience = this.configService.get<string>('AUTH0_AUDIENCE');
+    if (!domain || !clientId || !clientSecret || !audience) {
+      throw new HttpException('Configuración de autenticación no encontrada', HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+    const body = {
+      grant_type: "password",
+      username: email,
+      password,
+      audience,
+      scope: 'admin',
+      client_id: clientId,
+      client_secret: clientSecret,
+    };
+
+    const response = await this.httpService
+      .post(`https://${domain}/oauth/token`, body)
+      .toPromise();
+
+    return response.data;
   }
 }
