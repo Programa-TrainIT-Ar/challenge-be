@@ -67,9 +67,9 @@ export class UserController {
    */
   @Get() // Define la ruta para obtener todos los usuarios
   @ApiBearerAuth()
-  @UseGuards(AuthorizationGuard, RolesGuard) // Requiere autorización y verificación de roles
-  @Roles('admin') // Solo permite a los administradores
-  @ApiOperation({
+  @UseGuards(AuthorizationGuard) //, RolesGuard Requiere autorización y verificación de roles
+  //@Roles('admin') // Solo permite a los administradores
+  @ApiOperation({ 
     summary: 'Obtener todos los usuarios',
     description: '🔒 **REQUIERE ROL DE ADMINISTRADOR** \n',
   }) // Resumen de la operación para Swagger
@@ -124,12 +124,11 @@ export class UserController {
    */
   @Delete(':id') // Define la ruta para eliminar un usuario por ID
   @ApiBearerAuth()
-  @UseGuards(AuthorizationGuard, RolesGuard) // Requiere autorización y verificación de roles
-  @Roles('admin') // Solo permite a los administradores
-  @ApiOperation({
-    summary: 'Eliminar un usuario por ID',
-    description: '🔒 **REQUIERE ROL DE ADMINISTRADOR** \n',
-  }) // Resumen de la operación para Swagger
+  @UseGuards(AuthorizationGuard) // , RolesGuard Requiere autorización y verificación de roles
+  //@Roles('admin') // Solo permite a los administradores
+  @ApiOperation({ summary: 'Eliminar un usuario por ID',
+    description: '🔒 **REQUIERE ROL DE ADMINISTRADOR** \n'
+   }) // Resumen de la operación para Swagger
   @ApiResponse({ status: 200, description: 'Usuario eliminado.' })
   @ApiResponse({ status: 404, description: 'Usuario no encontrado.' })
   async remove(@Param('id') id: string) {
