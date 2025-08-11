@@ -315,6 +315,7 @@ export class UserService {
       user_id: user.id,
       email: user.email,
       name: user.first_name,
+      emailConfirmed: true,
     };
   }
 
