@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Recuperar contraseña</title>
+</head>
+<body style="margin:0; padding:0; background-color:#272727ec; font-family:'Poppins', Arial, sans-serif; color:#ffffff;">
+  
+  <table align="center" width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#272727ec;">
+    <tr>
+      <td align="center">
+        
+        <!-- Container -->
+        <table align="center" width="800" cellpadding="0" cellspacing="0" border="0" style="max-width:800px; background-color:transparent;">
+          
+          <!-- DotTop -->
+          <tr>
+            <td align="left" style="padding-top:20px;">
+              <img src="https://my-api-s3-files.s3.us-east-1.amazonaws.com/images/Dots.png" width="120" height="auto" alt="Decoración superior" style="display:block;">
+            </td>
+          </tr>
+
+          <!-- Logo -->
+          <tr>
+            <td align="center" style="padding: 5px 0;">
+              <img src="https://my-api-s3-files.s3.us-east-1.amazonaws.com/images/trainit.png" width="120" height="auto" alt="Trainit logo" style="display:block;">
+            </td>
+          </tr>
+
+          <!-- Contenido principal -->
+          <tr>
+            <td align="left" style="padding: 20px; font-size:16px; line-height:1.5; color:#ffffff;">
+              <h3 style="font-size:24px; font-weight:600; margin:10px 0; color:#ffffff;">Estimado {{name}}</h3>
+              <p style="margin:10px 0; color:#ffffff;">Puede cambiar su contraseña haciendo click en el siguiente enlace:</p>
+              <a href="{{recoverUrl}}" style="color:#ff5ea6; text-decoration:underline; font-size:16px; cursor: pointer;">URL</a>
+              <p style="margin:10px 0; color:#ffffff;">Este enlace es válido por 24 horas</p>
+            </td>
+          </tr>
+
+          <!-- Nota -->
+          <tr>
+            <td align="center" style="padding: 20px;">
+              <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#708de34d; border-radius:10px; margin-bottom: 30px;">
+                <tr>
+                  <td align="center" style="padding: 10px; font-size:14px; color:#ffffff;">
+                    <span style="color:#ff5ea6; font-weight:400;">Challenge TrainIt</span> es una herramienta que permite formar parte del Programa Trainit.
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+
+          <!-- DotBottom -->
+          <tr>
+            <td align="right" style="padding-bottom:20px;">
+              <img src="https://my-api-s3-files.s3.us-east-1.amazonaws.com/images/Dots_down.png" width="120" height="auto" alt="Decoración inferior" style="display:block; transform:rotate(180deg);">
+            </td>
+          </tr>
+
+        </table>
+
+      </td>
+    </tr>
+  </table>
+
+</body>
+</html>
