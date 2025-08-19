@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Confirmación de Email</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  </head>
+  <body style="margin:0; padding:0; background-color:#272727ec; font-family:'Poppins', Arial, sans-serif; color:white;">
+    <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#272727ec;">
+      <tr>
+        <td align="center">
+
+          <table width="1000" cellpadding="0" cellspacing="0" border="0" style="background-color:#272727ec; max-width:1000px;">
+            <tr>
+              <td style="position:relative;">
+
+                <!-- DotsTop -->
+                <img src="https://my-api-s3-files.s3.us-east-1.amazonaws.com/images/Dots.png" 
+                     alt="Decoración superior" 
+                     width="120" 
+                     style="display:block; position:absolute; top:0; left:0;">
+
+                <!-- Logo -->
+                <table align="center" cellpadding="0" cellspacing="0" border="0" style="margin-top:30px;">
+                  <tr>
+                    <td align="center">
+                      <img src="https://my-api-s3-files.s3.us-east-1.amazonaws.com/images/trainit.png" 
+                           alt="TrainIT Logo" 
+                           width="100" 
+                           style="display:block;">
+                    </td>
+                  </tr>
+                </table>
+
+                <!-- Info -->
+                <table align="center" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-top:30px; max-width: 80%;">
+                  <tr>
+                    <td style="padding:0 20px; text-align:left;">
+                      <h3 style="font-size:24px; font-weight:600; margin:10px 0; color:white;">Estimado {{name}}</h3>
+                      <p style="font-size:16px; margin:10px 0; color:white;">
+                        Antes de que puedas comenzar con nosotros, necesitamos verificar tu correo.
+                      </p>
+                    </td>
+                  </tr>
+
+                  <tr>
+                    <td align="center" style="padding:20px;">
+                      <a href="{{confirmationUrl}}" 
+                         style="background: linear-gradient(45deg, #572eff, #ff5ea6); padding:12px 25px; border-radius:8px; font-size:16px; font-weight:500; color:white; text-decoration:none; display:inline-block;">
+                        Confirmar cuenta
+                      </a>
+                    </td>
+                  </tr>
+
+                  <tr>
+                    <td style="padding:0 20px; text-align:center; color:white;">
+                      <p style="font-size:16px; margin:10px 0;">Si el botón no funciona, ¡No te preocupes!</p>
+                      <p style="font-size:16px; margin:10px 0;">Copia y pega el siguiente enlace en tu navegador:</p>
+                      <a href="{{confirmationUrl}}" style="color:#ff5ea6; text-decoration:underline;">Enlace aquí</a>
+                      <p style="font-size:14px; margin:10px 0;">
+                        Si no has solicitado una cuenta en TrainIT, por favor, ignora este correo.
+                      </p>
+                    </td>
+                  </tr>
+
+                  <!-- Nota -->
+                  <tr>
+                    <td style="padding:15px; background-color:rgba(112,141,227,0.3); border-radius:10px; text-align:center; margin-top:20px;">
+                      <p style="margin:0; font-size:14px; color:white;">
+                        <span style="color:#ff5ea6;">Challenge TrainIt</span> es una herramienta que permite formar parte del Programa Trainit.
+                      </p>
+                    </td>
+                  </tr>
+                </table>
+
+                <!-- DotsBottom -->
+                <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-top:30px;">
+                  <tr>
+                    <td align="right">
+                      <img src="https://my-api-s3-files.s3.us-east-1.amazonaws.com/images/Dots_down.png" 
+                           alt="Decoración inferior" 
+                           width="120" 
+                           style="display:block;">
+                    </td>
+                  </tr>
+                </table>
+
+              </td>
+            </tr>
+          </table>
+
+        </td>
+      </tr>
+    </table>
+  </body>
+</html>

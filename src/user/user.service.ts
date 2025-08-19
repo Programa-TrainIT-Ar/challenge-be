@@ -277,7 +277,7 @@ export class UserService {
       });
     }
     // Enviar correo de confirmación
-    await this.emailService.sendEmailConfirmation(email, token);
+    await this.emailService.sendEmailConfirmation(email, name, token);
     return {
       action: 'verification_sent',
       message: 'Se ha enviado un email de confirmación',
