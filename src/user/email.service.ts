@@ -70,7 +70,7 @@ export class EmailService {
             
             let htmlContent = fs.readFileSync(templatePath, 'utf8');
 
-            const confirmationUrl = `${this.configService.get('FRONTEND_URL')}/confirm-email?token=${token}`;
+            const confirmationUrl = `${this.configService.get('FRONTEND_URL')}/verify-email?token=${token}`;
             // const confirmationUrl = `${this.configService.get('FRONTEND_URL')}/sign-up?token=${token}`;
 
             htmlContent = htmlContent
