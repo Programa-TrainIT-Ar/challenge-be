@@ -23,9 +23,17 @@ export class PrismaExceptionFilter extends BaseExceptionFilter {
       //error cuando se intenta duplicar campo unico
       case 'P2002': {
         const status = HttpStatus.BAD_REQUEST;
+        
+        const targets = exception.meta?.target as string[];
+        let message = 'Unique constraint failed';
+        
+        if (targets?.includes('name') && targets?.includes('module_id')) {
+          message = 'Ya existe una célula con ese nombre en este módulo';
+        }
+        
         response.status(status).json({
           statusCode: status,
-          message: 'Unique constraint failed',
+          message,
         });
         break;
       }
