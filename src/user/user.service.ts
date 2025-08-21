@@ -364,15 +364,20 @@ export class UserService {
       username: email,
       password,
       audience,
-      scope: 'admin',
+      scope: 'openid',
       client_id: clientId,
       client_secret: clientSecret,
     };
 
-    const response = await this.httpService
-      .post(`https://${domain}/oauth/token`, body)
-      .toPromise();
-
-    return response.data;
+    this.httpService.post(`https://${domain}/oauth/token`, body).subscribe({
+      next: (res) => {
+        console.log('Login successful:', res.data);
+        return res.data;
+      },
+      error: (err) => {
+        console.error('Login failed:', err);
+        throw new HttpException('Error de inicio de sesión', HttpStatus.UNAUTHORIZED);
+      },
+    });
   }
 }

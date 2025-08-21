@@ -1,9 +1,12 @@
-import { Controller, Get, Post, Body, Put, Param, Delete, Query } from '@nestjs/common';
+import { Controller, Get, Post, Body, Put, Param, Delete, Query, UseGuards } from '@nestjs/common';
 import { QuizService } from './quiz.service';
 import { CreateQuizDto, CreateQuizNestedDto } from './dto/create-quiz.dto'; 
 import { UpdateQuizDto, UpdateQuizNestedDto } from './dto/update-quiz.dto';
-import { ApiCreatedResponse, ApiOkResponse, ApiTags, ApiQuery, ApiResponse } from '@nestjs/swagger';
+import { ApiCreatedResponse, ApiOkResponse, ApiTags, ApiQuery, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
 import { QuizEntity, QuizEntityNested, QuizEntityQuestion } from './entities/quiz.entity';
+import { Roles } from 'src/authorization/roles/roles.decorator';
+import { AuthorizationGuard } from 'src/authorization/authorization.guard';
+import { RolesGuard } from 'src/authorization/roles/roles.guard';
 
 @ApiTags('Quiz')
 @Controller('quiz')
@@ -11,6 +14,9 @@ export class QuizController {
   constructor(private readonly quizService: QuizService) {}
 
   @Get()
+  @ApiBearerAuth()
+  @UseGuards(AuthorizationGuard) // Requiere autorización y verificación de roles
+  //@Roles('admin') // Solo permite a los administradores
   @ApiQuery({ name: 'search', required: false, type: String })
   @ApiQuery({ name: 'seniority', required: false, type: String, enum: ['trainee', 'junior', 'middle', 'senior']})
   @ApiQuery({ name: 'cell', required: false, type: String })

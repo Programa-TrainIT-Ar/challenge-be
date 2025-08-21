@@ -123,6 +123,7 @@ model Cell {
   updated_at DateTime? @updatedAt
 
   quizzes     Quiz[]     
+  @@unique([name, module_id])
 }
 
 model Quiz {
