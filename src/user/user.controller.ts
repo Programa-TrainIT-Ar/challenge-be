@@ -61,6 +61,34 @@ export class UserController {
     }
   }
 
+    //registra un nuevo usuario
+  @Post('register-with-auth')
+  @ApiOperation({ summary: 'Registrar un nuevo usuario con autenticación de terceros' })
+  @ApiResponse({
+    status: 201,
+    description: 'Usuario registrado exitosamente.',
+    type: UserEntity,
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Error al registrar el usuario.',
+  })
+  async registerWithAuth(@Body() createUserDto: CreateUserDto) {
+    try {
+      const user = await this.userService.registerWithAuth(createUserDto);
+      return {
+        statusCode: 201,
+        message: 'Usuario registrado exitosamente.',
+        user,
+      };
+    } catch (error) {
+      throw new HttpException(
+        error.message || 'Error al registrar el usuario.',
+        error.status || HttpStatus.BAD_REQUEST,
+      );
+    }
+  }
+
   /**
    * Obtiene todos los usuarios.
    * @returns Una lista de usuarios.
