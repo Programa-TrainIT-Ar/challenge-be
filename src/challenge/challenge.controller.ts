@@ -28,7 +28,7 @@ export class ChallengeController {
   @Get()
   @ApiOkResponse({ description: 'Lista de  challenges devuelta exitosamente.' })
   @ApiNotFoundResponse({ description: 'Ningún challenge encontrado.' })
-  @ApiQuery({ name: 'search', required: false, description: 'Search term for user details' })
+  @ApiQuery({ name: 'search', required: false, description: 'Filtra por first_name o last_name del usuario' })
   @ApiQuery({ name: 'cell', required: false, description: 'Filtrar nombre de célula' })
   @ApiQuery({ name: 'seniority', required: false, description: 'Filtrar por seniority del quiz' })
   @ApiQuery({ name: 'module', required: false, description: 'Filtrar por nombre de módulo' })
@@ -40,7 +40,7 @@ export class ChallengeController {
 
   @Get(':id')
   findOne(@Param('id') id: string) {
-    return this.challengeService.findOne(+id);
+    return this.challengeService.findOne(id);
   }
 
   @Patch(':id')
@@ -48,11 +48,11 @@ export class ChallengeController {
     @Param('id') id: string,
     @Body() updateChallengeDto: UpdateChallengeDto,
   ) {
-    return this.challengeService.update(+id, updateChallengeDto);
+    return this.challengeService.update(id, updateChallengeDto);
   }
 
   @Delete(':id')
   remove(@Param('id') id: string) {
-    return this.challengeService.remove(+id);
+    return this.challengeService.remove(id);
   }
 }

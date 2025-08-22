@@ -86,15 +86,15 @@ export class ChallengeService {
     return { challenges, total };
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} challenge`;
+  findOne(id: string) {
+    return this.prisma.challenge.findUnique({ where: { id } });
   }
 
-  update(id: number, updateChallengeDto: UpdateChallengeDto) {
-    return `This action updates a #${id} challenge`;
+  update(id: string, data: UpdateChallengeDto) {
+    return this.prisma.challenge.update({ where: { id }, data });
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} challenge`;
+  remove(id: string) {
+    return this.prisma.challenge.delete({ where: { id } });
   }
 }
