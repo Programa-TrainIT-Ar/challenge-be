@@ -10,6 +10,7 @@ import * as bcrypt from 'bcrypt'; // Importa el módulo bcrypt para hashear cont
 import { EmailService } from './email.service';
 import { LoginDto } from './dto/auth.dto';
 import { ConfigService } from '@nestjs/config';
+import { firstValueFrom } from 'rxjs';
 
 @Injectable() // Decorador que marca esta clase como un servicio que puede ser inyectado
 export class UserService {
@@ -21,7 +22,7 @@ export class UserService {
   ) {} // Inyección del servicio Prisma
 
   private static REGEX_PASSWORD =
-    /^(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]).{8,}$/; // Expresión regular para validar contraseñas
+    /^(?=.*[A-Z])(?=.*[a-z])(?=.*\d)(?=.*[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]).{8,}$/; // Expresión regular para validar contraseñas
 
   private validatePassword(password: string): boolean {
     // Verifica si la contraseña cumple con los requisitos
@@ -46,6 +47,7 @@ export class UserService {
       }
 
       // 2.  Validar la contraseña y verificar que coincidan
+
       this.validatePassword(data.password);
       if (data.password !== data.confirmPassword) {
         throw new HttpException(
@@ -65,6 +67,34 @@ export class UserService {
           last_name: data.last_name,
           phone_number: data.phone_number,
           password: hashedPassword,
+        },
+      });
+
+      // 5. Retornar al usuario sin la contraseña
+      const { password, ...userWithoutPassword } = newUser;
+      return userWithoutPassword;
+    } catch (error) {
+      console.error('Error en registro de usuario:', error);
+      throw new HttpException(
+        error.message || 'Error al registrar el usuario',
+        error.status || HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
+
+  async registerWithAuth(data: CreateUserDto) {
+    try {
+      const newUser = await this.prisma.user.create({
+        data: {
+          email: data.email,
+          first_name: data.first_name,
+          last_name: data.last_name,
+          phone_number: data.phone_number,
+          birthdate: data.birthdate,
+          gender: data.gender,
+          photo: data.photo,
+          timezone: data.timezone,
+          emailConfirmed: true,
         },
       });
 
@@ -277,7 +307,7 @@ export class UserService {
       });
     }
     // Enviar correo de confirmación
-    await this.emailService.sendEmailConfirmation(email, token);
+    await this.emailService.sendEmailConfirmation(email, name, token);
     return {
       action: 'verification_sent',
       message: 'Se ha enviado un email de confirmación',
@@ -315,6 +345,7 @@ export class UserService {
       user_id: user.id,
       email: user.email,
       name: user.first_name,
+      emailConfirmed: true,
     };
   }
 
@@ -334,15 +365,16 @@ export class UserService {
       username: email,
       password,
       audience,
-      scope: 'admin',
+      scope: 'openid',
       client_id: clientId,
       client_secret: clientSecret,
     };
 
-    const response = await this.httpService
-      .post(`https://${domain}/oauth/token`, body)
-      .toPromise();
-
-    return response.data;
+    try {
+      const response = await firstValueFrom(this.httpService.post(`https://${domain}/oauth/token`, body))
+      return response.data;
+    } catch (err) {
+        throw new HttpException('Las credenciales son inválidas', HttpStatus.UNAUTHORIZED);
+      }
+    };
   }
-}

@@ -21,7 +21,7 @@ export class CellService {
     is_active: boolean;
     module_id: string;
   }): Promise<Cell> {
-
+    
     return this.prisma.cell.create({
       data: {
         name: data.name,

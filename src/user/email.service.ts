@@ -3,6 +3,8 @@ import { ConfigService } from '@nestjs/config';
 import { Resend } from 'resend';
 import * as nodemailer from 'nodemailer';
 import { Transporter } from 'nodemailer';
+import * as fs from 'fs';
+import * as path from 'path';
 
 @Injectable()
 export class EmailService {
@@ -20,17 +22,31 @@ export class EmailService {
             auth: {
                 user: this.gmailUser,
                 pass: this.gmailApikey,
-            },
+            }
         });
     }
 
     async sendPasswordResetEmail(email: string, token: string) {
+        const templatePath = path.join(
+            process.cwd(),
+            'dist',
+            'templates', 
+            'correo', 
+            'pages', 
+            'recover-pass.html'
+        );
+        
+        let htmlContent = fs.readFileSync(templatePath, 'utf8');
+            
         const resetUrl = `${this.configService.get('FRONTEND_URL')}/reset-password?token=${token}`;
+
+        htmlContent = htmlContent.replace('{{confirmationUrl}}', resetUrl);
+
         const mailOptions = {
             from: `Train IT <${this.gmailUser}>`,
             to: email,
             subject: 'Restablecimiento de contraseña',
-            html: `<p>Para restablecer tu contraseña, haz clic en el siguiente enlace: ${resetUrl}</p>`,
+            html: htmlContent,
         };
         
         try {
@@ -41,14 +57,32 @@ export class EmailService {
             }
         } 
         
-        async sendEmailConfirmation(email: string, token: string) {
-           
-            const confirmationUrl = `${this.configService.get('FRONTEND_URL')}/sign-up?token=${token}`;
+        async sendEmailConfirmation(email: string, name: string, token: string) {
+            
+            const templatePath = path.join(
+                process.cwd(),
+                'dist',
+                'templates', 
+                'correo', 
+                'pages', 
+                'verify-email.html'
+            );
+            
+            let htmlContent = fs.readFileSync(templatePath, 'utf8');
+
+            const confirmationUrl = `${this.configService.get('FRONTEND_URL')}/verify-email?token=${token}`;
+            // const confirmationUrl = `${this.configService.get('FRONTEND_URL')}/sign-up?token=${token}`;
+
+            htmlContent = htmlContent
+                .replace('{{confirmationUrl}}', confirmationUrl)
+                .replace('{{name}}', name)
+
+
             const mailOptions = {
                 from: `"Train IT" <${this.gmailUser}>`,
                 to: email,
                 subject: "Confirmación de Email ✔",
-                html: `<p>Por favor, confirma tu email haciendo clic en el siguiente enlace: ${confirmationUrl}</p>`,
+                html: htmlContent,
             };
 
             try {
