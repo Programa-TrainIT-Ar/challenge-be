@@ -10,6 +10,7 @@ import * as bcrypt from 'bcrypt'; // Importa el módulo bcrypt para hashear cont
 import { EmailService } from './email.service';
 import { LoginDto } from './dto/auth.dto';
 import { ConfigService } from '@nestjs/config';
+import { firstValueFrom } from 'rxjs';
 
 @Injectable() // Decorador que marca esta clase como un servicio que puede ser inyectado
 export class UserService {
@@ -369,15 +370,11 @@ export class UserService {
       client_secret: clientSecret,
     };
 
-    this.httpService.post(`https://${domain}/oauth/token`, body).subscribe({
-      next: (res) => {
-        console.log('Login successful:', res.data);
-        return res.data;
-      },
-      error: (err) => {
-        console.error('Login failed:', err);
-        throw new HttpException('Error de inicio de sesión', HttpStatus.UNAUTHORIZED);
-      },
-    });
+    try {
+      const response = await firstValueFrom(this.httpService.post(`https://${domain}/oauth/token`, body))
+      return response.data;
+    } catch (err) {
+        throw new HttpException('Las credenciales son inválidas', HttpStatus.UNAUTHORIZED);
+      }
+    };
   }
-}
