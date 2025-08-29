@@ -9,6 +9,7 @@ import { CellModule } from './cell/cell.module';
 import { QuizModule } from './quiz/quiz.module';
 import { QuestionModule } from './question/question.module';
 import { UserModule } from './user/user.module';
+import { ChallengeModule } from './challenge/challenge.module';
 
 @Module({
   imports: [
@@ -22,7 +23,8 @@ import { UserModule } from './user/user.module';
     CellModule,
     QuizModule,
     QuestionModule,
-    UserModule
+    UserModule,
+    ChallengeModule
   ],
   controllers: [AppController],
   providers: [AppService],
