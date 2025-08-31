@@ -128,13 +128,23 @@ export class UserService {
     try {
       const user = await this.prisma.user.findUnique({
         where: { email },
+        include: { 
+          hardSkills: true,
+          roles: true
+         },
       });
 
       if (!user) {
         throw new HttpException('Usuario no encontrado', HttpStatus.NOT_FOUND);
       }
+       
+      let register_complete: boolean = false;
 
-      return user;
+      if (user.first_name && user.last_name && user.phone_number && user.hardSkills.length > 0 && user.roles.length > 0) {
+        register_complete = true;
+      }
+      return { user, register_complete };
+     
     } catch (error) {
       throw new HttpException(
         error.message || 'Error al buscar usuario',
