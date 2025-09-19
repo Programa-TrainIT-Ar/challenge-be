@@ -3,7 +3,7 @@ import { QuizService } from './quiz.service';
 import { CreateQuizDto, CreateQuizNestedDto } from './dto/create-quiz.dto'; 
 import { UpdateQuizDto, UpdateQuizNestedDto } from './dto/update-quiz.dto';
 import { ApiCreatedResponse, ApiOkResponse, ApiTags, ApiQuery, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
-import { QuizEntity, QuizEntityNested, QuizEntityQuestion } from './entities/quiz.entity';
+import { QuizEntity, QuizEntityForTaking, QuizEntityNested, QuizEntityQuestion } from './entities/quiz.entity';
 import { Roles } from 'src/authorization/roles/roles.decorator';
 import { AuthorizationGuard } from 'src/authorization/authorization.guard';
 import { RolesGuard } from 'src/authorization/roles/roles.guard';
@@ -65,6 +65,12 @@ export class QuizController {
   @ApiOkResponse({ type: QuizEntityQuestion })
   async findOne(@Param('id') id: string) {
     return await this.quizService.findOneQuiz({id});
+  }
+
+  @Get('take/:id')
+  @ApiOkResponse({ type: QuizEntityForTaking })
+  async takeQuiz(@Param('id') id: string) {
+    return await this.quizService.getQuizForTaking({ id });
   }
 
   @Put(':id')
