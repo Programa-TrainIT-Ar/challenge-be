@@ -12,7 +12,8 @@ import { ChallengeService } from './challenge.service';
 import { CreateChallengeDto } from './dto/create-challenge.dto';
 import { UpdateChallengeDto } from './dto/update-challenge.dto';
 import { FindChallengesFiltersDto } from './dto/find-challenges-filters.dto';
-import { ApiNotFoundResponse, ApiOkResponse, ApiQuery, ApiTags } from '@nestjs/swagger';
+import { ApiNotFoundResponse, ApiOkResponse, ApiOperation, ApiQuery, ApiTags } from '@nestjs/swagger';
+import { Challenge } from './entities/challenge.entity';
 
 @ApiTags('Challenge')
 @Controller('challenge')
@@ -21,6 +22,8 @@ export class ChallengeController {
 
 
   @Post()
+  @ApiOperation({ summary: 'Crear un nuevo challenge' })
+  @ApiOkResponse({ type: Challenge })
   create(@Body() createChallengeDto: CreateChallengeDto) {
     return this.challengeService.create(createChallengeDto);
   }

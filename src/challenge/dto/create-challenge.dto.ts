@@ -1,17 +1,31 @@
-import { IsNotEmpty, IsInt, IsString, IsUUID } from 'class-validator';
+import { ApiProperty } from '@nestjs/swagger';
+import { IsNotEmpty, IsInt, IsUUID, IsArray } from 'class-validator';
 
 export class CreateChallengeDto {
   @IsInt()
   @IsNotEmpty()
-  calification: number;
+  @ApiProperty({ description: 'tiempo transcurrido para resolver en el challenge' })
+  time_taken: number;
 
-  @IsString()
+  @IsArray({ each: true })
+  @IsNotEmpty()
+  @ApiProperty({ description: 'respuestas a las preguntas del challenge' ,
+    type: 'array',
+    items: {
+      type: 'array',
+      items: {
+        type: 'number',
+      }
+    },})
+  question_answers: number[][];
+
   @IsUUID()
   @IsNotEmpty()
+  @ApiProperty({ description: 'ID del quiz asociado al challenge' })
   quiz_id: string;
 
-  @IsString()
   @IsUUID()
   @IsNotEmpty()
+  @ApiProperty({ description: 'ID del usuario que realiza el challenge' })
   user_id: string;
 }

@@ -163,6 +163,9 @@ model Question {
 model Challenge {
   id            String    @id @default(uuid())
   calification  Int
+  time_taken    Int?
+  question_answers Json
+  state         ChallengeState @default(pending)
   created_at    DateTime  @default(now())
   updated_at    DateTime? @updatedAt
   quiz          Quiz      @relation(fields: [quiz_id], references: [id])
@@ -170,6 +173,7 @@ model Challenge {
   user          User      @relation(fields: [user_id], references: [id])
   user_id       String
 }
+
 enum ChallengeType {
   immediate
   interview

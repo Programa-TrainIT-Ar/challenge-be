@@ -10,7 +10,37 @@ export class ChallengeService {
 
   //Crear challenge
   async create(data: CreateChallengeDto) {
-    return await this.prisma.challenge.create({ data });
+    const quiz = await this.prisma.quiz.findUnique({
+      where: { id: data.quiz_id },
+      include: { questions: true },
+    });
+
+    if (!quiz) {
+      throw new Error('Quiz not found');
+    }
+
+    var calification = 0;
+    
+    quiz.questions.forEach((question, index)=>{
+      var userAnswer = data.question_answers[index];
+      console.log('User answer for question', question.id, ':', userAnswer);
+      console.log('Correct option for question', question.id, ':', question.correct_option);
+      if (JSON.stringify(userAnswer) === JSON.stringify(question.correct_option)) {
+        calification++;
+        console.log('Current calification:', calification);
+      }
+    });
+
+    return await this.prisma.challenge.create({
+      data:{
+        calification: calification,
+        time_taken: data.time_taken,
+        question_answers: data.question_answers,
+        state: 'evaluated',
+        quiz_id: data.quiz_id,
+        user_id: data.user_id,
+      } 
+    });
   }
 
   async findChallenges(filters: {
