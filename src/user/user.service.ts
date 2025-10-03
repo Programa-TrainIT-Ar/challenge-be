@@ -183,6 +183,13 @@ export class UserService {
     return this.prisma.user.update({
       where: { id }, // Especifica el usuario a actualizar por ID
       data, // Proporciona los nuevos datos
+      select: { //Devolver sólo los datos de la entidad User que se necesitarán
+        id: true,
+        email: true,
+        first_name: true,
+        last_name: true,
+        phone_number: true,
+      },
     });
   }
 
