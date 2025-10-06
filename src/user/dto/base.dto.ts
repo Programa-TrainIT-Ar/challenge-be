@@ -1,5 +1,5 @@
-import { ApiProperty } from "@nestjs/swagger";
-import { IsEmail, IsNotEmpty, IsString } from "class-validator";
+import { ApiProperty } from '@nestjs/swagger';
+import { IsEmail, IsNotEmpty, IsString } from 'class-validator';
 
 export class EmailDto {
   @ApiProperty({ description: 'Email del usuario' })
@@ -10,16 +10,17 @@ export class EmailDto {
   @ApiProperty({ description: 'Nombre del usuario' })
   @IsString()
   @IsNotEmpty()
-  first_name:string;
+  first_name: string;
 }
 
-export class TokenDto {
-  @ApiProperty({ description: 'Token de restablecimiento de contraseña' })
+export class TokenEmail_PasswordDto {
+  @ApiProperty({ description: 'Token de confirmación de email y restablecimiento de contraseña' })
+  @IsString()
   @IsNotEmpty()
-  token: string;
+  confirmationToken: string;
 }
 
-export class TokenWithPasswordDto extends TokenDto {
+export class TokenWithPasswordDto extends TokenEmail_PasswordDto {
   @ApiProperty({ description: 'Nueva contraseña del usuario' })
   @IsNotEmpty()
   password: string;

@@ -11,6 +11,7 @@ import { EmailService } from './email.service';
 import { LoginDto } from './dto/auth.dto';
 import { ConfigService } from '@nestjs/config';
 import { firstValueFrom } from 'rxjs';
+import { JwtService } from '@nestjs/jwt';
 
 @Injectable() // Decorador que marca esta clase como un servicio que puede ser inyectado
 export class UserService {
@@ -19,6 +20,7 @@ export class UserService {
     private readonly emailService: EmailService,
     private readonly configService: ConfigService,
     private readonly httpService: HttpService, // Inyecta el servicio HTTP para realizar peticiones externas
+    private readonly jwtService: JwtService,
   ) {} // Inyección del servicio Prisma
 
   private static REGEX_PASSWORD =
@@ -128,23 +130,28 @@ export class UserService {
     try {
       const user = await this.prisma.user.findUnique({
         where: { email },
-        include: { 
+        include: {
           hardSkills: true,
-          roles: true
-         },
+          roles: true,
+        },
       });
 
       if (!user) {
         throw new HttpException('Usuario no encontrado', HttpStatus.NOT_FOUND);
       }
-       
+
       let register_complete: boolean = false;
 
-      if (user.first_name && user.last_name && user.phone_number && user.hardSkills.length > 0 && user.roles.length > 0) {
+      if (
+        user.first_name &&
+        user.last_name &&
+        user.phone_number &&
+        user.hardSkills.length > 0 &&
+        user.roles.length > 0
+      ) {
         register_complete = true;
       }
       return { user, register_complete };
-     
     } catch (error) {
       throw new HttpException(
         error.message || 'Error al buscar usuario',
@@ -176,6 +183,13 @@ export class UserService {
     return this.prisma.user.update({
       where: { id }, // Especifica el usuario a actualizar por ID
       data, // Proporciona los nuevos datos
+      select: { //Devolver sólo los datos de la entidad User que se necesitarán
+        id: true,
+        email: true,
+        first_name: true,
+        last_name: true,
+        phone_number: true,
+      },
     });
   }
 
@@ -295,7 +309,7 @@ export class UserService {
     }
 
     const token = crypto.randomBytes(32).toString('hex');
-    const expires = new Date(now.getTime() + 60 * 60 * 1000); 
+    const expires = new Date(now.getTime() + 60 * 60 * 1000);
 
     if (!user) {
       user = await this.prisma.user.create({
@@ -350,8 +364,19 @@ export class UserService {
       },
     });
 
+    // Definir la carga útil (payload) para el JWT
+    const payload = {
+      email: user.email,
+      sub: user.id, // 'sub' es un estándar para el ID del usuario en JWT
+    };
+
+    // Generar el JWT (Token de Autenticación/Bearer Token)
+    const accessToken = this.jwtService.sign(payload);
+
+    //Retornar el token y la información necesaria
     return {
-      message: 'Email confirmado exitosamente',
+      message: 'Email confirmado y usuario autenticado exitosamente',
+      access_token: accessToken, //Este token será usado para permitir al FRONT ingresar los nuevos datos del usuario
       user_id: user.id,
       email: user.email,
       name: user.first_name,
@@ -360,7 +385,6 @@ export class UserService {
   }
 
   async login(loginDto: LoginDto) {
-    
     const { email, password } = loginDto;
     console.log('Login attempt for email:', email);
     const domain = this.configService.get<string>('AUTH0_DOMAIN');
@@ -368,10 +392,13 @@ export class UserService {
     const clientSecret = this.configService.get<string>('CLIENT_SECRET');
     const audience = this.configService.get<string>('AUTH0_AUDIENCE');
     if (!domain || !clientId || !clientSecret || !audience) {
-      throw new HttpException('Configuración de autenticación no encontrada', HttpStatus.INTERNAL_SERVER_ERROR);
+      throw new HttpException(
+        'Configuración de autenticación no encontrada',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
     }
     const body = {
-      grant_type: "password",
+      grant_type: 'password',
       username: email,
       password,
       audience,
@@ -381,10 +408,15 @@ export class UserService {
     };
 
     try {
-      const response = await firstValueFrom(this.httpService.post(`https://${domain}/oauth/token`, body))
+      const response = await firstValueFrom(
+        this.httpService.post(`https://${domain}/oauth/token`, body),
+      );
       return response.data;
     } catch (err) {
-        throw new HttpException('Las credenciales son inválidas', HttpStatus.UNAUTHORIZED);
-      }
-    };
+      throw new HttpException(
+        'Las credenciales son inválidas',
+        HttpStatus.UNAUTHORIZED,
+      );
+    }
   }
+}
