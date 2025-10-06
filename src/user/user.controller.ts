@@ -181,7 +181,7 @@ export class UserController {
   async remove(@Param('id') id: string) {
     await this.userService.remove(id);
     return {
-      message: 'Usuario eliminado exitosamentex.',
+      message: 'Usuario eliminado exitosamente.',
     };
   }
 
