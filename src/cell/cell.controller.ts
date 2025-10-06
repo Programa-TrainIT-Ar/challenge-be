@@ -51,7 +51,7 @@ export class CellController {
   @ApiBody({ type: CreateCellDto })
   @ApiResponse({
     status: 201,
-    description: 'celula creada ok',
+    description: 'celula creada',
     type: CellEntity,
   })
   async createCell(
@@ -64,7 +64,7 @@ export class CellController {
   @ApiOperation({ summary: 'obtener celula segun id' })
   @ApiResponse({
     status: 201,
-    description: 'retornar  celula por id',
+    description: 'retornar celula por id',
     type: CellEntity,
   })
   async getCellById(@Param('id') id: string) {
@@ -76,7 +76,7 @@ export class CellController {
   }
 
   @Delete(':id')
-  @ApiResponse({ status: 200, description: 'Celula eliminada ok' })
+  @ApiResponse({ status: 200, description: 'Celula eliminada' })
   @ApiResponse({ status: 404, description: 'Celula no encontrada.' })
   async deleteCell(@Param('id') id: string) {
     this.cellService.deleteCell(id);
@@ -87,7 +87,7 @@ export class CellController {
   @ApiBody({ type: UpdateCellDto })
   @ApiResponse({
     status: 201,
-    description: 'celula actualizada ok',
+    description: 'celula actualizada',
     type: CellEntity,
   })
   async updateCell(

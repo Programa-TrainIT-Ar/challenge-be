@@ -19,7 +19,7 @@ export class CellService {
       whereClause.is_active = filters.is_active;
     }
 
-    // 2. Filitrar por la presencia de quizzes
+    // 2. Filtrar por la presencia de quizzes
     if (filters.has_quizzes) {
       // Se usa el operador 'some' en el campo relacional 'quizzes'
       // para indicar que DEBE existir AL MENOS UN quiz asociado.
@@ -32,8 +32,6 @@ export class CellService {
     return this.prisma.cell.findMany({
       where: whereClause,
     });
-
-    // return this.prisma.cell.findMany();
   }
 
   async getCellById(id: string): Promise<Cell | null> {
