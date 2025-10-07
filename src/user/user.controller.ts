@@ -22,11 +22,13 @@ import {
 } from '@nestjs/swagger';
 import { AuthorizationGuard } from 'src/authorization/authorization.guard';
 import { CreateUserDto } from './dto/create-user.dto';
-import { EmailDto, TokenDto, TokenWithPasswordDto } from './dto/base.dto';
+import { TokenEmail_PasswordDto, EmailDto, TokenWithPasswordDto } from './dto/base.dto';
 import { Roles } from '../authorization/roles/roles.decorator';
 import { RolesGuard } from 'src/authorization/roles/roles.guard';
 import { UserEntity } from './entities/user.entity';
 import { LoginDto } from './dto/auth.dto';
+import { AccountSetupDto } from './dto/account-setup.dto';
+import { AuthGuard } from '@nestjs/passport';
 
 @ApiTags('User')
 @Controller('user')
@@ -145,6 +147,22 @@ export class UserController {
     return this.userService.update(id, data); // Llama al servicio para actualizar el usuario por ID
   }
 
+
+/**
+   * Actualiza un usuario existente por su ID desde ACCOUNTSETUP.
+   * @param id - El ID del usuario a actualizar.
+   * @body data - Los nuevos datos del usuario.
+   * @returns El usuario actualizado.
+   */
+  @Put('setup/:id') // Define la ruta para actualizar un usuario por ID
+  @UseGuards(AuthGuard('jwt')) // Requiere autorización local para el caso de AccountSetup
+  @ApiOperation({ summary: 'Actualizar un usuario por ID' })
+  @ApiResponse({ status: 200, description: 'Usuario actualizado.' })
+  @ApiResponse({ status: 404, description: 'Usuario no encontrado.' })
+  async updateAccountSetup(@Param('id') id: string, @Body() data: AccountSetupDto) {
+    return this.userService.update(id, data); // Llama al servicio para actualizar el usuario por ID
+  }  
+
   /**
    * Elimina un usuario por su ID.
    * @param id - El ID del usuario a eliminar.
@@ -190,7 +208,7 @@ export class UserController {
   @HttpCode(HttpStatus.OK)
   async resetPassword(@Body() body: TokenWithPasswordDto) {
     return this.userService.resetPassword(
-      body.token,
+      body.confirmationToken,
       body.password,
       body.confirmPassword,
     );
@@ -210,16 +228,16 @@ export class UserController {
   }
 
   @Post('confirm-email') // Endpoint para confirmar email
-  @ApiBearerAuth()
-  @ApiOperation({ summary: 'Confirmar email' })
-  @ApiBody({ type: TokenDto })
+  @ApiOperation({ summary: 'Confirmar email y obtener JWT de autenticación' })
+  @ApiBody({ type: TokenEmail_PasswordDto })
   @ApiResponse({
     status: 200,
-    description: 'Email confirmado exitosamente.',
+    description: 'Email confirmado y JWT de acceso generado exitosamente.',
   })
   @HttpCode(HttpStatus.OK)
-  async confirmEmail(@Body() body: TokenDto) {
-    return this.userService.confirmEmail(body.token);
+  async confirmEmail(@Body() body: TokenEmail_PasswordDto) {
+
+    return this.userService.confirmEmail(body.confirmationToken);
   }
 
   @Post('login')
