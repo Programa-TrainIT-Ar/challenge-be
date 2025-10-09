@@ -37,52 +37,52 @@ export class UserService {
     return true;
   }
 
-  async register(data: CreateUserDto) {
-    try {
-      // 1. Verificar si el usuario ya existe por email
-      const existingUser = await this.prisma.user.findUnique({
-        where: { email: data.email },
-      });
+  // async register(data: CreateUserDto) {
+  //   try {
+  //     // 1. Verificar si el usuario ya existe por email
+  //     const existingUser = await this.prisma.user.findUnique({
+  //       where: { email: data.email },
+  //     });
 
-      if (existingUser) {
-        throw new HttpException('El usuario ya existe.', HttpStatus.CONFLICT);
-      }
+  //     if (existingUser) {
+  //       throw new HttpException('El usuario ya existe.', HttpStatus.CONFLICT);
+  //     }
 
-      // 2.  Validar la contraseña y verificar que coincidan
+  //     // 2.  Validar la contraseña y verificar que coincidan
 
-      this.validatePassword(data.password);
-      if (data.password !== data.confirmPassword) {
-        throw new HttpException(
-          'Las contraseñas no coinciden.',
-          HttpStatus.BAD_REQUEST,
-        );
-      }
+  //     this.validatePassword(data.password);
+  //     if (data.password !== data.confirmPassword) {
+  //       throw new HttpException(
+  //         'Las contraseñas no coinciden.',
+  //         HttpStatus.BAD_REQUEST,
+  //       );
+  //     }
 
-      // 3. Hashear la contraseña
-      const hashedPassword = await bcrypt.hash(data.password, 10);
+  //     // 3. Hashear la contraseña
+  //     const hashedPassword = await bcrypt.hash(data.password, 10);
 
-      // 4. Crear usuario SOLO con los campos del formulario
-      const newUser = await this.prisma.user.create({
-        data: {
-          email: data.email,
-          first_name: data.first_name,
-          last_name: data.last_name,
-          phone_number: data.phone_number,
-          password: hashedPassword,
-        },
-      });
+  //     // 4. Crear usuario SOLO con los campos del formulario
+  //     const newUser = await this.prisma.user.create({
+  //       data: {
+  //         email: data.email,
+  //         first_name: data.first_name,
+  //         last_name: data.last_name,
+  //         phone_number: data.phone_number,
+  //         password: hashedPassword,
+  //       },
+  //     });
 
-      // 5. Retornar al usuario sin la contraseña
-      const { password, ...userWithoutPassword } = newUser;
-      return userWithoutPassword;
-    } catch (error) {
-      console.error('Error en registro de usuario:', error);
-      throw new HttpException(
-        error.message || 'Error al registrar el usuario',
-        error.status || HttpStatus.INTERNAL_SERVER_ERROR,
-      );
-    }
-  }
+  //     // 5. Retornar al usuario sin la contraseña
+  //     const { password, ...userWithoutPassword } = newUser;
+  //     return userWithoutPassword;
+  //   } catch (error) {
+  //     console.error('Error en registro de usuario:', error);
+  //     throw new HttpException(
+  //       error.message || 'Error al registrar el usuario',
+  //       error.status || HttpStatus.INTERNAL_SERVER_ERROR,
+  //     );
+  //   }
+  // }
 
   async registerWithAuth(data: CreateUserDto) {
     try {
@@ -180,6 +180,10 @@ export class UserService {
       birthdate?: Date;
     },
   ) {
+    //Hashear la contraseña antes de enviarla a la BD
+    const hashedPassword = await bcrypt.hash(data.password, 10);
+    data.password = hashedPassword;
+
     return this.prisma.user.update({
       where: { id }, // Especifica el usuario a actualizar por ID
       data, // Proporciona los nuevos datos
