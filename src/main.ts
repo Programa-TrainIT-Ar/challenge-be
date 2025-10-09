@@ -34,6 +34,7 @@ async function bootstrap() {
     .addTag('Module')
     .addTag('Cell')
     .addTag('User')
+    .addTag('Challenge')
     .build();
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('docs', app, document, {
