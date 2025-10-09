@@ -22,7 +22,11 @@ import {
 } from '@nestjs/swagger';
 import { AuthorizationGuard } from 'src/authorization/authorization.guard';
 import { CreateUserDto } from './dto/create-user.dto';
-import { TokenEmail_PasswordDto, EmailDto, TokenWithPasswordDto } from './dto/base.dto';
+import {
+  TokenEmail_PasswordDto,
+  EmailDto,
+  TokenWithPasswordDto,
+} from './dto/base.dto';
 import { Roles } from '../authorization/roles/roles.decorator';
 import { RolesGuard } from 'src/authorization/roles/roles.guard';
 import { UserEntity } from './entities/user.entity';
@@ -63,9 +67,11 @@ export class UserController {
     }
   }
 
-    //registra un nuevo usuario
+  //registra un nuevo usuario
   @Post('register-with-auth')
-  @ApiOperation({ summary: 'Registrar un nuevo usuario con autenticación de terceros' })
+  @ApiOperation({
+    summary: 'Registrar un nuevo usuario con autenticación de terceros',
+  })
   @ApiResponse({
     status: 201,
     description: 'Usuario registrado exitosamente.',
@@ -147,8 +153,7 @@ export class UserController {
     return this.userService.update(id, data); // Llama al servicio para actualizar el usuario por ID
   }
 
-
-/**
+  /**
    * Actualiza un usuario existente por su ID desde ACCOUNTSETUP.
    * @param id - El ID del usuario a actualizar.
    * @body data - Los nuevos datos del usuario.
@@ -159,9 +164,12 @@ export class UserController {
   @ApiOperation({ summary: 'Actualizar un usuario por ID' })
   @ApiResponse({ status: 200, description: 'Usuario actualizado.' })
   @ApiResponse({ status: 404, description: 'Usuario no encontrado.' })
-  async updateAccountSetup(@Param('id') id: string, @Body() data: AccountSetupDto) {
+  async updateAccountSetup(
+    @Param('id') id: string,
+    @Body() data: AccountSetupDto,
+  ) {
     return this.userService.update(id, data); // Llama al servicio para actualizar el usuario por ID
-  }  
+  }
 
   /**
    * Elimina un usuario por su ID.
@@ -236,16 +244,23 @@ export class UserController {
   })
   @HttpCode(HttpStatus.OK)
   async confirmEmail(@Body() body: TokenEmail_PasswordDto) {
-
     return this.userService.confirmEmail(body.confirmationToken);
+  }
+
+  @Post('login-local')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Iniciar sesión con credenciales' })
+  @ApiBody({ type: LoginDto })
+  loginLocal(@Body() loginDto: LoginDto) {
+    return this.userService.loginLocal(loginDto);
   }
 
   @Post('login')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Iniciar sesión' })
   @ApiBody({ type: LoginDto })
-  @ApiResponse({ 
-    status: 200, 
+  @ApiResponse({
+    status: 200,
     description: 'Login exitoso',
     schema: {
       example: {
@@ -257,21 +272,21 @@ export class UserController {
         user: {
           sub: 'auth0|...',
           email: 'usuario@ejemplo.com',
-          name: 'Usuario Ejemplo'
-        }
-      }
-    }
+          name: 'Usuario Ejemplo',
+        },
+      },
+    },
   })
   @ApiResponse({ status: 401, description: 'Credenciales inválidas' })
   @ApiBody({
     schema: {
       example: {
         email: 'usuario@ejemplo.com',
-        password: 'MiPassword123!'
-      }
-    }
+        password: 'MiPassword123!',
+      },
+    },
   })
-  async login(@Body() loginDto: LoginDto) {
-    return await this.userService.login(loginDto);
+  async loginAuth0(@Body() loginDto: LoginDto) {
+    return await this.userService.loginAuth0(loginDto);
   }
 }

@@ -183,7 +183,8 @@ export class UserService {
     return this.prisma.user.update({
       where: { id }, // Especifica el usuario a actualizar por ID
       data, // Proporciona los nuevos datos
-      select: { //Devolver sólo los datos de la entidad User que se necesitarán
+      select: {
+        //Devolver sólo los datos de la entidad User que se necesitarán
         id: true,
         email: true,
         first_name: true,
@@ -384,7 +385,7 @@ export class UserService {
     };
   }
 
-  async login(loginDto: LoginDto) {
+  async loginAuth0(loginDto: LoginDto) {
     const { email, password } = loginDto;
     console.log('Login attempt for email:', email);
     const domain = this.configService.get<string>('AUTH0_DOMAIN');
@@ -418,5 +419,63 @@ export class UserService {
         HttpStatus.UNAUTHORIZED,
       );
     }
+  }
+
+  /**
+   * Autentica a un usuario usando credenciales de email y contraseña
+   * almacenadas localmente.
+   * @param loginDto - El DTO con email y password.
+   * @returns Un objeto con el token de acceso (JWT).
+   */
+  async loginLocal(loginDto: LoginDto) {
+    const { email, password } = loginDto;
+
+    // 1. Buscar el usuario en la DB
+    const user = await this.prisma.user.findUnique({
+      where: { email },
+    });
+
+    if (!user) {
+      throw new HttpException(
+        'Credenciales inválidas.',
+        HttpStatus.UNAUTHORIZED,
+      );
+    }
+
+    // 2. Comparar la contraseña (si el usuario tiene contraseña, es decir, no es un usuario solo de Auth0)
+    if (!user.password) {
+      throw new HttpException(
+        'Usuario registrado con un servicio externo. Usa el inicio de sesión con Google.',
+        HttpStatus.UNAUTHORIZED,
+      );
+    }
+
+    // Comparación de la contraseña en texto plano con el hash de la DB
+    const isPasswordValid = await bcrypt.compare(password, user.password);
+
+    if (!isPasswordValid) {
+      throw new HttpException(
+        'Credenciales inválidas.',
+        HttpStatus.UNAUTHORIZED,
+      );
+    }
+
+    // 3. Generar un JSON Web Token (JWT) propio para la sesión local
+
+    // Carga útil (Payload) del token
+    const payload = {
+      email: user.email,
+      sub: user.id,
+    };
+
+    // Generar el token
+    const accessToken = this.jwtService.sign(payload);
+
+    // 4. Retornar el token al frontend
+    return {
+      access_token: accessToken,
+      user_id: user.id,
+      email: user.email,
+    };
   }
 }
