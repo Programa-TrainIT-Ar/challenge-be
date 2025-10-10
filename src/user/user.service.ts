@@ -37,52 +37,90 @@ export class UserService {
     return true;
   }
 
-  // async register(data: CreateUserDto) {
-  //   try {
-  //     // 1. Verificar si el usuario ya existe por email
-  //     const existingUser = await this.prisma.user.findUnique({
-  //       where: { email: data.email },
-  //     });
+  /**
+   * Registra o gestiona la solicitud de un usuario.
+   * Utiliza upsert para crear el usuario si no existe, o actualizar el token si ya existe.
+   * Envía un correo de confirmación.
+   * @param data - Los datos del usuario a registrar.
+   * @returns El estado de la acción (login, pending, sent).
+   */
+  async registerUser(data: CreateUserDto) {
+    const { email, first_name } = data;
+    try {
+      // 1. Verificar existencia del usuario (solo una lectura inicial)
+      const user = await this.prisma.user.findUnique({
+        where: { email },
+        select: {
+          // Seleccionar solo los campos necesarios
+          emailConfirmed: true,
+          emailConfirmationToken: true,
+          emailConfirmationExpires: true,
+        },
+      });
 
-  //     if (existingUser) {
-  //       throw new HttpException('El usuario ya existe.', HttpStatus.CONFLICT);
-  //     }
+      // 2. Comprobación Rápida: Usuario ya confirmado
+      if (user && user.emailConfirmed) {        
+        return {
+          action: 'login',
+          message: 'El correo ya ha sido confirmado. Inicia sesión.',
+        };
+      }
 
-  //     // 2.  Validar la contraseña y verificar que coincidan
+      const now = new Date();
+      // Definir el límite de tiempo para reenviar
+      const RESEND_LIMIT_MS = 15 * 60 * 1000; //(15 minutos  en este caso)
 
-  //     this.validatePassword(data.password);
-  //     if (data.password !== data.confirmPassword) {
-  //       throw new HttpException(
-  //         'Las contraseñas no coinciden.',
-  //         HttpStatus.BAD_REQUEST,
-  //       );
-  //     }
+      // 3. Comprobación Rápida: Token Vigente (Recientemente enviado)
+      // Comprueba si ya existe un token que aún no ha expirado y no han pasado RESEND_LIMIT_MS desde su emisión
+      if (
+        user &&
+        user.emailConfirmationExpires &&
+        user.emailConfirmationExpires.getTime() >
+          now.getTime() - RESEND_LIMIT_MS // Usar un límite de tiempo más corto para evitar spam
+      ) {
+        return {
+          action: 'pending',
+          message:
+            'Ya se ha enviado un correo de confirmación. Revisa tu bandeja.',
+        };
+      }
 
-  //     // 3. Hashear la contraseña
-  //     const hashedPassword = await bcrypt.hash(data.password, 10);
+      // 4. Generar nuevo token y expiración
+      const token = crypto.randomBytes(32).toString('hex');
+      const expires = new Date(now.getTime() + 60 * 60 * 1000); //(1 hora para expirar)
 
-  //     // 4. Crear usuario SOLO con los campos del formulario
-  //     const newUser = await this.prisma.user.create({
-  //       data: {
-  //         email: data.email,
-  //         first_name: data.first_name,
-  //         last_name: data.last_name,
-  //         phone_number: data.phone_number,
-  //         password: hashedPassword,
-  //       },
-  //     });
+      // 5. UNA SOLA OPERACIÓN DB: Registrar/Actualizar usando upsert
+      //Si el usuario no existía, lo crea. Si existe, actualiza el nuevo token de confirmación
+      await this.prisma.user.upsert({
+        where: { email },
+        update: {
+          emailConfirmationToken: token,
+          emailConfirmationExpires: expires,
+        },
+        create: {
+          email,
+          first_name: first_name,
+          emailConfirmed: false,
+          emailConfirmationToken: token,
+          emailConfirmationExpires: expires,
+        },
+      });
 
-  //     // 5. Retornar al usuario sin la contraseña
-  //     const { password, ...userWithoutPassword } = newUser;
-  //     return userWithoutPassword;
-  //   } catch (error) {
-  //     console.error('Error en registro de usuario:', error);
-  //     throw new HttpException(
-  //       error.message || 'Error al registrar el usuario',
-  //       error.status || HttpStatus.INTERNAL_SERVER_ERROR,
-  //     );
-  //   }
-  // }
+      // 6. Finalmente, se envía el correo
+      await this.emailService.sendEmailConfirmation(email, first_name, token);
+      return {
+        action: 'verification_sent',
+        message:
+          'Se ha enviado un nuevo correo de confirmación. Revisa tu bandeja.',
+      };
+    } catch (error) {
+      console.error('Error en registro de usuario: ', error);
+      throw new HttpException(
+        error.message || 'Error al registrar el usuario',
+        error.status || HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
 
   async registerWithAuth(data: CreateUserDto) {
     try {
@@ -285,62 +323,6 @@ export class UserService {
     });
 
     return { message: 'Contraseña restablecida exitosamente' };
-  }
-
-  async sendEmailConfirmation(email: string, name: string) {
-    let user = await this.prisma.user.findUnique({ where: { email } });
-
-    if (user && user.emailConfirmed) {
-      // Ya confirmado → login
-      return {
-        action: 'login',
-        message: 'El correo ya ha sido confirmado. Inicia sesión.',
-      };
-    }
-
-    const now = new Date();
-
-    if (
-      user &&
-      user.emailConfirmationToken &&
-      user.emailConfirmationExpires &&
-      user.emailConfirmationExpires > now
-    ) {
-      return {
-        action: 'pending',
-        message:
-          'Ya se ha enviado un correo de confirmación. Revisa tu bandeja.',
-      };
-    }
-
-    const token = crypto.randomBytes(32).toString('hex');
-    const expires = new Date(now.getTime() + 60 * 60 * 1000);
-
-    if (!user) {
-      user = await this.prisma.user.create({
-        data: {
-          email,
-          first_name: name,
-          emailConfirmed: false,
-          emailConfirmationToken: token,
-          emailConfirmationExpires: expires,
-        },
-      });
-    } else {
-      await this.prisma.user.update({
-        where: { email },
-        data: {
-          emailConfirmationToken: token,
-          emailConfirmationExpires: expires,
-        },
-      });
-    }
-    // Enviar correo de confirmación
-    await this.emailService.sendEmailConfirmation(email, name, token);
-    return {
-      action: 'verification_sent',
-      message: 'Se ha enviado un email de confirmación',
-    };
   }
 
   async confirmEmail(token: string) {

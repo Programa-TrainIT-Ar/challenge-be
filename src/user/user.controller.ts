@@ -39,36 +39,34 @@ import { AuthGuard } from '@nestjs/passport';
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
-  //ESTE REGISTRO NO SE ESTÁ USANDO ACTUALMENTE.
-  //registra un nuevo usuario
-  // @Post('register')
-  // @ApiOperation({ summary: 'Registrar un nuevo usuario' })
-  // @ApiResponse({
-  //   status: 201,
-  //   description: 'Usuario registrado exitosamente.',
-  //   type: UserEntity,
-  // })
-  // @ApiResponse({
-  //   status: 400,
-  //   description: 'Error al registrar el usuario.',
-  // })
-  // async register(@Body() createUserDto: CreateUserDto) {
-  //   try {
-  //     const user = await this.userService.register(createUserDto);
-  //     return {
-  //       statusCode: 201,
-  //       message: 'Usuario registrado exitosamente.',
-  //       user,
-  //     };
-  //   } catch (error) {
-  //     throw new HttpException(
-  //       error.message || 'Error al registrar el usuario.',
-  //       error.status || HttpStatus.BAD_REQUEST,
-  //     );
-  //   }
-  // }
+//Registro SIN Auth0 (Credenciales manuales) incluido en este proceso
+  @Post('send-email-confirmation')
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Enviar confirmación de email' })
+  @ApiBody({ type: CreateUserDto })
+  @ApiResponse({
+    status: 200,
+    description: 'Email de confirmación enviado exitosamente.',
+  })
+  @HttpCode(HttpStatus.OK)
+  async sendEmailConfirmation(@Body() data: CreateUserDto) {
+    return this.userService.registerUser(data);
+  }
 
-  //registra un nuevo usuario
+  @Post('confirm-email') // Endpoint para confirmar email
+  @ApiOperation({ summary: 'Confirmar email y obtener JWT de autenticación' })
+  @ApiBody({ type: TokenEmail_PasswordDto })
+  @ApiResponse({
+    status: 200,
+    description: 'Email confirmado y JWT de acceso generado exitosamente.',
+  })
+  @HttpCode(HttpStatus.OK)
+  async confirmEmail(@Body() body: TokenEmail_PasswordDto) {
+    return this.userService.confirmEmail(body.confirmationToken);
+  }
+
+
+  //Registra un nuevo usuario con Auth0
   @Post('register-with-auth')
   @ApiOperation({
     summary: 'Registrar un nuevo usuario con autenticación de terceros',
@@ -221,31 +219,6 @@ export class UserController {
       body.password,
       body.confirmPassword,
     );
-  }
-
-  @Post('send-email-confirmation')
-  @ApiBearerAuth()
-  @ApiOperation({ summary: 'Enviar confirmación de email' })
-  @ApiBody({ type: EmailDto })
-  @ApiResponse({
-    status: 200,
-    description: 'Email de confirmación enviado exitosamente.',
-  })
-  @HttpCode(HttpStatus.OK)
-  async sendEmailConfirmation(@Body() body: EmailDto) {
-    return this.userService.sendEmailConfirmation(body.email, body.first_name);
-  }
-
-  @Post('confirm-email') // Endpoint para confirmar email
-  @ApiOperation({ summary: 'Confirmar email y obtener JWT de autenticación' })
-  @ApiBody({ type: TokenEmail_PasswordDto })
-  @ApiResponse({
-    status: 200,
-    description: 'Email confirmado y JWT de acceso generado exitosamente.',
-  })
-  @HttpCode(HttpStatus.OK)
-  async confirmEmail(@Body() body: TokenEmail_PasswordDto) {
-    return this.userService.confirmEmail(body.confirmationToken);
   }
 
   @Post('login-local')
