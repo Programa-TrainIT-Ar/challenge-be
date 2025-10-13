@@ -423,7 +423,7 @@ export class UserService {
 
     if (!user) {
       throw new HttpException(
-        'Credenciales inválidas.',
+        'Usuario no existe.',
         HttpStatus.UNAUTHORIZED,
       );
     }
@@ -448,10 +448,14 @@ export class UserService {
 
     // 3. Generar un JSON Web Token (JWT) propio para la sesión local
 
+    //Evaluando rol del usuario para enviarlo en el token
+    const role = user.is_superuser ? 'admin' : 'candidato'; 
+
     // Carga útil (Payload) del token
     const payload = {
       email: user.email,
       sub: user.id,
+      role: role,
     };
 
     // Generar el token
@@ -462,6 +466,7 @@ export class UserService {
       access_token: accessToken,
       user_id: user.id,
       email: user.email,
+      role: role,
     };
   }
 }

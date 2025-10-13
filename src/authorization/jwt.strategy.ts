@@ -18,6 +18,6 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
   async validate(payload: any) {
     // Retorna la carga útil del token. Esto se inyecta en req.user.
     // El payload de JWT debe contener 'sub' (userId) y 'email'
-    return { userId: payload.sub, email: payload.email }; 
+    return { userId: payload.sub, email: payload.email, role: payload.role }; 
   }
 }

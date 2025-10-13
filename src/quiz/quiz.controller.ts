@@ -7,6 +7,7 @@ import { QuizEntity, QuizEntityForTaking, QuizEntityNested, QuizEntityQuestion }
 import { Roles } from 'src/authorization/roles/roles.decorator';
 import { AuthorizationGuard } from 'src/authorization/authorization.guard';
 import { RolesGuard } from 'src/authorization/roles/roles.guard';
+import { HybridAuthGuard } from 'src/authorization/hybrid-auth.guard';
 
 @ApiTags('Quiz')
 @Controller('quiz')
@@ -15,7 +16,7 @@ export class QuizController {
 
   @Get()
   @ApiBearerAuth()
-  @UseGuards(AuthorizationGuard) // Requiere autorización y verificación de roles
+  @UseGuards(HybridAuthGuard, RolesGuard) // Requiere autorización y verificación de roles
   //@Roles('admin') // Solo permite a los administradores
   @ApiQuery({ name: 'search', required: false, type: String })
   @ApiQuery({ name: 'seniority', required: false, type: String, enum: ['trainee', 'junior', 'middle', 'senior']})
