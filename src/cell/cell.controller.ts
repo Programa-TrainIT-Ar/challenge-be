@@ -8,19 +8,25 @@ import {
   Param,
   NotFoundException,
   Query,
+  UseGuards,
 } from '@nestjs/common';
 import { CellService } from './cell.service';
-import { ApiBody, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiBody, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { CreateCellDto, UpdateCellDto } from './dto/cell.dto';
 import { CellEntity } from './entities/cell.entity';
 import { Cell } from '@prisma/client';
+import { Roles } from 'src/authorization/roles/roles.decorator';
+import { HybridAuthGuard } from 'src/authorization/hybrid-auth.guard';
+import { RolesGuard } from 'src/authorization/roles/roles.guard';
 
 @ApiTags('Cell')
+@UseGuards(HybridAuthGuard)
 @Controller('cells')
 export class CellController {
   constructor(private readonly cellService: CellService) {}
 
   @Get()
+  @ApiBearerAuth()
   @ApiOperation({ summary: 'obtener todas las celulas' })
   @ApiResponse({
     status: 201,
@@ -47,6 +53,9 @@ export class CellController {
   }
 
   @Post()
+  @ApiBearerAuth()
+  @UseGuards(RolesGuard)
+  @Roles('admin')
   @ApiOperation({ summary: 'crear una celula' })
   @ApiBody({ type: CreateCellDto })
   @ApiResponse({
@@ -61,6 +70,7 @@ export class CellController {
   }
 
   @Get(':id')
+  @ApiBearerAuth()
   @ApiOperation({ summary: 'obtener celula segun id' })
   @ApiResponse({
     status: 201,
@@ -76,6 +86,9 @@ export class CellController {
   }
 
   @Delete(':id')
+  @ApiBearerAuth()
+  @UseGuards(RolesGuard)
+  @Roles('admin')
   @ApiResponse({ status: 200, description: 'Celula eliminada' })
   @ApiResponse({ status: 404, description: 'Celula no encontrada.' })
   async deleteCell(@Param('id') id: string) {
@@ -83,6 +96,9 @@ export class CellController {
   }
 
   @Put(':id')
+  @ApiBearerAuth()
+  @UseGuards(RolesGuard)
+  @Roles('admin')
   @ApiOperation({ summary: 'actualizar una celula' })
   @ApiBody({ type: UpdateCellDto })
   @ApiResponse({
