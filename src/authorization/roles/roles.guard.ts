@@ -14,10 +14,13 @@ export class RolesGuard implements CanActivate {
 
     const request = context.switchToHttp().getRequest();
     const user = request.user; 
-    //const scope = 
+
+    if(!user){
+      throw new ForbiddenException("Token de acceso no proporcionado o inválido")
+    }
     
-    if (user && user.permissions) {
-      const hasRequiredPermissions = () => requiredRoles.some(role => user.permissions.includes(role));
+    if (user.permissions) {
+      const hasRequiredPermissions = requiredRoles.some(role => user.permissions.includes(role));
       if (!hasRequiredPermissions) {
         throw new ForbiddenException('No tienes permiso para acceder a este recurso');
       }
@@ -29,8 +32,8 @@ export class RolesGuard implements CanActivate {
       if (!hasRequiredScope()) {
         throw new ForbiddenException('No tienes el alcance para acceder a este recurso');
       }
-    // Verifica si el usuario tiene alguno de los roles requeridos
-    } else {
+    
+    } else { //El usuario no tiene permissions ni scope
       throw new ForbiddenException('Error en el token de acceso');
     }
     return true;
