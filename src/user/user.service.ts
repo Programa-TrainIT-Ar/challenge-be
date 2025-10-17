@@ -219,8 +219,11 @@ export class UserService {
     },
   ) {
     //Hashear la contraseña antes de enviarla a la BD
-    const hashedPassword = await bcrypt.hash(data.password, 10);
-    data.password = hashedPassword;
+    if (data.password) {
+      //Si el usuario introdujo una contraseña (como en el caso de accountSetup)
+      const hashedPassword = await bcrypt.hash(data.password, 10);
+      data.password = hashedPassword;
+    }
 
     return this.prisma.user.update({
       where: { id }, // Especifica el usuario a actualizar por ID

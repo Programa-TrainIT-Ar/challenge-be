@@ -8,7 +8,14 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
   //Activa CORS
-  app.enableCors();
+  app.enableCors({
+    // Permite cualquier origen en desarrollo. Considera cambiar a tu dominio de frontend en producción.
+    origin: true, 
+    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
+    // ¡CRUCIAL! Asegura que la cabecera 'Authorization' se permita
+    allowedHeaders: 'Content-Type, Accept, Authorization', 
+    credentials: true,
+  });
 
   //Activa validaciones
   app.useGlobalPipes(
@@ -42,7 +49,7 @@ async function bootstrap() {
     yamlDocumentUrl: '/api-yaml', // URL para descargar el YAML
   });
 
-  const PORT = process.env.PORT;
+  const PORT = process.env.PORT || 3001;
   await app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);
   });
