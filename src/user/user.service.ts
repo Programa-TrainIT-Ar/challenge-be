@@ -428,6 +428,10 @@ export class UserService {
       throw new HttpException('Usuario no existe.', HttpStatus.UNAUTHORIZED);
     }
 
+    if (!user.emailConfirmed){
+      throw new HttpException('El usuario no ha confirmado su correo.', HttpStatus.UNAUTHORIZED)
+    }
+
     // 2. Comparar la contraseña (si el usuario tiene contraseña, es decir, no es un usuario solo de Auth0)
     if (!user.password) {
       throw new HttpException(
