@@ -1,41 +1,59 @@
-import { Injectable, CanActivate, ExecutionContext, ForbiddenException } from '@nestjs/common';
+import {
+  Injectable,
+  CanActivate,
+  ExecutionContext,
+  ForbiddenException,
+} from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 
 @Injectable()
 export class RolesGuard implements CanActivate {
   constructor(private reflector: Reflector) {}
 
+  // Definición de la clave de la claim personalizada
+  private readonly ROLES_CLAIM = 'https://miaplicacion.com/roles';
+
   canActivate(context: ExecutionContext): boolean {
-    const requiredRoles = this.reflector.get<string[]>('roles', context.getHandler());
-    
+    const requiredRoles = this.reflector.get<string[]>(
+      'roles',
+      context.getHandler(),
+    );
+
     if (!requiredRoles) {
       return true; // Si no se requieren roles, permite el acceso
     }
 
     const request = context.switchToHttp().getRequest();
-    const user = request.user; 
+    const user = request.user;
 
-    if(!user){
-      throw new ForbiddenException("Token de acceso no proporcionado o inválido")
+    //PASO 1: Verificar existencia del usuario  (payload)
+    if (!user) {
+      // Si no hay usuario, el token falló la validación o no se proporcionó
+      return false; // El HybridGuard ya debería haber lanzado una excepción antes.
+      // throw new ForbiddenException("Token de acceso no proporcionado o inválido")
     }
-    
-    if (user.permissions) {
-      const hasRequiredPermissions = requiredRoles.some(role => user.permissions.includes(role));
-      if (!hasRequiredPermissions) {
-        throw new ForbiddenException('No tienes permiso para acceder a este recurso');
-      }
+
+    // PASO 2: Extraer roles de la claim personalizada o de permissions
+    const userRoles: string[] = user[this.ROLES_CLAIM] || user.permissions;
+
+    // Si todavía no hay roles, se denega el acceso
+    if (!userRoles || userRoles.length === 0) {
+      throw new ForbiddenException(
+        'Su token no contiene los roles requeridos para la autorización.',
+      );
     }
-    // Verifica que la consulta machine to machine tenga el scope requerido 
-    else if (user.scope) {
-      const scopes = user.scope.split(' ');
-      const hasRequiredScope = () => requiredRoles.some(role => scopes.includes(role));
-      if (!hasRequiredScope()) {
-        throw new ForbiddenException('No tienes el alcance para acceder a este recurso');
-      }
-    
-    } else { //El usuario no tiene permissions ni scope
-      throw new ForbiddenException('Error en el token de acceso');
+
+    // PASO 3: Ejecutar la lógica de comprobación
+    const hasRequiredRoles = requiredRoles.some((role) =>
+      userRoles.includes(role),
+    );
+
+    if (!hasRequiredRoles) {
+      throw new ForbiddenException(
+        'No tienes permiso para acceder a este recurso (Roles insuficientes).',
+      );
     }
+
     return true;
-    }
-   }
+  }
+}
