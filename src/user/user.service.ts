@@ -59,7 +59,7 @@ export class UserService {
       });
 
       // 2. Comprobación Rápida: Usuario ya confirmado
-      if (user && user.emailConfirmed) {        
+      if (user && user.emailConfirmed) {
         return {
           action: 'login',
           message: 'El correo ya ha sido confirmado. Inicia sesión.',
@@ -425,10 +425,7 @@ export class UserService {
     });
 
     if (!user) {
-      throw new HttpException(
-        'Usuario no existe.',
-        HttpStatus.UNAUTHORIZED,
-      );
+      throw new HttpException('Usuario no existe.', HttpStatus.UNAUTHORIZED);
     }
 
     // 2. Comparar la contraseña (si el usuario tiene contraseña, es decir, no es un usuario solo de Auth0)
@@ -452,13 +449,19 @@ export class UserService {
     // 3. Generar un JSON Web Token (JWT) propio para la sesión local
 
     //Evaluando rol del usuario para enviarlo en el token
-    const role = user.is_superuser ? 'admin' : 'candidato'; 
+    const role = user.is_superuser ? 'admin' : 'candidato';
+
+    // Se crea el array de roles que imita la estructura de Auth0
+    const AUTH0_ROLES_CLAIM = 'https://miaplicacion.com/roles';
+    const auth0Roles = [role];
 
     // Carga útil (Payload) del token
     const payload = {
       email: user.email,
       sub: user.id,
       role: role,
+      is_superuser: user.is_superuser,
+      [AUTH0_ROLES_CLAIM]: auth0Roles, //// Añadir la custom claim de roles (para estandarizar lógica)
     };
 
     // Generar el token
