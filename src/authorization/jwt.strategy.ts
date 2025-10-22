@@ -16,8 +16,10 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
 
   // Este método se ejecuta SÓLO si el token es válido (firma, expiración)
   async validate(payload: any) {
+    const AUTH0_ROLES_CLAIM = 'https://miaplicacion.com/roles';
     // Retorna la carga útil del token. Esto se inyecta en req.user.
     // El payload de JWT debe contener 'sub' (userId) y 'email'
-    return { userId: payload.sub, email: payload.email }; 
+    return { userId: payload.sub, email: payload.email, role: payload.role, is_superuser: payload.is_superuser,
+        [AUTH0_ROLES_CLAIM]: payload[AUTH0_ROLES_CLAIM] }; 
   }
 }

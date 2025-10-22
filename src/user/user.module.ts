@@ -6,12 +6,14 @@ import { EmailService } from './email.service';
 import { HttpModule } from '@nestjs/axios'; // Importa el servicio HTTP para realizar peticiones externas
 import { JwtModule } from '@nestjs/jwt';
 import { ConfigModule, ConfigService } from '@nestjs/config';
+import { AuthorizationModule } from 'src/authorization/authorization.module';
 
 @Module({
   controllers: [UserController],
   providers: [UserService, EmailService],
   imports: [
     PrismaModule,
+    AuthorizationModule,
     HttpModule,
     JwtModule.registerAsync({
       //Configurando el JwtModule

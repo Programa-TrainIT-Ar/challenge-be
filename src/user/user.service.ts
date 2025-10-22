@@ -37,46 +37,84 @@ export class UserService {
     return true;
   }
 
-  async register(data: CreateUserDto) {
+  /**
+   * Registra o gestiona la solicitud de un usuario.
+   * Utiliza upsert para crear el usuario si no existe, o actualizar el token si ya existe.
+   * Envía un correo de confirmación.
+   * @param data - Los datos del usuario a registrar.
+   * @returns El estado de la acción (login, pending, sent).
+   */
+  async registerUser(data: CreateUserDto) {
+    const { email, first_name } = data;
     try {
-      // 1. Verificar si el usuario ya existe por email
-      const existingUser = await this.prisma.user.findUnique({
-        where: { email: data.email },
-      });
-
-      if (existingUser) {
-        throw new HttpException('El usuario ya existe.', HttpStatus.CONFLICT);
-      }
-
-      // 2.  Validar la contraseña y verificar que coincidan
-
-      this.validatePassword(data.password);
-      if (data.password !== data.confirmPassword) {
-        throw new HttpException(
-          'Las contraseñas no coinciden.',
-          HttpStatus.BAD_REQUEST,
-        );
-      }
-
-      // 3. Hashear la contraseña
-      const hashedPassword = await bcrypt.hash(data.password, 10);
-
-      // 4. Crear usuario SOLO con los campos del formulario
-      const newUser = await this.prisma.user.create({
-        data: {
-          email: data.email,
-          first_name: data.first_name,
-          last_name: data.last_name,
-          phone_number: data.phone_number,
-          password: hashedPassword,
+      // 1. Verificar existencia del usuario (solo una lectura inicial)
+      const user = await this.prisma.user.findUnique({
+        where: { email },
+        select: {
+          // Seleccionar solo los campos necesarios
+          emailConfirmed: true,
+          emailConfirmationToken: true,
+          emailConfirmationExpires: true,
         },
       });
 
-      // 5. Retornar al usuario sin la contraseña
-      const { password, ...userWithoutPassword } = newUser;
-      return userWithoutPassword;
+      // 2. Comprobación Rápida: Usuario ya confirmado
+      if (user && user.emailConfirmed) {
+        return {
+          action: 'login',
+          message: 'El correo ya ha sido confirmado. Inicia sesión.',
+        };
+      }
+
+      const now = new Date();
+      // Definir el límite de tiempo para reenviar
+      const RESEND_LIMIT_MS = 15 * 60 * 1000; //(15 minutos  en este caso)
+
+      // 3. Comprobación Rápida: Token Vigente (Recientemente enviado)
+      // Comprueba si ya existe un token que aún no ha expirado y no han pasado RESEND_LIMIT_MS desde su emisión
+      if (
+        user &&
+        user.emailConfirmationExpires &&
+        user.emailConfirmationExpires.getTime() >
+          now.getTime() - RESEND_LIMIT_MS // Usar un límite de tiempo más corto para evitar spam
+      ) {
+        return {
+          action: 'pending',
+          message:
+            'Ya se ha enviado un correo de confirmación. Revisa tu bandeja.',
+        };
+      }
+
+      // 4. Generar nuevo token y expiración
+      const token = crypto.randomBytes(32).toString('hex');
+      const expires = new Date(now.getTime() + 60 * 60 * 1000); //(1 hora para expirar)
+
+      // 5. UNA SOLA OPERACIÓN DB: Registrar/Actualizar usando upsert
+      //Si el usuario no existía, lo crea. Si existe, actualiza el nuevo token de confirmación
+      await this.prisma.user.upsert({
+        where: { email },
+        update: {
+          emailConfirmationToken: token,
+          emailConfirmationExpires: expires,
+        },
+        create: {
+          email,
+          first_name: first_name,
+          emailConfirmed: false,
+          emailConfirmationToken: token,
+          emailConfirmationExpires: expires,
+        },
+      });
+
+      // 6. Finalmente, se envía el correo
+      await this.emailService.sendEmailConfirmation(email, first_name, token);
+      return {
+        action: 'verification_sent',
+        message:
+          'Se ha enviado un nuevo correo de confirmación. Revisa tu bandeja.',
+      };
     } catch (error) {
-      console.error('Error en registro de usuario:', error);
+      console.error('Error en registro de usuario: ', error);
       throw new HttpException(
         error.message || 'Error al registrar el usuario',
         error.status || HttpStatus.INTERNAL_SERVER_ERROR,
@@ -180,10 +218,18 @@ export class UserService {
       birthdate?: Date;
     },
   ) {
+    //Hashear la contraseña antes de enviarla a la BD
+    if (data.password) {
+      //Si el usuario introdujo una contraseña (como en el caso de accountSetup)
+      const hashedPassword = await bcrypt.hash(data.password, 10);
+      data.password = hashedPassword;
+    }
+
     return this.prisma.user.update({
       where: { id }, // Especifica el usuario a actualizar por ID
       data, // Proporciona los nuevos datos
-      select: { //Devolver sólo los datos de la entidad User que se necesitarán
+      select: {
+        //Devolver sólo los datos de la entidad User que se necesitarán
         id: true,
         email: true,
         first_name: true,
@@ -282,62 +328,6 @@ export class UserService {
     return { message: 'Contraseña restablecida exitosamente' };
   }
 
-  async sendEmailConfirmation(email: string, name: string) {
-    let user = await this.prisma.user.findUnique({ where: { email } });
-
-    if (user && user.emailConfirmed) {
-      // Ya confirmado → login
-      return {
-        action: 'login',
-        message: 'El correo ya ha sido confirmado. Inicia sesión.',
-      };
-    }
-
-    const now = new Date();
-
-    if (
-      user &&
-      user.emailConfirmationToken &&
-      user.emailConfirmationExpires &&
-      user.emailConfirmationExpires > now
-    ) {
-      return {
-        action: 'pending',
-        message:
-          'Ya se ha enviado un correo de confirmación. Revisa tu bandeja.',
-      };
-    }
-
-    const token = crypto.randomBytes(32).toString('hex');
-    const expires = new Date(now.getTime() + 60 * 60 * 1000);
-
-    if (!user) {
-      user = await this.prisma.user.create({
-        data: {
-          email,
-          first_name: name,
-          emailConfirmed: false,
-          emailConfirmationToken: token,
-          emailConfirmationExpires: expires,
-        },
-      });
-    } else {
-      await this.prisma.user.update({
-        where: { email },
-        data: {
-          emailConfirmationToken: token,
-          emailConfirmationExpires: expires,
-        },
-      });
-    }
-    // Enviar correo de confirmación
-    await this.emailService.sendEmailConfirmation(email, name, token);
-    return {
-      action: 'verification_sent',
-      message: 'Se ha enviado un email de confirmación',
-    };
-  }
-
   async confirmEmail(token: string) {
     const user = await this.prisma.user.findFirst({
       where: {
@@ -384,7 +374,7 @@ export class UserService {
     };
   }
 
-  async login(loginDto: LoginDto) {
+  async loginAuth0(loginDto: LoginDto) {
     const { email, password } = loginDto;
     console.log('Login attempt for email:', email);
     const domain = this.configService.get<string>('AUTH0_DOMAIN');
@@ -418,5 +408,75 @@ export class UserService {
         HttpStatus.UNAUTHORIZED,
       );
     }
+  }
+
+  /**
+   * Autentica a un usuario usando credenciales de email y contraseña
+   * almacenadas localmente.
+   * @param loginDto - El DTO con email y password.
+   * @returns Un objeto con el token de acceso (JWT).
+   */
+  async loginLocal(loginDto: LoginDto) {
+    const { email, password } = loginDto;
+
+    // 1. Buscar el usuario en la DB
+    const user = await this.prisma.user.findUnique({
+      where: { email },
+    });
+
+    if (!user) {
+      throw new HttpException('Usuario no existe.', HttpStatus.UNAUTHORIZED);
+    }
+
+    if (!user.emailConfirmed){
+      throw new HttpException('El usuario no ha confirmado su correo.', HttpStatus.UNAUTHORIZED)
+    }
+
+    // 2. Comparar la contraseña (si el usuario tiene contraseña, es decir, no es un usuario solo de Auth0)
+    if (!user.password) {
+      throw new HttpException(
+        'Usuario registrado con un servicio externo. Usa el inicio de sesión con Google.',
+        HttpStatus.UNAUTHORIZED,
+      );
+    }
+
+    // Comparación de la contraseña en texto plano con el hash de la DB
+    const isPasswordValid = await bcrypt.compare(password, user.password);
+
+    if (!isPasswordValid) {
+      throw new HttpException(
+        'Credenciales inválidas.',
+        HttpStatus.UNAUTHORIZED,
+      );
+    }
+
+    // 3. Generar un JSON Web Token (JWT) propio para la sesión local
+
+    //Evaluando rol del usuario para enviarlo en el token
+    const role = user.is_superuser ? 'admin' : 'candidato';
+
+    // Se crea el array de roles que imita la estructura de Auth0
+    const AUTH0_ROLES_CLAIM = 'https://miaplicacion.com/roles';
+    const auth0Roles = [role];
+
+    // Carga útil (Payload) del token
+    const payload = {
+      email: user.email,
+      sub: user.id,
+      role: role,
+      is_superuser: user.is_superuser,
+      [AUTH0_ROLES_CLAIM]: auth0Roles, //// Añadir la custom claim de roles (para estandarizar lógica)
+    };
+
+    // Generar el token
+    const accessToken = this.jwtService.sign(payload);
+
+    // 4. Retornar el token al frontend
+    return {
+      access_token: accessToken,
+      user_id: user.id,
+      email: user.email,
+      role: role,
+    };
   }
 }
