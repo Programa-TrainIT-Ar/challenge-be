@@ -250,34 +250,46 @@ export class UserService {
       data: { is_active: false },
     }); // cambia el estado del usuario a inactivo en lugar de eliminarlo físicamente
   }
+
   /**
    * Solicita el restablecimiento de contraseña para un usuario.
    * @param email - El email del usuario para solicitar el restablecimiento de contraseña.
    * @returns Un mensaje de confirmación.
    */
   async requestPasswordReset(email: string) {
-    const user = await this.prisma.user.findUnique({ where: { email } });
-    if (!user) {
-      throw new HttpException('Usuario no encontrado', HttpStatus.NOT_FOUND);
+    // 1. Generar token y expiración
+    const token = crypto.randomBytes(32).toString('hex');
+    const expires = new Date(Date.now() + 3600000); // 1 hora
+
+    // 2. Intentar actualizar el usuario (si existe)
+    try {
+        const user = await this.prisma.user.update({
+            where: { email },
+            data: {
+                resetPasswordToken: token,
+                resetPasswordExpires: expires,
+            },
+            // Seleccionar los datos necesarios para el email
+            select: { id: true, email: true, first_name: true } 
+        });
+
+        // 3. Enviar email (solo si la actualización fue exitosa)
+        await this.emailService.sendPasswordResetEmail(
+            user.email,
+            token, // Usa la variable 'token' generada
+        );
+
+        // 4. PRÁCTICA DE SEGURIDAD: MENSAJE GENÉRICO
+        return { message: 'Si el email existe, recibirás un enlace de reseteo.' };
+    } catch (error) {
+        // Se maneja el caso de que el usuario NO exista (Prisma lanzará un error)
+        if (error.code === 'P2025' || error.status === 404) {
+            // Se devuelve un mensaje genérico de éxito por seguridad
+            console.warn(`Intento de restablecimiento para email no encontrado: ${email}`);
+            return { message: 'Si el email existe, recibirás un enlace de reseteo.' };
+        }
+        throw new HttpException('Error interno al solicitar reseteo.', HttpStatus.INTERNAL_SERVER_ERROR);
     }
-    user.resetPasswordToken = crypto.randomBytes(32).toString('hex'); // Genera un token aleatorio
-    user.resetPasswordExpires = new Date(Date.now() + 3600000); // Establece la expiración del token a 1 hora
-
-    await this.prisma.user.update({
-      where: { email },
-      data: {
-        resetPasswordToken: user.resetPasswordToken,
-        resetPasswordExpires: user.resetPasswordExpires,
-      },
-    });
-
-    // Enviar email con el enlace
-    await this.emailService.sendPasswordResetEmail(
-      user.email,
-      user.resetPasswordToken,
-    );
-
-    return { message: 'Si el email existe, recibirás un enlace de reseteo' };
   }
 
   /**
