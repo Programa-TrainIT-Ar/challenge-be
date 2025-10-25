@@ -276,7 +276,8 @@ export class UserService {
         // 3. Enviar email (solo si la actualización fue exitosa)
         await this.emailService.sendPasswordResetEmail(
             user.email,
-            token, // Usa la variable 'token' generada
+            user.first_name,
+            token, // Se usa la variable 'token' generada
         );
 
         // 4. PRÁCTICA DE SEGURIDAD: MENSAJE GENÉRICO
