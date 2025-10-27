@@ -263,33 +263,80 @@ export class UserService {
 
     // 2. Intentar actualizar el usuario (si existe)
     try {
-        const user = await this.prisma.user.update({
-            where: { email },
-            data: {
-                resetPasswordToken: token,
-                resetPasswordExpires: expires,
-            },
-            // Seleccionar los datos necesarios para el email
-            select: { id: true, email: true, first_name: true } 
-        });
+      const user = await this.prisma.user.update({
+        where: {
+          email,
+          // Lógica de Condición: SOLO actualizar si el token ha expirado o no existe.
+          OR: [
+            { resetPasswordExpires: null }, // El token nunca ha sido generado
+            { resetPasswordExpires: { lte: new Date() } }, // El token ya expiró
+          ],
+        },
+        data: {
+          resetPasswordToken: token,
+          resetPasswordExpires: expires,
+        },
+        // Seleccionar los datos necesarios para el email
+        select: {
+          id: true,
+          email: true,
+          first_name: true,
+          resetPasswordToken: true,
+        },
+      });
 
-        // 3. Enviar email (solo si la actualización fue exitosa)
-        await this.emailService.sendPasswordResetEmail(
-            user.email,
-            user.first_name,
-            token, // Se usa la variable 'token' generada
-        );
+      // 3. Enviar email (solo si la actualización fue exitosa)
+      await this.emailService.sendPasswordResetEmail(
+        user.email,
+        user.first_name,
+        token, // Se usa la variable 'token' generada
+      );
 
-        // 4. PRÁCTICA DE SEGURIDAD: MENSAJE GENÉRICO
-        return { message: 'Si el email existe, recibirás un enlace de reseteo.' };
+      // 4. PRÁCTICA DE SEGURIDAD: MENSAJE GENÉRICO
+      return { message: 'Si el email existe, recibirás un enlace de recuperación.' };
     } catch (error) {
-        // Se maneja el caso de que el usuario NO exista (Prisma lanzará un error)
-        if (error.code === 'P2025' || error.status === 404) {
-            // Se devuelve un mensaje genérico de éxito por seguridad
-            console.warn(`Intento de restablecimiento para email no encontrado: ${email}`);
-            return { message: 'Si el email existe, recibirás un enlace de reseteo.' };
+
+      // El error P2025 de Prisma puede ocurrir por dos razones:
+        // A) El email no existe.
+        // B) El email existe, pero la cláusula 'where' no se cumplió 
+        //    (es decir, el token aún era VÁLIDO y por lo tanto NO SE HIZO el update).
+
+      // Se maneja el caso de que el usuario NO exista (Prisma lanzará un error)
+      if (error.code === 'P2025' || error.status === 404) {
+        // Si no se hizo el update, debemos verificar si fue por token válido o email no existente.
+        const user = await this.prisma.user.findUnique({
+          where: { email },
+          select: {
+            email: true,
+            first_name: true,
+            resetPasswordToken: true,
+            resetPasswordExpires: true,
+          },
+        });
+        if (
+          user &&
+          user.resetPasswordToken &&
+          user.resetPasswordExpires > new Date()
+        ) {
+          // Caso B: El token EXISTE y es VÁLIDO
+           return { message: 'El enlace de recuperación anterior no ha expirado. Revisa tu bandeja de entrada.' };
+        } else {
+          // Caso A: El email no existe o existe pero no tiene token válido (pero la primera
+          // consulta ya falló, lo cual es inusual si la lógica inicial fue correcta).
+          // En este punto, por seguridad, se devuelve el mensaje genérico.
+          console.warn(
+            `Intento de restablecimiento para email no encontrado o fallo inesperado: ${email}`,
+          );
+          return { message: 'Si el email existe, recibirás un enlace de recuperación.' };
         }
-        throw new HttpException('Error interno al solicitar reseteo.', HttpStatus.INTERNAL_SERVER_ERROR);
+      } else {
+        // Error interno no relacionado.
+        throw new HttpException(
+          'Error interno al solicitar reseteo.',
+          HttpStatus.INTERNAL_SERVER_ERROR,
+        );
+      }
+      // throw new HttpException('Error interno al solicitar reseteo.', HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
 
@@ -441,8 +488,11 @@ export class UserService {
       throw new HttpException('Usuario no existe.', HttpStatus.UNAUTHORIZED);
     }
 
-    if (!user.emailConfirmed){
-      throw new HttpException('El usuario no ha confirmado su correo.', HttpStatus.UNAUTHORIZED)
+    if (!user.emailConfirmed) {
+      throw new HttpException(
+        'El usuario no ha confirmado su correo.',
+        HttpStatus.UNAUTHORIZED,
+      );
     }
 
     // 2. Comparar la contraseña (si el usuario tiene contraseña, es decir, no es un usuario solo de Auth0)
