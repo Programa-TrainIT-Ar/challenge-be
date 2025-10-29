@@ -138,4 +138,41 @@ export class ChallengeService {
   remove(id: string) {
     return this.prisma.challenge.delete({ where: { id } });
   }
+
+  //  Verificar si existe un challenge completado
+  async findByUserAndQuiz(userId: string, quizId: string) {
+    const challenge = await this.prisma.challenge.findFirst({
+      where: {
+        user_id: userId,
+        quiz_id: quizId,
+        state: 'evaluated' // Solo challenges completados
+      },
+      include: {
+        quiz: {
+          select: {
+            name: true,
+            questions: {
+              select: {
+                id: true
+              }
+            }
+          }
+        }
+      }
+    });
+
+    if (challenge) {
+      return {
+        id: challenge.id,
+        calification: challenge.calification,
+        time_taken: challenge.time_taken,
+        quiz_name: challenge.quiz.name,
+        total_questions: challenge.quiz.questions.length,
+        created_at: challenge.created_at,
+        already_completed: true
+      };
+    }
+
+    return { already_completed: false };
+  }
 }
