@@ -125,7 +125,7 @@ export class EmailJsImplementation implements UserMail {
 
     try {
       await this.sendEmailViaEmailJS(
-        this.configService.get('EMAILJS_PASSWORD_RESET_TEMPLATE_ID'),
+        this.configService.get('EMAILJS_PASSWORD_TEMPLATE_ID'),
         {
           to_email: email,
           recoverUrl: resetUrl,
