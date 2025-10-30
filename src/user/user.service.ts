@@ -463,6 +463,7 @@ export class UserService {
     const payload = {
       email: user.email,
       sub: user.id,
+      first_name: user.first_name,
       role: role,
       is_superuser: user.is_superuser,
       [AUTH0_ROLES_CLAIM]: auth0Roles, //// Añadir la custom claim de roles (para estandarizar lógica)
