@@ -1,5 +1,5 @@
 // src/usuarios/usuarios.service.ts
-import { Injectable } from '@nestjs/common'; // Importa el decorador Injectable de NestJS
+import { Inject, Injectable } from '@nestjs/common'; // Importa el decorador Injectable de NestJS
 import { PrismaService } from 'src/prisma/prisma.service'; // Importa el servicio Prisma para acceder a la base de datos
 import { CreateUserDto } from './dto/create-user.dto';
 import { HttpException } from '@nestjs/common';
@@ -7,17 +7,18 @@ import { HttpStatus } from '@nestjs/common';
 import { HttpService } from '@nestjs/axios'; // Importa el servicio HTTP para realizar peticiones externas
 import * as crypto from 'crypto'; // Importa el módulo crypto para generar tokens
 import * as bcrypt from 'bcrypt'; // Importa el módulo bcrypt para hashear contraseñas
-import { EmailService } from './email.service';
 import { LoginDto } from './dto/auth.dto';
 import { ConfigService } from '@nestjs/config';
 import { firstValueFrom } from 'rxjs';
 import { JwtService } from '@nestjs/jwt';
+import { UserMail } from './entities/userMail';
 
 @Injectable() // Decorador que marca esta clase como un servicio que puede ser inyectado
 export class UserService {
   constructor(
     private readonly prisma: PrismaService,
-    private readonly emailService: EmailService,
+    @Inject('UserMail')
+    private readonly emailService: UserMail,
     private readonly configService: ConfigService,
     private readonly httpService: HttpService, // Inyecta el servicio HTTP para realizar peticiones externas
     private readonly jwtService: JwtService,
@@ -293,13 +294,14 @@ export class UserService {
       );
 
       // 4. PRÁCTICA DE SEGURIDAD: MENSAJE GENÉRICO
-      return { message: 'Si el email existe, recibirás un enlace de recuperación.' };
+      return {
+        message: 'Si el email existe, recibirás un enlace de recuperación.',
+      };
     } catch (error) {
-
       // El error P2025 de Prisma puede ocurrir por dos razones:
-        // A) El email no existe.
-        // B) El email existe, pero la cláusula 'where' no se cumplió 
-        //    (es decir, el token aún era VÁLIDO y por lo tanto NO SE HIZO el update).
+      // A) El email no existe.
+      // B) El email existe, pero la cláusula 'where' no se cumplió
+      //    (es decir, el token aún era VÁLIDO y por lo tanto NO SE HIZO el update).
 
       // Se maneja el caso de que el usuario NO exista (Prisma lanzará un error)
       if (error.code === 'P2025' || error.status === 404) {
@@ -319,7 +321,10 @@ export class UserService {
           user.resetPasswordExpires > new Date()
         ) {
           // Caso B: El token EXISTE y es VÁLIDO
-           return { message: 'El enlace de recuperación anterior no ha expirado. Revisa tu bandeja de entrada.' };
+          return {
+            message:
+              'El enlace de recuperación anterior no ha expirado. Revisa tu bandeja de entrada.',
+          };
         } else {
           // Caso A: El email no existe o existe pero no tiene token válido (pero la primera
           // consulta ya falló, lo cual es inusual si la lógica inicial fue correcta).
@@ -327,7 +332,9 @@ export class UserService {
           console.warn(
             `Intento de restablecimiento para email no encontrado o fallo inesperado: ${email}`,
           );
-          return { message: 'Si el email existe, recibirás un enlace de recuperación.' };
+          return {
+            message: 'Si el email existe, recibirás un enlace de recuperación.',
+          };
         }
       } else {
         // Error interno no relacionado.
@@ -493,53 +500,62 @@ export class UserService {
         'El usuario no ha confirmado su correo.',
         HttpStatus.UNAUTHORIZED,
       );
+      if (!user.emailConfirmed) {
+        throw new HttpException(
+          'El usuario no ha confirmado su correo.',
+          HttpStatus.UNAUTHORIZED,
+        );
+      }
+
+      // 2. Comparar la contraseña (si el usuario tiene contraseña, es decir, no es un usuario solo de Auth0)
+      if (!user.password) {
+        throw new HttpException(
+          'Usuario registrado con un servicio externo. Usa el inicio de sesión con Google.',
+          HttpStatus.UNAUTHORIZED,
+        );
+      }
+
+      // Comparación de la contraseña en texto plano con el hash de la DB
+      const isPasswordValid = await bcrypt.compare(password, user.password);
+
+      if (!isPasswordValid) {
+        throw new HttpException(
+          'Credenciales inválidas.',
+          HttpStatus.UNAUTHORIZED,
+        );
+      }
+
+      // 3. Generar un JSON Web Token (JWT) propio para la sesión local
+
+      //Evaluando rol del usuario para enviarlo en el token
+      const role = user.is_superuser ? 'admin' : 'candidato';
+
+      // Se crea el array de roles que imita la estructura de Auth0
+      const AUTH0_ROLES_CLAIM = 'https://miaplicacion.com/roles';
+      const auth0Roles = [role];
+
+      // Carga útil (Payload) del token
+      const payload = {
+        email: user.email,
+        sub: user.id,
+        role: role,
+        is_superuser: user.is_superuser,
+        [AUTH0_ROLES_CLAIM]: auth0Roles, //// Añadir la custom claim de roles (para estandarizar lógica)
+      };
+
+      // Generar el token
+      const accessToken = this.jwtService.sign(payload);
+
+      // 4. Retornar el token al frontend
+      return {
+        access_token: accessToken,
+        user_id: user.id,
+        email: user.email,
+        role: role,
+      };
     }
-
-    // 2. Comparar la contraseña (si el usuario tiene contraseña, es decir, no es un usuario solo de Auth0)
-    if (!user.password) {
-      throw new HttpException(
-        'Usuario registrado con un servicio externo. Usa el inicio de sesión con Google.',
-        HttpStatus.UNAUTHORIZED,
-      );
-    }
-
-    // Comparación de la contraseña en texto plano con el hash de la DB
-    const isPasswordValid = await bcrypt.compare(password, user.password);
-
-    if (!isPasswordValid) {
-      throw new HttpException(
-        'Credenciales inválidas.',
-        HttpStatus.UNAUTHORIZED,
-      );
-    }
-
-    // 3. Generar un JSON Web Token (JWT) propio para la sesión local
-
-    //Evaluando rol del usuario para enviarlo en el token
-    const role = user.is_superuser ? 'admin' : 'candidato';
-
-    // Se crea el array de roles que imita la estructura de Auth0
-    const AUTH0_ROLES_CLAIM = 'https://miaplicacion.com/roles';
-    const auth0Roles = [role];
-
-    // Carga útil (Payload) del token
-    const payload = {
-      email: user.email,
-      sub: user.id,
-      role: role,
-      is_superuser: user.is_superuser,
-      [AUTH0_ROLES_CLAIM]: auth0Roles, //// Añadir la custom claim de roles (para estandarizar lógica)
-    };
-
-    // Generar el token
-    const accessToken = this.jwtService.sign(payload);
-
-    // 4. Retornar el token al frontend
-    return {
-      access_token: accessToken,
-      user_id: user.id,
-      email: user.email,
-      role: role,
-    };
+  }
+  async prueba(email: string) {
+    await this.emailService.sendTestEmail(email);
   }
 }
