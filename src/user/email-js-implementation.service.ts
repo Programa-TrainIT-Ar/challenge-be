@@ -143,14 +143,11 @@ export class EmailJsImplementation implements UserMail {
 
     try {
       console.log('enviando mail');
-      await this.sendEmailViaEmailJS(
-        this.configService.get('EMAILJS_EMAIL_TEMPLATE_ID'),
-        {
-          name: name,
-          confirmationUrl: confirmationUrl,
-          to_email: email,
-        },
-      );
+      await this.sendEmailViaEmailJS('template_epp9lg2', {
+        name: name,
+        confirmationUrl: confirmationUrl,
+        to_email: email,
+      });
       this.logger.log('✅ Email de confirmación enviado');
     } catch (error) {
       this.logger.error(
