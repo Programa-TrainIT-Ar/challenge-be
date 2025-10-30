@@ -181,7 +181,7 @@ export class UserController {
    */
   @Get() // Define la ruta para obtener todos los usuarios
   @ApiBearerAuth()
-  @UseGuards(HybridAuthGuard, RolesGuard) 
+  @UseGuards(HybridAuthGuard, RolesGuard)
   @Roles('admin') // Solo permite a los administradores
   @ApiOperation({
     summary: 'Obtener todos los usuarios',
@@ -242,7 +242,7 @@ export class UserController {
    */
   @Put('setup/:id') // Define la ruta para completar los datos del usuario al confirmar email
   @ApiBearerAuth()
-  @UseGuards(HybridAuthGuard) 
+  @UseGuards(HybridAuthGuard)
   @ApiOperation({ summary: 'Actualizar un usuario por ID' })
   @ApiResponse({ status: 200, description: 'Usuario actualizado.' })
   @ApiResponse({ status: 404, description: 'Usuario no encontrado.' })
@@ -273,5 +273,11 @@ export class UserController {
     return {
       message: 'Usuario eliminado exitosamente.',
     };
+  }
+
+  @Get('sendMailTest')
+  @ApiOperation({ summary: 'Enviar email de prueba' })
+  async sendMailTest(@Query('email') email: string) {
+    return this.userService.prueba(email);
   }
 }

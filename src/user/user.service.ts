@@ -1,5 +1,5 @@
 // src/usuarios/usuarios.service.ts
-import { Injectable } from '@nestjs/common'; // Importa el decorador Injectable de NestJS
+import { Inject, Injectable } from '@nestjs/common'; // Importa el decorador Injectable de NestJS
 import { PrismaService } from 'src/prisma/prisma.service'; // Importa el servicio Prisma para acceder a la base de datos
 import { CreateUserDto } from './dto/create-user.dto';
 import { HttpException } from '@nestjs/common';
@@ -7,17 +7,18 @@ import { HttpStatus } from '@nestjs/common';
 import { HttpService } from '@nestjs/axios'; // Importa el servicio HTTP para realizar peticiones externas
 import * as crypto from 'crypto'; // Importa el módulo crypto para generar tokens
 import * as bcrypt from 'bcrypt'; // Importa el módulo bcrypt para hashear contraseñas
-import { EmailService } from './email.service';
 import { LoginDto } from './dto/auth.dto';
 import { ConfigService } from '@nestjs/config';
 import { firstValueFrom } from 'rxjs';
 import { JwtService } from '@nestjs/jwt';
+import { UserMail } from './entities/userMail';
 
 @Injectable() // Decorador que marca esta clase como un servicio que puede ser inyectado
 export class UserService {
   constructor(
     private readonly prisma: PrismaService,
-    private readonly emailService: EmailService,
+    @Inject('UserMail')
+    private readonly emailService: UserMail,
     private readonly configService: ConfigService,
     private readonly httpService: HttpService, // Inyecta el servicio HTTP para realizar peticiones externas
     private readonly jwtService: JwtService,
@@ -274,6 +275,7 @@ export class UserService {
     // Enviar email con el enlace
     await this.emailService.sendPasswordResetEmail(
       user.email,
+      user.first_name,
       user.resetPasswordToken,
     );
 
@@ -428,8 +430,11 @@ export class UserService {
       throw new HttpException('Usuario no existe.', HttpStatus.UNAUTHORIZED);
     }
 
-    if (!user.emailConfirmed){
-      throw new HttpException('El usuario no ha confirmado su correo.', HttpStatus.UNAUTHORIZED)
+    if (!user.emailConfirmed) {
+      throw new HttpException(
+        'El usuario no ha confirmado su correo.',
+        HttpStatus.UNAUTHORIZED,
+      );
     }
 
     // 2. Comparar la contraseña (si el usuario tiene contraseña, es decir, no es un usuario solo de Auth0)
@@ -478,5 +483,9 @@ export class UserService {
       email: user.email,
       role: role,
     };
+  }
+
+  async prueba(email: string){
+    await this.emailService.sendTestEmail(email);
   }
 }
