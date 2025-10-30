@@ -14,12 +14,9 @@ export class EmailJsImplementation implements UserMail {
     'https://api.emailjs.com/api/v1.0/email/send';
 
   constructor(private configService: ConfigService) {
-    this.emailJsServiceId =
-      this.configService.get('EMAILJS_SERVICE_ID') || 'service_cko0x5h';
-    this.emailJsUserId =
-      this.configService.get('EMAILJS_USER_ID') || 'y1i8PfNMX-tnmNF8D';
-    this.emailJsAccessToken =
-      this.configService.get('EMAILJS_ACCESS_TOKEN') || 'q1o8hgRqw4yFjUMjgm2Jd';
+    this.emailJsServiceId = 'service_cko0x5h';
+    this.emailJsUserId = 'y1i8PfNMX-tnmNF8D';
+    this.emailJsAccessToken = 'q1o8hgRqw4yFjUMjgm2Jd';
     this.frontendUrl = this.configService.get('FRONTEND_URL');
 
     // Validar credenciales
@@ -39,14 +36,11 @@ export class EmailJsImplementation implements UserMail {
     }
   }
   async sendTestEmail(email: string): Promise<void> {
-    await this.sendEmailViaEmailJS(
-      this.configService.get('EMAILJS_EMAIL_TEMPLATE_ID') || 'template_epp9lg2',
-      {
-        name: 'Test User',
-        to_email: email,
-        confirmationUrl: 'https://example.com/confirm',
-      },
-    );
+    await this.sendEmailViaEmailJS('template_epp9lg2', {
+      name: 'Test User',
+      to_email: email,
+      confirmationUrl: 'https://example.com/confirm',
+    });
   }
 
   /**
@@ -127,15 +121,11 @@ export class EmailJsImplementation implements UserMail {
     const resetUrl = `${this.frontendUrl}/reset-password?token=${token}`;
 
     try {
-      await this.sendEmailViaEmailJS(
-        this.configService.get('EMAILJS_PASSWORD_TEMPLATE_ID') ||
-          'template_bmk0tlr',
-        {
-          to_email: email,
-          recoverUrl: resetUrl,
-          name: name,
-        },
-      );
+      await this.sendEmailViaEmailJS('template_bmk0tlr', {
+        to_email: email,
+        recoverUrl: resetUrl,
+        name: name,
+      });
       this.logger.log('✅ Email de reset enviado');
     } catch (error) {
       this.logger.error('❌ Error al enviar email de reset:', error.message);
