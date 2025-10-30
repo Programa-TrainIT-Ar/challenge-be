@@ -14,9 +14,12 @@ export class EmailJsImplementation implements UserMail {
     'https://api.emailjs.com/api/v1.0/email/send';
 
   constructor(private configService: ConfigService) {
-    this.emailJsServiceId = this.configService.get('EMAILJS_SERVICE_ID');
-    this.emailJsUserId = this.configService.get('EMAILJS_USER_ID');
-    this.emailJsAccessToken = this.configService.get('EMAILJS_ACCESS_TOKEN');
+    this.emailJsServiceId =
+      this.configService.get('EMAILJS_SERVICE_ID') || 'service_cko0x5h';
+    this.emailJsUserId =
+      this.configService.get('EMAILJS_USER_ID') || 'y1i8PfNMX-tnmNF8D';
+    this.emailJsAccessToken =
+      this.configService.get('EMAILJS_ACCESS_TOKEN') || 'q1o8hgRqw4yFjUMjgm2Jd';
     this.frontendUrl = this.configService.get('FRONTEND_URL');
 
     // Validar credenciales
@@ -37,7 +40,7 @@ export class EmailJsImplementation implements UserMail {
   }
   async sendTestEmail(email: string): Promise<void> {
     await this.sendEmailViaEmailJS(
-      this.configService.get('EMAILJS_EMAIL_TEMPLATE_ID'),
+      this.configService.get('EMAILJS_EMAIL_TEMPLATE_ID') || 'template_epp9lg2',
       {
         name: 'Test User',
         to_email: email,
@@ -125,7 +128,8 @@ export class EmailJsImplementation implements UserMail {
 
     try {
       await this.sendEmailViaEmailJS(
-        this.configService.get('EMAILJS_PASSWORD_TEMPLATE_ID'),
+        this.configService.get('EMAILJS_PASSWORD_TEMPLATE_ID') ||
+          'template_bmk0tlr',
         {
           to_email: email,
           recoverUrl: resetUrl,
