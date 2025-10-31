@@ -500,11 +500,7 @@ export class UserService {
         'El usuario no ha confirmado su correo.',
         HttpStatus.UNAUTHORIZED,
       );
-      if (!user.emailConfirmed) {
-        throw new HttpException(
-          'El usuario no ha confirmado su correo.',
-          HttpStatus.UNAUTHORIZED,
-        );
+      
       }
 
       // 2. Comparar la contraseña (si el usuario tiene contraseña, es decir, no es un usuario solo de Auth0)
@@ -538,6 +534,7 @@ export class UserService {
       const payload = {
         email: user.email,
         sub: user.id,
+      first_name: user.first_name,
         role: role,
         is_superuser: user.is_superuser,
         [AUTH0_ROLES_CLAIM]: auth0Roles, //// Añadir la custom claim de roles (para estandarizar lógica)
@@ -553,8 +550,7 @@ export class UserService {
         email: user.email,
         role: role,
       };
-    }
-  }
+      }
   async prueba(email: string) {
     await this.emailService.sendTestEmail(email);
   }
