@@ -6,11 +6,6 @@ export class EmailDto {
   @IsEmail()
   @IsNotEmpty()
   email: string;
-
-  @ApiProperty({ description: 'Nombre del usuario' })
-  @IsString()
-  @IsNotEmpty()
-  first_name: string;
 }
 
 export class TokenEmail_PasswordDto {

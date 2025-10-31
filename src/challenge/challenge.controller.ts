@@ -95,4 +95,13 @@ export class ChallengeController {
   remove(@Param('id') id: string) {
     return this.challengeService.remove(id);
   }
+
+  //  Verificar challenge existente
+  @Get('check/:userId/:quizId')
+  checkExistingChallenge(
+    @Param('userId') userId: string,
+    @Param('quizId') quizId: string,
+  ) {
+    return this.challengeService.findByUserAndQuiz(userId, quizId);
+  }
 }
