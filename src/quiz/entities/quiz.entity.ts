@@ -4,6 +4,7 @@ import { UUID } from 'crypto';
 import { UserEntity } from 'src/user/entities/user.entity';
 import { CellEntityNested } from 'src/cell/entities/cell.entity';
 import { QuestionEntity } from 'src/question/entities/question.entity';
+import { QuestionForTakingEntity } from 'src/question/entities/question-for-taking.entity';
 
 export class QuizEntity  {
     
@@ -58,4 +59,13 @@ export class QuizEntityQuestion extends QuizEntityNested{
         description: 'Array de Questions asociadas al Quiz' 
     })
     questions: QuestionEntity[];
+}
+
+export class QuizEntityForTaking extends QuizEntityNested {
+    @ApiProperty({ 
+        type: () => QuestionForTakingEntity,
+        isArray: true,
+        description: 'Array de Questions para realizar el Quiz (sin respuestas correctas)' 
+    })
+    questions: QuestionForTakingEntity[];
 }

@@ -12,24 +12,35 @@ export class ChallengeService {
   async create(data: CreateChallengeDto) {
     const quiz = await this.prisma.quiz.findUnique({
       where: { id: data.quiz_id },
-      include: { questions: true },
+      include: { questions: { orderBy: { created_at: 'asc' } } }, // Asegurar orden
     });
 
     if (!quiz) {
       throw new Error('Quiz not found');
     }
 
+    console.log('📋 Quiz encontrado con', quiz.questions.length, 'preguntas');
+    console.log('📝 Respuestas recibidas:', data.question_answers.length, 'respuestas');
+
     var calification = 0;
     
-    quiz.questions.forEach((question, index)=>{
+    quiz.questions.forEach((question, index) => {
       var userAnswer = data.question_answers[index];
-      console.log('User answer for question', question.id, ':', userAnswer);
-      console.log('Correct option for question', question.id, ':', question.correct_option);
+      console.log(`\n🔍 Pregunta ${index + 1}:`);
+      console.log('  ID:', question.id);
+      console.log('  Pregunta:', question.question);
+      console.log('  Respuesta usuario:', userAnswer);
+      console.log('  Respuesta correcta:', question.correct_option);
+      
       if (JSON.stringify(userAnswer) === JSON.stringify(question.correct_option)) {
         calification++;
-        console.log('Current calification:', calification);
+        console.log('  ✅ CORRECTO! Calificación actual:', calification);
+      } else {
+        console.log('  ❌ INCORRECTO');
       }
     });
+
+    console.log(`\n🏆 Calificación final: ${calification}/${quiz.questions.length}`);
 
     return await this.prisma.challenge.create({
       data:{
@@ -126,5 +137,42 @@ export class ChallengeService {
 
   remove(id: string) {
     return this.prisma.challenge.delete({ where: { id } });
+  }
+
+  //  Verificar si existe un challenge completado
+  async findByUserAndQuiz(userId: string, quizId: string) {
+    const challenge = await this.prisma.challenge.findFirst({
+      where: {
+        user_id: userId,
+        quiz_id: quizId,
+        state: 'evaluated' // Solo challenges completados
+      },
+      include: {
+        quiz: {
+          select: {
+            name: true,
+            questions: {
+              select: {
+                id: true
+              }
+            }
+          }
+        }
+      }
+    });
+
+    if (challenge) {
+      return {
+        id: challenge.id,
+        calification: challenge.calification,
+        time_taken: challenge.time_taken,
+        quiz_name: challenge.quiz.name,
+        total_questions: challenge.quiz.questions.length,
+        created_at: challenge.created_at,
+        already_completed: true
+      };
+    }
+
+    return { already_completed: false };
   }
 }

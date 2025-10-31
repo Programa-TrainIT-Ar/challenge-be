@@ -28,6 +28,7 @@ export class AuthorizationGuard implements CanActivate {
         audience: this.AUTH0_AUDIENCE,
         issuer: `https://${this.AUTH0_DOMAIN}/`,
         algorithms: ['RS256'],
+        requestProperty: 'user', // Esto adjunta el payload a req.user (estándar de NestJS)
       })
     );
 

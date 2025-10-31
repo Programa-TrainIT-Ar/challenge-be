@@ -1,4 +1,3 @@
-
 import { Injectable, NotFoundException, Param } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { Quiz, Prisma, Seniority } from '@prisma/client';
@@ -19,21 +18,21 @@ export class QuizService {
   async createQuizNested(data: CreateQuizNestedDto): Promise<Quiz | null> {
     //crea un quiz con 10 preguntas anidadas
     const { questions, ...quizData } = data;
-    
+
     return this.prisma.quiz.create({
       data: {
         ...quizData,
         questions: {
-          create: questions.map(question => ({
-            ...question
-          }))
-        }
+          create: questions.map((question) => ({
+            ...question,
+          })),
+        },
       },
       include: {
         created_by: true,
         cell: true,
-        questions: true
-      }
+        questions: true,
+      },
     });
   }
 
@@ -42,7 +41,7 @@ export class QuizService {
     module?: string;
     cell?: string;
     seniority?: string;
-  }): Promise<{quizzes:Quiz[], total:number}> {
+  }): Promise<{ quizzes: Quiz[]; total: number }> {
     const { search, cell, seniority, module } = filters;
     //creo una variable where vacia para almacenar los terminos de busqueda y filtros
     let where: Prisma.QuizWhereInput = {};
@@ -50,30 +49,34 @@ export class QuizService {
     if (search) {
       where.OR = [
         { name: { contains: search, mode: 'insensitive' } },
-        { created_by: { first_name: { contains: search, mode: 'insensitive' } } },
-        { created_by: { last_name: { contains: search, mode: 'insensitive' } } },
+        {
+          created_by: { first_name: { contains: search, mode: 'insensitive' } },
+        },
+        {
+          created_by: { last_name: { contains: search, mode: 'insensitive' } },
+        },
         { created_by: { email: { contains: search, mode: 'insensitive' } } },
       ];
     }
-    
+
     if (module) {
       where.cell = {
         module: {
-          name: { equals: module, mode: 'insensitive' }
-        }
+          name: { equals: module, mode: 'insensitive' },
+        },
       };
     }
 
     if (cell) {
       where.cell = {
-        name: { equals: cell, mode: 'insensitive' }
+        name: { equals: cell, mode: 'insensitive' },
       };
     }
-    
+
     if (seniority) {
       where.seniority = seniority as Seniority;
     }
-        
+
     //genera la consulta a la base de datos
     const [quizzes, total] = await Promise.all([
       this.prisma.quiz.findMany({
@@ -82,19 +85,18 @@ export class QuizService {
           created_by: true,
           cell: {
             include: {
-              module: true
-            }
+              module: true,
+            },
+          },
         },
-      },
-      orderBy: {
-        created_at: 'desc', // o 'asc' para orden descendente
-      },
+        orderBy: {
+          created_at: 'desc', // o 'asc' para orden descendente
+        },
       }),
-      this.prisma.quiz.count({ where })
-    ])
+      this.prisma.quiz.count({ where }),
+    ]);
 
-    return {quizzes, total};
-     
+    return { quizzes, total };
   }
 
   async findOneQuiz(
@@ -106,12 +108,46 @@ export class QuizService {
         created_by: true,
         cell: {
           include: {
-            module: true
-          }
+            module: true,
+          },
         },
         questions: true,
+      },
+    });
+  }
+
+  // NUEVO: Servicio para obtener quiz sin respuestas (candidatos)
+  async getQuizForTaking(
+    quizWhereUniqueInput: Prisma.QuizWhereUniqueInput,
+  ): Promise<any> {
+    const quiz = await this.prisma.quiz.findUnique({
+      where: quizWhereUniqueInput,
+      include: {
+        created_by: true,
+        cell: {
+          include: {
+            module: true,
+          },
+        },
+        questions: {
+          select: {
+            id: true,
+            question: true,
+            seniority: true,
+            type: true,
+            options: true,
+            quiz_id: true,
+            // NO incluir correct_option, explanation, link
+          },
+        },
+      },
+    });
+
+    if (!quiz) {
+      throw new NotFoundException('Quiz not found');
     }
-  });
+
+    return quiz;
   }
 
   async updateQuiz(
@@ -125,35 +161,38 @@ export class QuizService {
     });
   }
 
-  async updateQuizNested(where: { id: string }, updateQuizDto: UpdateQuizNestedDto){
-      // Actualiza un quiz con sus preguntas anidadas
-      // Primero verificamos que el quiz existe
-      const existingQuiz = await this.prisma.quiz.findUnique({
-          where,
-          include: { questions: true }
-      });
-
-      if (!existingQuiz) {
-          throw new NotFoundException(`Quiz with ID ${where.id} not found`);
-      }
-    const { questions, ...quizData } = updateQuizDto;
-    
-    return this.prisma.quiz.update({
-        where,
-        data: {
-            ...quizData,
-            questions: {
-                update: questions.map(question => ({
-                    where: { id: question.id || '' },
-                    data: question,
-                }))
-              }
-        },
-        include: {
-          questions: true
-        }
+  async updateQuizNested(
+    where: { id: string },
+    updateQuizDto: UpdateQuizNestedDto,
+  ) {
+    // Actualiza un quiz con sus preguntas anidadas
+    // Primero verificamos que el quiz existe
+    const existingQuiz = await this.prisma.quiz.findUnique({
+      where,
+      include: { questions: true },
     });
-}
+
+    if (!existingQuiz) {
+      throw new NotFoundException(`Quiz with ID ${where.id} not found`);
+    }
+    const { questions, ...quizData } = updateQuizDto;
+
+    return this.prisma.quiz.update({
+      where,
+      data: {
+        ...quizData,
+        questions: {
+          update: questions.map((question) => ({
+            where: { id: question.id || '' },
+            data: question,
+          })),
+        },
+      },
+      include: {
+        questions: true,
+      },
+    });
+  }
 
   async removeQuiz(where: Prisma.QuizWhereUniqueInput): Promise<Quiz> {
     return this.prisma.quiz.delete({
@@ -161,4 +200,3 @@ export class QuizService {
     });
   }
 }
-

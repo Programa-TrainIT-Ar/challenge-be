@@ -1,25 +1,21 @@
-import { ApiProperty } from "@nestjs/swagger";
-import { IsEmail, IsNotEmpty, IsString } from "class-validator";
+import { ApiProperty } from '@nestjs/swagger';
+import { IsEmail, IsNotEmpty, IsString } from 'class-validator';
 
 export class EmailDto {
   @ApiProperty({ description: 'Email del usuario' })
   @IsEmail()
   @IsNotEmpty()
   email: string;
+}
 
-  @ApiProperty({ description: 'Nombre del usuario' })
+export class TokenEmail_PasswordDto {
+  @ApiProperty({ description: 'Token de confirmación de email y restablecimiento de contraseña' })
   @IsString()
   @IsNotEmpty()
-  first_name:string;
+  confirmationToken: string;
 }
 
-export class TokenDto {
-  @ApiProperty({ description: 'Token de restablecimiento de contraseña' })
-  @IsNotEmpty()
-  token: string;
-}
-
-export class TokenWithPasswordDto extends TokenDto {
+export class TokenWithPasswordDto extends TokenEmail_PasswordDto {
   @ApiProperty({ description: 'Nueva contraseña del usuario' })
   @IsNotEmpty()
   password: string;

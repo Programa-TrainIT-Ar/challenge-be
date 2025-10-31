@@ -13,10 +13,11 @@ export class CreateUserDto {
   @ApiProperty({ description: 'nombre del usuario' })
   first_name: string;
 
+  @IsOptional()
   @IsString()
   @ApiProperty()
   @ApiProperty({ description: 'apellido del usuario' })
-  last_name: string;
+  last_name?: string;
 
   @IsOptional()
   @IsString()
