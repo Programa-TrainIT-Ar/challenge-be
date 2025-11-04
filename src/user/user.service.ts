@@ -136,6 +136,7 @@ export class UserService {
           photo: data.photo,
           timezone: data.timezone,
           emailConfirmed: true,
+          // externalId: data.externalId, // ID del proveedor externo (Auth0)
         },
       });
 
@@ -150,6 +151,26 @@ export class UserService {
       );
     }
   }
+
+  /**
+   * Obtiene un usuario por su ID externo (Auth0 sub).
+   * Esta función es necesaria para la lógica de CanActivate del ChallengeService.
+   * @param externalId - El ID externo (Auth0 sub) del usuario.
+   * @returns El usuario encontrado o null.
+   */
+//   async findByExternalId(externalId: string) {
+//     // 🚨 CAMBIO 2: Nueva función para buscar por externalId
+//     return this.prisma.user.findUnique({
+//       where: { externalId },
+//       select: {
+//         // Puedes seleccionar todos los campos que tu ChallengeService necesite.
+//         id: true, 
+//         email: true,
+//         first_name: true,
+//         last_name: true,
+//       },
+//     });
+//   }
 
   /**
    * Obtiene todos los usuarios.

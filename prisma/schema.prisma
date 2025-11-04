@@ -8,53 +8,52 @@ datasource db {
 }
 
 model User {
-  id           String        @id @default(uuid())
-  email        String        @unique
-  password     String?
-  first_name   String
-  last_name    String?
-  gender       String?
-  photo        String?
-  phone_number String?
-  timezone     String?
-  is_active    Boolean       @default(true)
-  is_staff     Boolean       @default(false)
-  is_superuser Boolean       @default(false)
-  created_at   DateTime      @default(now())
-  updated_at   DateTime?     @updatedAt
-  last_login   DateTime?
-  birthdate    DateTime?
-  emailConfirmationToken String?
+  id                       String          @id @default(uuid())
+  email                    String          @unique
+  password                 String?
+  first_name               String
+  last_name                String?
+  gender                   String?
+  photo                    String?
+  phone_number             String?
+  timezone                 String?
+  is_active                Boolean         @default(true)
+  is_staff                 Boolean         @default(false)
+  is_superuser             Boolean         @default(false)
+  created_at               DateTime        @default(now())
+  updated_at               DateTime?       @updatedAt
+  last_login               DateTime?
+  birthdate                DateTime?
+  resetPasswordExpires     DateTime?
+  resetPasswordToken       String?
+  emailConfirmationToken   String?
+  emailConfirmed           Boolean         @default(false)
   emailConfirmationExpires DateTime?
-  emailConfirmed         Boolean   @default(false)
-  resetPasswordToken     String?
-  resetPasswordExpires   DateTime?
-
-  quizzes       Quiz[]        
-  challenges    Challenge[]    
-  hardSkills    HardSkill[]      @relation("HardSkillUser")
-  softSkills    SoftSkill[]      @relation("SoftSkillUser")
-  socials       SocialNetwork[]  @relation("SocialNetworkUser")
-  languagesUser LanguageUser[]
-  roles         RoleUser[]
+  availability             String?
+  country                  String?
+  challenges               Challenge[]
+  languagesUser            LanguageUser[]
+  quizzes                  Quiz[]
+  roles                    RoleUser[]
+  hardSkills               HardSkill[]     @relation("HardSkillUser")
+  socials                  SocialNetwork[] @relation("SocialNetworkUser")
+  softSkills               SoftSkill[]     @relation("SoftSkillUser")
 }
 
 model HardSkill {
-  id          String    @id @default(uuid())
-  name        String    @unique
-  created_at  DateTime  @default(now())
-  updated_at  DateTime? @updatedAt
-
-  users       User[]    @relation("HardSkillUser")
+  id         String    @id @default(uuid())
+  name       String    @unique
+  created_at DateTime  @default(now())
+  updated_at DateTime? @updatedAt
+  users      User[]    @relation("HardSkillUser")
 }
 
 model SoftSkill {
-  id          String    @id @default(uuid())
-  name        String    @unique   
-  created_at  DateTime  @default(now())
-  updated_at  DateTime? @updatedAt
-
-  users       User[]    @relation("SoftSkillUser")
+  id         String    @id @default(uuid())
+  name       String    @unique
+  created_at DateTime  @default(now())
+  updated_at DateTime? @updatedAt
+  users      User[]    @relation("SoftSkillUser")
 }
 
 model SocialNetwork {
@@ -63,115 +62,111 @@ model SocialNetwork {
   url        String
   created_at DateTime  @default(now())
   updated_at DateTime? @updatedAt
-
   users      User[]    @relation("SocialNetworkUser")
 }
 
 model Language {
-  id          String    @id @default(uuid())
-  language    String    @unique
-  created_at  DateTime  @default(now())
-  updated_at  DateTime? @updatedAt
-
-  language_user       LanguageUser[]
+  id            String         @id @default(uuid())
+  language      String         @unique
+  created_at    DateTime       @default(now())
+  updated_at    DateTime?      @updatedAt
+  language_user LanguageUser[]
 }
 
 model LanguageUser {
-  id            String    @id @default(uuid())
-  language      Language  @relation(fields: [language_id], references: [id])
-  language_id   String
-  user          User      @relation(fields: [user_id], references: [id])
-  user_id       String
-  level         Level
+  id          String   @id @default(uuid())
+  language_id String
+  user_id     String
+  level       Level
+  language    Language @relation(fields: [language_id], references: [id])
+  user        User     @relation(fields: [user_id], references: [id])
 }
 
 model Role {
-  id          String    @id @default(uuid())
-  name        String    @unique
-  created_at  DateTime  @default(now())
-  updated_at  DateTime? @updatedAt
-
-  role_user   RoleUser[]
+  id         String     @id @default(uuid())
+  name       String     @unique
+  created_at DateTime   @default(now())
+  updated_at DateTime?  @updatedAt
+  role_user  RoleUser[]
 }
 
 model RoleUser {
-  id          String        @id @default(uuid())
-  role        Role      @relation(fields: [role_id], references: [id])
-  role_id     String
-  user        User      @relation(fields: [user_id], references: [id])
-  user_id     String
-  seniority   Seniority
+  id        String    @id @default(uuid())
+  role_id   String
+  user_id   String
+  seniority Seniority
+  role      Role      @relation(fields: [role_id], references: [id])
+  user      User      @relation(fields: [user_id], references: [id])
 }
 
 model Module {
-  id        String  @id @default(uuid())
-  name      String  @unique
-  is_active Boolean @default(true)
+  id         String    @id @default(uuid())
+  name       String    @unique
+  is_active  Boolean   @default(true)
   created_at DateTime  @default(now())
   updated_at DateTime? @updatedAt
-
-  cell      Cell[]
+  cell       Cell[]
 }
 
 model Cell {
-  id          String        @id @default(uuid())
-  name        String
-  is_active   Boolean       @default(true)
-  module      Module        @relation(fields: [module_id], references: [id], onDelete: Cascade, onUpdate: Cascade )
-  module_id   String
+  id         String    @id @default(uuid())
+  name       String
+  is_active  Boolean   @default(true)
+  module_id  String
   created_at DateTime  @default(now())
   updated_at DateTime? @updatedAt
+  module     Module    @relation(fields: [module_id], references: [id], onDelete: Cascade)
+  quizzes    Quiz[]
 
-  quizzes     Quiz[]     
   @@unique([name, module_id])
 }
 
 model Quiz {
-  id              String         @id @default(uuid())
-  name            String         @unique
-  description     String?
-  cell            Cell           @relation(fields: [cell_id], references: [id])
-  cell_id         String
-  seniority       Seniority
-  challenge_type  ChallengeType
-  max_time        Int?
-  created_by      User           @relation(fields: [created_by_id], references: [id])
-  created_by_id   String
-  created_at      DateTime       @default(now())
-  updated_at      DateTime?      @updatedAt
-  is_active       Boolean        @default(true)
-  questions       Question[]
-  challenges      Challenge[]
+  id             String        @id @default(uuid())
+  name           String        @unique
+  description    String?
+  cell_id        String
+  seniority      Seniority
+  challenge_type ChallengeType
+  max_time       Int?
+  created_by_id  String
+  created_at     DateTime      @default(now())
+  updated_at     DateTime?     @updatedAt
+  is_active      Boolean       @default(true)
+  challenges     Challenge[]
+  questions      Question[]
+  cell           Cell          @relation(fields: [cell_id], references: [id])
+  created_by     User          @relation(fields: [created_by_id], references: [id])
 }
 
 model Question {
-  id              String       @id @default(uuid()) 
-  question        String       
-  seniority       Seniority
-  type            QuestionType
-  options         String[]
-  correct_option  Int[]
-  explanation     String?
-  link            String?
-  is_active       Boolean
-  created_at      DateTime      @default(now())
-  updated_at      DateTime?     @updatedAt
-  quiz            Quiz          @relation(fields: [quiz_id], references: [id], onDelete: Cascade, onUpdate: Cascade )
-  quiz_id         String
+  id             String       @id @default(uuid())
+  question       String
+  seniority      Seniority
+  type           QuestionType
+  options        String[]
+  correct_option Int[]
+  explanation    String?
+  link           String?
+  is_active      Boolean
+  created_at     DateTime     @default(now())
+  updated_at     DateTime?    @updatedAt
+  quiz_id        String
+  quiz           Quiz         @relation(fields: [quiz_id], references: [id], onDelete: Cascade)
 }
 
 model Challenge {
-  id            String    @id @default(uuid())
-  calification  Int
-  time_taken    Int?
+  id               String         @id @default(uuid())
+  calification     Int
+  created_at       DateTime       @default(now())
+  updated_at       DateTime?      @updatedAt
+  quiz_id          String
+  user_id          String
+  state            ChallengeState @default(pending)
+  time_taken       Int?
   question_answers Json
-  state         ChallengeState @default(pending)
-  created_at    DateTime  @default(now())
-  updated_at    DateTime? @updatedAt
-  quiz          Quiz      @relation(fields: [quiz_id], references: [id])
-  quiz_id       String
-  user          User      @relation(fields: [user_id], references: [id])
-  user_id       String
+  quiz             Quiz           @relation(fields: [quiz_id], references: [id])
+  user             User           @relation(fields: [user_id], references: [id])
 }
 
 enum ChallengeType {
@@ -211,4 +206,3 @@ enum Level {
   C1
   C2
 }
-

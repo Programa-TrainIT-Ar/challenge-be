@@ -31,17 +31,24 @@ export class CreateUserDto {
 
   @IsOptional()
   @IsString()
-  @ApiProperty({ description: 'contraseña del usuario', required: false, writeOnly: true })
+  @ApiProperty({
+    description: 'contraseña del usuario',
+    required: false,
+    writeOnly: true,
+  })
   password?: string;
 
   @IsOptional()
   @IsString()
-  @ApiProperty({ required: false, writeOnly: true  })
+  @ApiProperty({ required: false, writeOnly: true })
   confirmPassword?: string;
 
   @IsOptional()
   @IsString()
-  @ApiProperty({ description: 'número de teléfono del usuario', required: false })
+  @ApiProperty({
+    description: 'número de teléfono del usuario',
+    required: false,
+  })
   phone_number?: string;
 
   @IsOptional()
@@ -52,6 +59,18 @@ export class CreateUserDto {
   @IsOptional()
   @Transform(({ value }) => new Date(value))
   @IsDate()
-  @ApiProperty({ description: 'fecha de nacimiento del usuario', required: false })
+  @ApiProperty({
+    description: 'fecha de nacimiento del usuario',
+    required: false,
+  })
   birthdate?: Date;
+
+  @IsString()
+  @IsOptional()
+  @ApiProperty({
+    description: 'ID externo del proveedor de autenticación (Auth0 sub)',
+    required: false,
+    example: 'auth0|65c3413...',
+  })
+  externalId?: string;
 }
