@@ -67,7 +67,7 @@ export class UserController {
     return this.userService.confirmEmail(body.confirmationToken);
   }
 
-  //Registra un nuevo usuario con Auth0
+  //Registra un nuevo usuario con Auth0 (Esto se ejecuta cuando un usuario loguea por primera vez con Auth0, se hace una validación en el app.component del Front)
   @Post('register-with-auth')
   @ApiOperation({
     summary: 'Registrar un nuevo usuario con autenticación de terceros',
@@ -192,9 +192,9 @@ export class UserController {
     return this.userService.findAll(); // Llama al servicio para obtener todos los usuarios
   }
 
+  //Este método permite verificar si un usuario de Auth0 ya está registrado en la base de datos local o no.
+  //Si no lo está, permite su registro automático.
   @Get('FindByEmail')
-  @ApiBearerAuth()
-  @UseGuards(HybridAuthGuard)
   @ApiOperation({ summary: 'Buscar usuario por email' })
   @ApiResponse({
     status: 201,
