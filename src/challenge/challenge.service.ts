@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { CreateChallengeDto } from './dto/create-challenge.dto';
 import { UpdateChallengeDto } from './dto/update-challenge.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
@@ -20,10 +20,14 @@ export class ChallengeService {
     }
 
     console.log('📋 Quiz encontrado con', quiz.questions.length, 'preguntas');
-    console.log('📝 Respuestas recibidas:', data.question_answers.length, 'respuestas');
+    console.log(
+      '📝 Respuestas recibidas:',
+      data.question_answers.length,
+      'respuestas',
+    );
 
     var calification = 0;
-    
+
     quiz.questions.forEach((question, index) => {
       var userAnswer = data.question_answers[index];
       console.log(`\n🔍 Pregunta ${index + 1}:`);
@@ -31,8 +35,10 @@ export class ChallengeService {
       console.log('  Pregunta:', question.question);
       console.log('  Respuesta usuario:', userAnswer);
       console.log('  Respuesta correcta:', question.correct_option);
-      
-      if (JSON.stringify(userAnswer) === JSON.stringify(question.correct_option)) {
+
+      if (
+        JSON.stringify(userAnswer) === JSON.stringify(question.correct_option)
+      ) {
         calification++;
         console.log('  ✅ CORRECTO! Calificación actual:', calification);
       } else {
@@ -40,17 +46,19 @@ export class ChallengeService {
       }
     });
 
-    console.log(`\n🏆 Calificación final: ${calification}/${quiz.questions.length}`);
+    console.log(
+      `\n🏆 Calificación final: ${calification}/${quiz.questions.length}`,
+    );
 
     return await this.prisma.challenge.create({
-      data:{
+      data: {
         calification: calification,
         time_taken: data.time_taken,
         question_answers: data.question_answers,
         state: 'evaluated',
         quiz_id: data.quiz_id,
         user_id: data.user_id,
-      } 
+      },
     });
   }
 
@@ -141,38 +149,47 @@ export class ChallengeService {
 
   //  Verificar si existe un challenge completado
   async findByUserAndQuiz(userId: string, quizId: string) {
-    const challenge = await this.prisma.challenge.findFirst({
-      where: {
-        user_id: userId,
-        quiz_id: quizId,
-        state: 'evaluated' // Solo challenges completados
-      },
-      include: {
-        quiz: {
-          select: {
-            name: true,
-            questions: {
-              select: {
-                id: true
-              }
-            }
-          }
-        }
+    try {
+      const challenge = await this.prisma.challenge.findFirst({
+        where: {
+          user_id: userId,
+          quiz_id: quizId,
+          state: 'evaluated', // Solo challenges completados
+        },
+        include: {
+          quiz: {
+            select: {
+              name: true,
+              questions: {
+                select: {
+                  id: true,
+                },
+              },
+            },
+          },
+        },
+      });
+
+      if (challenge) {
+        return {
+          id: challenge.id,
+          calification: challenge.calification,
+          time_taken: challenge.time_taken,
+          quiz_name: challenge.quiz.name,
+          total_questions: challenge.quiz.questions.length,
+          created_at: challenge.created_at,
+          already_completed: true,
+        };
       }
-    });
 
-    if (challenge) {
-      return {
-        id: challenge.id,
-        calification: challenge.calification,
-        time_taken: challenge.time_taken,
-        quiz_name: challenge.quiz.name,
-        total_questions: challenge.quiz.questions.length,
-        created_at: challenge.created_at,
-        already_completed: true
-      };
+      return { already_completed: false };
+    } catch (error) {
+      console.error('❌ ERROR EN findByUserAndQuiz:', error);
+
+      throw new InternalServerErrorException({
+        message: 'Fallo interno al verificar el challenge.',
+        details: error.message, // Incluye el mensaje de error de Prisma o de JS
+      });
     }
-
-    return { already_completed: false };
   }
 }
