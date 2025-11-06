@@ -32,7 +32,7 @@ import { RolesGuard } from 'src/authorization/roles/roles.guard';
 import { HybridAuthGuard } from 'src/authorization/hybrid-auth.guard';
 
 @ApiTags('Quiz')
-@UseGuards(HybridAuthGuard)
+// @UseGuards(HybridAuthGuard)
 @Controller('quiz')
 export class QuizController {
   constructor(private readonly quizService: QuizService) {}
@@ -73,52 +73,49 @@ export class QuizController {
 
     return this.quizService.findQuizzes(filter);
   }
-
-  @ApiBearerAuth()
-  @UseGuards(RolesGuard)
-  @Roles('admin')
   @Post()
+  // @ApiBearerAuth()
+  // @UseGuards(RolesGuard)
+  @Roles('admin')
   @ApiCreatedResponse({ type: QuizEntity })
   async create(@Body() createQuizDto: CreateQuizDto) {
     return await this.quizService.createQuiz(createQuizDto);
   }
 
-  @ApiBearerAuth()
-  @UseGuards(RolesGuard)
-  @Roles('admin')
   @Post('nested')
+  // @ApiBearerAuth()
+  // @UseGuards(RolesGuard)
+  // @Roles('admin')
   @ApiCreatedResponse({ type: QuizEntityQuestion })
   async createNested(@Body() createQuizDto: CreateQuizNestedDto) {
     return await this.quizService.createQuizNested(createQuizDto);
   }
 
-  @ApiBearerAuth()
   @Get(':id')
   @ApiOkResponse({ type: QuizEntityQuestion })
   async findOne(@Param('id') id: string) {
     return await this.quizService.findOneQuiz({ id });
   }
 
-  @ApiBearerAuth()
   @Get('take/:id')
   @ApiOkResponse({ type: QuizEntityForTaking })
   async takeQuiz(@Param('id') id: string) {
     return await this.quizService.getQuizForTaking({ id });
   }
 
-  @ApiBearerAuth()
-  @UseGuards(RolesGuard)
-  @Roles('admin')
   @Put(':id')
+  // @ApiBearerAuth()
+  // @UseGuards(RolesGuard)
+  // @Roles('admin')
   @ApiOkResponse({ type: QuizEntity })
   update(@Param('id') id: string, @Body() updateQuizDto: UpdateQuizDto) {
     return this.quizService.updateQuiz({ id }, updateQuizDto);
   }
 
-  @ApiBearerAuth()
-  @UseGuards(RolesGuard)
-  @Roles('admin')
   @Put('nested/:id')
+  // @ApiBearerAuth()
+  // @UseGuards(RolesGuard)
+  // @Roles('admin')
   @ApiOkResponse({ type: QuizEntityQuestion })
   updateNested(
     @Param('id') id: string,
@@ -127,10 +124,10 @@ export class QuizController {
     return this.quizService.updateQuizNested({ id }, updateQuizDto);
   }
 
-  @ApiBearerAuth()
-  @UseGuards(RolesGuard)
-  @Roles('admin')
   @Delete(':id')
+  // @ApiBearerAuth()
+  // @UseGuards(RolesGuard)
+  // @Roles('admin')
   @ApiResponse({ status: 200, description: 'Quiz eliminado ok' })
   @ApiResponse({ status: 404, description: 'Quiz no encontrado.' })
   remove(@Param('id') id: string) {
