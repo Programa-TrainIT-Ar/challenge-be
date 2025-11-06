@@ -275,6 +275,7 @@ export class UserController {
     };
   }
 
+  //Email de prueba (EmailJS)
   @Get('sendMailTest')
   @ApiOperation({ summary: 'Enviar email de prueba' })
   async sendMailTest(@Query('email') email: string) {
